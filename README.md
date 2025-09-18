@@ -51,6 +51,14 @@ flutter run
 
 ---
 
+### 🧾 Check OpenRouter API Credit
+
+```bash
+pnpm check:credit
+```
+
+---
+
 ## 🌿 Branch Workflow
 
 - ทุกฟีเจอร์ใหม่ ให้แตก branch จาก `dev` โดยใช้รูปแบบ:

@@ -1,0 +1,41 @@
+name: chayenity
+description: 'Chayenity Marketplace'
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8 # iOS style icons.
+
+  # State Management
+  flutter_riverpod: ^2.4.9
+
+  # Environment Variables
+  flutter_dotenv: ^5.1.0
+
+  logger: ^2.6.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - .env
+
+  fonts:
+    - family: Prompt
+      fonts:
+        - asset: assets/fonts/Prompt/Prompt-Light.ttf
+        - asset: assets/fonts/Prompt/Prompt-Regular.ttf
+        - asset: assets/fonts/Prompt/Prompt-Medium.ttf
+        - asset: assets/fonts/Prompt/Prompt-SemiBold.ttf
+        - asset: assets/fonts/Prompt/Prompt-Bold.ttf
