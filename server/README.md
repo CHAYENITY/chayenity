@@ -95,6 +95,12 @@ poetry env info --path
 
 ---
 
+### Active Environments
+
+```bash
+.venv\Scripts\activate.bat
+```
+
 ### 🛢 First Initial Database 🛢
 
 ```bash
