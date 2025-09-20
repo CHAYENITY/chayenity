@@ -1,13 +1,15 @@
 # schemas/user_schema.py
 import re
-from pydantic import BaseModel, EmailStr, field_validator
+from sqlmodel import SQLModel
+from pydantic import EmailStr, field_validator
 from typing import Optional
 from datetime import datetime
 
 from app.models import UserTypeEnum
 
 
-class UserBase(BaseModel):
+# Base schema with common fields (excluding sensitive fields)
+class UserBase(SQLModel):
     email: EmailStr = "user.name@example.com"
     phone_number: str = "0812345678"
     citizen_id: str = "1234567890123"
@@ -15,6 +17,7 @@ class UserBase(BaseModel):
     last_name_th: str = "ใจดี"
 
 
+# Schema for creating users (includes password)
 class UserCreate(UserBase):
     password: str
     agreed_to_terms: bool
@@ -66,7 +69,8 @@ class UserCreate(UserBase):
         return v.strip()
 
 
-class Pin(BaseModel):
+# Schema for PIN operations
+class Pin(SQLModel):
     pin: str
 
     @field_validator("pin")
@@ -79,12 +83,11 @@ class Pin(BaseModel):
         return v.strip()
 
 
+# Schema for returning user data (excludes sensitive fields)
 class UserOut(UserBase):
     id: int
     user_type: UserTypeEnum
     agreed_to_terms: bool
     is_active: bool
-    created_at: datetime
-    updated_at: datetime
-
-    model_config = {"from_attributes": True}
+    created_at: Optional[datetime]
+    updated_at: Optional[datetime]
