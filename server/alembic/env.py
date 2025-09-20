@@ -49,7 +49,7 @@ def run_migrations_online():
     url = config.get_main_option("sqlalchemy.url")
     if not url:
         raise ValueError("No sqlalchemy.url configured")
-    
+
     connectable = create_engine(
         url,
         poolclass=pool.NullPool,

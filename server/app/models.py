@@ -12,6 +12,7 @@ from app.database.base import Base
 
 # === Enum Definitions ===
 
+
 class ItemStatus(str, enum.Enum):
     AVAILABLE = "available"
     RESERVED = "reserved"
@@ -50,6 +51,7 @@ class TransactionStatus(str, enum.Enum):
 
 # === Core Entities ===
 
+
 class User(SQLModel, table=True):
     """User accounts for the marketplace"""
 
@@ -69,31 +71,26 @@ class User(SQLModel, table=True):
     # Relationships
     items: List["Item"] = Relationship(back_populates="owner")
     reviews_written: List["Review"] = Relationship(
-        back_populates="reviewer",
-        sa_relationship_kwargs={"foreign_keys": "Review.reviewer_id"}
+        back_populates="reviewer", sa_relationship_kwargs={"foreign_keys": "Review.reviewer_id"}
     )
     reviews_received: List["Review"] = Relationship(
-        back_populates="reviewee",
-        sa_relationship_kwargs={"foreign_keys": "Review.reviewee_id"}
+        back_populates="reviewee", sa_relationship_kwargs={"foreign_keys": "Review.reviewee_id"}
     )
     favorites: List["Favorite"] = Relationship(back_populates="user")
     notifications: List["Notification"] = Relationship(back_populates="user")
     reports_as_reporter: List["Report"] = Relationship(
-        back_populates="reporter",
-        sa_relationship_kwargs={"foreign_keys": "Report.reporter_id"}
+        back_populates="reporter", sa_relationship_kwargs={"foreign_keys": "Report.reporter_id"}
     )
     reports_as_reported: List["Report"] = Relationship(
         back_populates="reported_user",
-        sa_relationship_kwargs={"foreign_keys": "Report.reported_user_id"}
+        sa_relationship_kwargs={"foreign_keys": "Report.reported_user_id"},
     )
     wanted_items: List["WantedItem"] = Relationship(back_populates="user")
     transactions_as_buyer: List["Transaction"] = Relationship(
-        back_populates="buyer",
-        sa_relationship_kwargs={"foreign_keys": "Transaction.buyer_id"}
+        back_populates="buyer", sa_relationship_kwargs={"foreign_keys": "Transaction.buyer_id"}
     )
     transactions_as_seller: List["Transaction"] = Relationship(
-        back_populates="seller",
-        sa_relationship_kwargs={"foreign_keys": "Transaction.seller_id"}
+        back_populates="seller", sa_relationship_kwargs={"foreign_keys": "Transaction.seller_id"}
     )
 
 
@@ -148,6 +145,7 @@ class ItemImage(SQLModel, table=True):
 
 # === Social Features ===
 
+
 class Review(SQLModel, table=True):
     """Reviews and ratings for users and items"""
 
@@ -162,8 +160,14 @@ class Review(SQLModel, table=True):
     item_id: UUID = Field(foreign_key="item.id")
 
     # Relationships
-    reviewer: User = Relationship(back_populates="reviews_written")
-    reviewee: User = Relationship(back_populates="reviews_received")
+    reviewer: User = Relationship(
+        back_populates="reviews_written",
+        sa_relationship_kwargs={"foreign_keys": "Review.reviewer_id"},
+    )
+    reviewee: User = Relationship(
+        back_populates="reviews_received",
+        sa_relationship_kwargs={"foreign_keys": "Review.reviewee_id"},
+    )
     item: Item = Relationship(back_populates="reviews")
 
 
@@ -197,6 +201,7 @@ class WantedItem(SQLModel, table=True):
 
 # === Communication ===
 
+
 class Conversation(SQLModel, table=True):
     """Chat conversations between users about items"""
 
@@ -210,6 +215,8 @@ class Conversation(SQLModel, table=True):
     # Relationships
     messages: List["Message"] = Relationship(back_populates="conversation")
     item: Item = Relationship(back_populates="conversations")
+    user1: User = Relationship(sa_relationship_kwargs={"foreign_keys": "Conversation.user1_id"})
+    user2: User = Relationship(sa_relationship_kwargs={"foreign_keys": "Conversation.user2_id"})
 
 
 class Message(SQLModel, table=True):
@@ -233,6 +240,7 @@ class Message(SQLModel, table=True):
 
 # === System Features ===
 
+
 class Report(SQLModel, table=True):
     """User reports for inappropriate behavior"""
 
@@ -244,8 +252,14 @@ class Report(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     # Relationships
-    reporter: User = Relationship(back_populates="reports_as_reporter")
-    reported_user: User = Relationship(back_populates="reports_as_reported")
+    reporter: User = Relationship(
+        back_populates="reports_as_reporter",
+        sa_relationship_kwargs={"foreign_keys": "Report.reporter_id"},
+    )
+    reported_user: User = Relationship(
+        back_populates="reports_as_reported",
+        sa_relationship_kwargs={"foreign_keys": "Report.reported_user_id"},
+    )
 
 
 class Notification(SQLModel, table=True):
@@ -259,8 +273,7 @@ class Notification(SQLModel, table=True):
     is_read: bool = Field(default=False, index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     extra_data: Optional[dict] = Field(
-        default=None,
-        sa_column=Column(JSONB, server_default=sa_text("'{}'::jsonb"))
+        default=None, sa_column=Column(JSONB, server_default=sa_text("'{}'::jsonb"))
     )  # e.g., {"item_id": "...", "sender_id": "...", "conversation_id": "..."}
 
     # Relationships
@@ -286,9 +299,9 @@ class Transaction(SQLModel, table=True):
     item: Item = Relationship(back_populates="transactions")
     buyer: User = Relationship(
         back_populates="transactions_as_buyer",
-        sa_relationship_kwargs={"foreign_keys": "Transaction.buyer_id"}
+        sa_relationship_kwargs={"foreign_keys": "Transaction.buyer_id"},
     )
     seller: User = Relationship(
         back_populates="transactions_as_seller",
-        sa_relationship_kwargs={"foreign_keys": "Transaction.seller_id"}
+        sa_relationship_kwargs={"foreign_keys": "Transaction.seller_id"},
     )

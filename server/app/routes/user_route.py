@@ -19,7 +19,7 @@ async def read_me(current_user: User = Depends(get_current_user_with_access_toke
 async def update_me(
     user_update: UserUpdate,
     current_user: User = Depends(get_current_user_with_access_token),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     return await user_crud.update_user(db, current_user.id, user_update)
 
@@ -27,6 +27,6 @@ async def update_me(
 @router.post("/me/verify", response_model=UserOut)
 async def verify_me(
     current_user: User = Depends(get_current_user_with_access_token),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     return await user_crud.verify_user(db, current_user.id)
