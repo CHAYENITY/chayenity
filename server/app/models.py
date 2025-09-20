@@ -39,66 +39,50 @@ class UserTypeEnum(str, enum.Enum):
 # * ====== Tables ======
 
 
-class UserTravel(Base):
+class UserTravel(SQLModel, table=True):
     """ตารางเก็บข้อมูลแผนการเดินทางของผู้ใช้"""
 
-    __tablename__ = "user_travels"
+    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    user_id: int = Field(foreign_key="user.id")
+    province_id: int = Field(foreign_key="province.id")
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    province_id = Column(Integer, ForeignKey("provinces.id"), nullable=False)
+    start_date: date
+    end_date: date
+    notes: str = Field(default="")
 
-    start_date = Column(Date, nullable=False)
-    end_date = Column(Date, nullable=False)
-    notes = Column(TEXT, default="")
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-    # * Relationships
-    user = relationship("User", back_populates="travels")
-    province = relationship("Province", back_populates="travels")
+    created_at: Optional[datetime] = Field(default=None)
+    updated_at: Optional[datetime] = Field(default=None)
 
 
-class Province(Base):
+class Province(SQLModel, table=True):
     """ตารางเก็บข้อมูลจังหวัดและประเภทเมือง (หลัก/รอง)"""
 
-    __tablename__ = "provinces"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name_th = Column(String(100), nullable=False, unique=True)
-    name_en = Column(String(100))
-    region = Column(String(50), nullable=False)
-    city_tier = Column(Enum(CityTierEnum), nullable=False)
+    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    name_th: str = Field(max_length=100, unique=True)
+    name_en: Optional[str] = Field(default=None, max_length=100)
+    region: str = Field(max_length=50)
+    city_tier: CityTierEnum
     
-    tax_reduction_rate = Column(Numeric(4, 2), default=0.00)
-    tax_description = Column(TEXT, default="")
-
-    # * Relationships
-    travels = relationship("UserTravel", back_populates="province")
+    tax_reduction_rate: Decimal = Field(default=Decimal("0.00"), max_digits=4, decimal_places=2)
+    tax_description: str = Field(default="")
 
 
-class User(Base):
+class User(SQLModel, table=True):
     """ตารางสำหรับเก็บข้อมูลบัญชีผู้ใช้ร่วมกัน"""
 
-    __tablename__ = "users"
+    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    email: str = Field(max_length=255, unique=True, index=True)
+    phone_number: str = Field(max_length=15, unique=True)
+    password_hash: str = Field(max_length=255)
+    pin_hash: Optional[str] = Field(default=None, max_length=255)
 
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255), nullable=False, unique=True, index=True)
-    phone_number = Column(String(15), nullable=False, unique=True)
-    password_hash = Column(String(255), nullable=False)
-    pin_hash = Column(String(255))
+    citizen_id: str = Field(max_length=13, unique=True, index=True)
+    first_name_th: str = Field(max_length=100)
+    last_name_th: str = Field(max_length=100)
 
-    citizen_id = Column(String(13), nullable=False, unique=True, index=True)
-    first_name_th = Column(String(100), nullable=False)
-    last_name_th = Column(String(100), nullable=False)
+    user_type: UserTypeEnum
+    agreed_to_terms: bool = Field(default=False)
+    is_active: bool = Field(default=True)
 
-    user_type = Column(Enum(UserTypeEnum), nullable=False)
-    agreed_to_terms = Column(Boolean, default=False)
-    is_active = Column(Boolean, default=True)
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-    # * Relationships
-    travels = relationship("UserTravel", back_populates="user")
+    created_at: Optional[datetime] = Field(default=None)
+    updated_at: Optional[datetime] = Field(default=None)
