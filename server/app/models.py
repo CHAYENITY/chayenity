@@ -1,4 +1,8 @@
 import enum
+from typing import Optional, List
+from decimal import Decimal
+from datetime import datetime, date
+
 from sqlalchemy import (
     Column,
     Integer,
@@ -10,9 +14,11 @@ from sqlalchemy import (
     DECIMAL,
     Date,
     ForeignKey,
+    Numeric,
 )
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
+from sqlmodel import SQLModel, Field
 
 from app.database.base import Base
 
@@ -64,8 +70,8 @@ class Province(Base):
     name_en = Column(String(100))
     region = Column(String(50), nullable=False)
     city_tier = Column(Enum(CityTierEnum), nullable=False)
-
-    tax_reduction_rate = Column(DECIMAL(4, 2), default=0.00)
+    
+    tax_reduction_rate = Column(Numeric(4, 2), default=0.00)
     tax_description = Column(TEXT, default="")
 
     # * Relationships

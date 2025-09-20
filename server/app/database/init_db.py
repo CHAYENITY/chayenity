@@ -4,6 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
+from sqlmodel import SQLModel
 
 from app.database.session import engine
 from app.database.base import Base
@@ -27,6 +28,7 @@ async def init(db_engine: AsyncEngine) -> None:
         async with db_engine.begin() as conn:
             logger.info("🧨 Dropping all tables...")
             await conn.run_sync(Base.metadata.drop_all)
+            
             logger.info("🛠 Creating all tables...")
             await conn.run_sync(Base.metadata.create_all)
 
