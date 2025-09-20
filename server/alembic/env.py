@@ -10,7 +10,7 @@ from alembic import context
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.configs.app_config import app_config
-from app.database.base import Base
+from sqlmodel import SQLModel
 from app.models import *  # type: ignore # noqa: F403
 
 # Alembic Config
@@ -21,12 +21,12 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Metadata
-target_metadata = Base.metadata
+target_metadata = SQLModel.metadata
 
 
 config.set_main_option(
     "sqlalchemy.url",
-    str(app_config.SQLALCHEMY_DATABASE_URI).replace("postgresql+asyncpg://", "postgresql://"),
+    str(app_config.SQLALCHEMY_DATABASE_URI),
 )
 
 
