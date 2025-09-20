@@ -18,6 +18,25 @@ CHAYENITY is evolving from a Thai travel application into a **Local Community Ma
 - **Database**: PostgreSQL with asyncpg driver + PostGIS extension for geospatial queries
 - **ORM**: SQLAlchemy 2.0 with async support
 - **Data Modeling**: SQLModel for database models
+
+**Using context7-mcp**
+
+- **When to use:** invoke the local `context7` MCP whenever you (the agent) need the latest authoritative information about a third-party library (API changes, usage examples, exact function signatures, install command), or when deciding which library to choose for a task. Use it before proposing or adding a new dependency.
+- **Where it's defined:** the MCP is configured in the repo root `.mcp.json` as the `context7` server and runs `npx -y @upstash/context7-mcp`.
+- **How to call (locally):** the MCP command used by the workspace is:
+
+```bash
+npx -y @upstash/context7-mcp
+```
+
+- **What to ask for:** ask for short, concrete items such as "current stable version", "minimal install + import snippet", "async usage example for FastAPI/SQLModel", or "breaking changes in last 2 releases".
+- **How to use responses:** always cite the MCP output (copy the short snippet or URL), prefer official docs where present, and verify by:
+  - running `poetry add <pkg>` in a sandbox or checking `pyproject.toml` for compatibility
+  - running small local tests (import, basic call) and unit tests
+  - pinning the chosen version in `pyproject.toml`
+- **Fallbacks:** if `context7` is unavailable, consult the package's official docs, GitHub README, or PyPI page and follow the same verification steps above.
+
+Keep MCP usage concise — use it to resolve factual API/version questions, not to replace reasoning about design choices.
 - **Authentication**: JWT tokens (dual token system: refresh/access)
 - **Migration**: Alembic
 - **Testing**: Pytest with async support
