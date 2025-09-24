@@ -1,90 +1,83 @@
 # schemas/user_schema.py
 import re
-from pydantic import BaseModel, EmailStr, field_validator
+from sqlmodel import SQLModel
+from pydantic import EmailStr, field_validator
 from typing import Optional
 from datetime import datetime
+from uuid import UUID
 
-from app.models import UserTypeEnum
 
-
-class UserBase(BaseModel):
+# Base schema with common fields (excluding sensitive fields)
+class UserBase(SQLModel):
     email: EmailStr = "user.name@example.com"
-    phone_number: str = "0812345678"
-    citizen_id: str = "1234567890123"
-    first_name_th: str = "สมชาย"
-    last_name_th: str = "ใจดี"
+    full_name: str = "John Doe"
+    contact_info: Optional[str] = None  # phone or LINE ID
+    address_text: Optional[str] = None
 
 
+# Schema for creating users (includes password)
 class UserCreate(UserBase):
     password: str
-    agreed_to_terms: bool
-    user_type: UserTypeEnum = UserTypeEnum.TOURIST
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: Optional[str]) -> Optional[str]:
         return v.strip().lower() if v else v
 
-    @field_validator("phone_number")
+    @field_validator("contact_info")
     @classmethod
-    def validate_phone_number(cls, v: Optional[str]) -> Optional[str]:
+    def validate_contact_info(cls, v: Optional[str]) -> Optional[str]:
         if v is None:
             return None
-        if not re.fullmatch(r"[0-9]{7,15}", v):
-            raise ValueError(
-                "Phone number must contain digits only (7-15 characters), no spaces or symbols"
-            )
-        return v.strip()
+        # Allow phone numbers or LINE IDs
+        if re.fullmatch(r"[0-9]{7,15}", v) or re.fullmatch(r"[a-zA-Z0-9._-]{3,30}", v):
+            return v.strip()
+        raise ValueError(
+            "Contact info must be a valid phone number (7-15 digits) or LINE ID (3-30 characters)"
+        )
 
-    @field_validator("citizen_id")
+    @field_validator("full_name")
     @classmethod
-    def validate_citizen_id(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return None
-        if not re.fullmatch(r"[0-9]{13}", v):
-            raise ValueError(
-                "Citizen id must contain digits only (13 characters), no spaces or symbols"
-            )
-        return v.strip()
-
-    @field_validator("first_name_th")
-    @classmethod
-    def validate_first_name_th(cls, v: str) -> str:
-        if not re.fullmatch(r"[ก-๙]{1,50}", v):
-            raise ValueError(
-                "First name (TH) must contain only Thai characters (no spaces, numbers, or symbols) and be 1-50 characters long."
-            )
-        return v.strip()
-
-    @field_validator("last_name_th")
-    @classmethod
-    def validate_last_name_th(cls, v: str) -> str:
-        if not re.fullmatch(r"[ก-๙]{1,50}", v):
-            raise ValueError(
-                "Last name (TH) must contain only Thai characters (no spaces, numbers, or symbols) and be 1-50 characters long."
-            )
+    def validate_full_name(cls, v: str) -> str:
+        if not v or len(v.strip()) < 2:
+            raise ValueError("Full name must be at least 2 characters long")
         return v.strip()
 
 
-class Pin(BaseModel):
-    pin: str
-
-    @field_validator("pin")
-    @classmethod
-    def validate_phone_number(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return None
-        if not re.fullmatch(r"[0-9]{6}", v):
-            raise ValueError("Pin must contain digits only (6 characters), no spaces or symbols")
-        return v.strip()
-
-
+# Schema for returning user data (excludes sensitive fields)
 class UserOut(UserBase):
-    id: int
-    user_type: UserTypeEnum
-    agreed_to_terms: bool
-    is_active: bool
+    id: UUID
+    profile_image_url: Optional[str] = None
+    is_verified: bool
+    reputation_score: float
     created_at: datetime
-    updated_at: datetime
 
-    model_config = {"from_attributes": True}
+
+# Schema for updating user profile
+class UserUpdate(SQLModel):
+    full_name: Optional[str] = None
+    contact_info: Optional[str] = None
+    address_text: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    profile_image_url: Optional[str] = None
+
+    @field_validator("contact_info")
+    @classmethod
+    def validate_contact_info(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return None
+        if re.fullmatch(r"[0-9]{7,15}", v) or re.fullmatch(r"[a-zA-Z0-9._-]{3,30}", v):
+            return v.strip()
+        raise ValueError(
+            "Contact info must be a valid phone number (7-15 digits) or LINE ID (3-30 characters)"
+        )
+
+    @field_validator("full_name")
+    @classmethod
+    def validate_full_name(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and len(v.strip()) < 2:
+            raise ValueError("Full name must be at least 2 characters long")
+        return v.strip() if v else v

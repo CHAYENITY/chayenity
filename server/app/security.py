@@ -15,8 +15,8 @@ from app.configs.app_config import app_config
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-refresh_token_scheme = OAuth2PasswordBearer(tokenUrl="/auth/refresh")
-access_token_scheme = OAuth2PasswordBearer(tokenUrl="/auth/access")
+refresh_token_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+access_token_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
 def get_password_hash(password: str) -> str:
@@ -72,8 +72,7 @@ async def get_current_user_with_refresh_token(
         user_id = payload.get("sub")
         if user_id is None:
             raise credentials_exception
-        int(user_id)
-    except (JWTError, ValueError):
+    except JWTError:
         raise credentials_exception
 
     result = await db.execute(select(User).filter(User.id == user_id))
@@ -99,8 +98,7 @@ async def get_current_user_with_access_token(
         user_id = payload.get("sub")
         if user_id is None:
             raise credentials_exception
-        int(user_id)
-    except (JWTError, ValueError):
+    except JWTError:
         raise credentials_exception
 
     result = await db.execute(select(User).filter(User.id == user_id))
