@@ -4,7 +4,7 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import Column, text as sa_text
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON
 from sqlmodel import SQLModel, Field, Relationship
 
 from app.database.base import Base
@@ -40,6 +40,11 @@ class NotificationType(str, enum.Enum):
     PRICE_CHANGE = "price_change"
     REVIEW_RECEIVED = "review_received"
     REPORT_RESPONSE = "report_response"
+
+
+class UserTypeEnum(str, enum.Enum):
+    TOURIST = "tourist"
+    OPERATOR = "operator"
 
 
 class TransactionStatus(str, enum.Enum):
@@ -273,7 +278,7 @@ class Notification(SQLModel, table=True):
     is_read: bool = Field(default=False, index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     extra_data: Optional[dict] = Field(
-        default=None, sa_column=Column(JSONB, server_default=sa_text("'{}'::jsonb"))
+        default=None, sa_column=Column(JSON, server_default=sa_text("'{}'"))
     )  # e.g., {"item_id": "...", "sender_id": "...", "conversation_id": "..."}
 
     # Relationships

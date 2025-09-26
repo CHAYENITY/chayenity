@@ -6,7 +6,9 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from jose import JWTError, jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+import hashlib
+import calendar
 
 from app.database.session import get_db
 from app.models import User
@@ -19,29 +21,51 @@ def _to_bytes(s: str | bytes) -> bytes:
     return s.encode("utf-8") if isinstance(s, str) else s
 
 
+def _normalize_password_bytes(pw_bytes: bytes) -> bytes:
+    """Normalize password bytes to something bcrypt can accept.
+
+    bcrypt has a 72-byte input limit. To avoid truncation or ValueError with
+    long inputs, pre-hash inputs longer than 72 bytes using SHA-256 and use
+    the hex digest bytes as the input to bcrypt. For short inputs, use the
+    original bytes so bcrypt's salting remains effective.
+    """
+    if len(pw_bytes) > 72:
+        # SHA-256 digest hex length is 64 characters (64 bytes when utf-8 encoded)
+        return hashlib.sha256(pw_bytes).hexdigest().encode("utf-8")
+    return pw_bytes
+
+
 # Use bcrypt directly for hashing and verification. This avoids relying on
 # Passlib (which is unmaintained and has compatibility issues with newer
 # bcrypt releases). We return encoded UTF-8 strings for storage in the DB.
 def get_password_hash(password: str) -> str:
-    hashed = bcrypt.hashpw(_to_bytes(password), bcrypt.gensalt())
+    pwb = _to_bytes(password)
+    pwb = _normalize_password_bytes(pwb)
+    hashed = bcrypt.hashpw(pwb, bcrypt.gensalt())
     return hashed.decode("utf-8")
 
 
 def get_pin_hash(pin: str) -> str:
-    hashed = bcrypt.hashpw(_to_bytes(pin), bcrypt.gensalt())
+    pwb = _to_bytes(pin)
+    pwb = _normalize_password_bytes(pwb)
+    hashed = bcrypt.hashpw(pwb, bcrypt.gensalt())
     return hashed.decode("utf-8")
 
 
 def verify_password(plain_password: str, password_hash: str) -> bool:
     try:
-        return bcrypt.checkpw(_to_bytes(plain_password), _to_bytes(password_hash))
+        pwb = _to_bytes(plain_password)
+        pwb = _normalize_password_bytes(pwb)
+        return bcrypt.checkpw(pwb, _to_bytes(password_hash))
     except Exception:
         return False
 
 
 def verify_pin(plain_pin: str, pin_hash: str) -> bool:
     try:
-        return bcrypt.checkpw(_to_bytes(plain_pin), _to_bytes(pin_hash))
+        pwb = _to_bytes(plain_pin)
+        pwb = _normalize_password_bytes(pwb)
+        return bcrypt.checkpw(pwb, _to_bytes(pin_hash))
     except Exception:
         return False
 
@@ -55,8 +79,10 @@ def create_refresh_token(
     data: dict, expires_delta: timedelta = timedelta(days=app_config.REFRESH_TOKEN_EXPIRE)
 ) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
-    to_encode.update({"exp": expire})
+    now = datetime.now(timezone.utc)
+    expire = now + expires_delta
+    # encode exp as int UTC timestamp to ensure consistent behaviour
+    to_encode.update({"exp": int(expire.timestamp())})
     return jwt.encode(to_encode, app_config.REFRESH_SECRET_KEY, algorithm=app_config.ALGORITHM)
 
 
@@ -65,8 +91,10 @@ def create_access_token(
     expires_delta: timedelta = timedelta(minutes=app_config.ACCESS_TOKEN_EXPIRE),
 ) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
-    to_encode.update({"exp": expire})
+    now = datetime.now(timezone.utc)
+    expire = now + expires_delta
+    # encode exp as int UTC timestamp to ensure consistent behaviour
+    to_encode.update({"exp": int(expire.timestamp())})
     return jwt.encode(to_encode, app_config.ACCESS_SECRET_KEY, algorithm=app_config.ALGORITHM)
 
 

@@ -35,10 +35,15 @@ async def create_user(db: AsyncSession, user: UserCreate, password_hash: str) ->
         longitude=user.longitude,
     )
     try:
-        # Use a transaction for atomicity
-        async with db.begin():
+        # Use a transaction for atomicity if there isn't one already. Tests and
+        # some frameworks may provide an outer transaction, so avoid starting
+        # a nested top-level transaction which raises an InvalidRequestError.
+        if not db.in_transaction():
+            async with db.begin():
+                db.add(db_user)
+        else:
             db.add(db_user)
-        # refresh after commit
+        # refresh after commit (or after the outer transaction completes)
         await db.refresh(db_user)
         return db_user
     except IntegrityError as exc:
@@ -62,8 +67,11 @@ async def update_user(db: AsyncSession, user_id: UUID, user_update: UserUpdate) 
     for field, value in update_data.items():
         setattr(db_user, field, value)
 
-    # Use transaction for update
-    async with db.begin():
+    # Use transaction for update if needed
+    if not db.in_transaction():
+        async with db.begin():
+            db.add(db_user)
+    else:
         db.add(db_user)
 
     await db.refresh(db_user)
@@ -78,7 +86,11 @@ async def verify_user(db: AsyncSession, user_id: UUID) -> User:
         raise HTTPException(status_code=404, detail="User not found")
 
     db_user.is_verified = True
-    async with db.begin():
+    # Use transaction for update if needed
+    if not db.in_transaction():
+        async with db.begin():
+            db.add(db_user)
+    else:
         db.add(db_user)
 
     await db.refresh(db_user)
