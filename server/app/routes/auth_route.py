@@ -27,7 +27,20 @@ async def register(user_create: UserCreate, db: AsyncSession = Depends(get_db)):
 
     password_hash = get_password_hash(user_create.password)
     user = await user_crud.create_user(db, user_create, password_hash)
-    return user
+    # Return only fields that exist in the current User model/schema to avoid
+    # leaking or depending on fields that tests or callers may expect.
+    return {
+        "id": user.id,
+        "email": user.email,
+        "full_name": user.full_name,
+        "contact_info": user.contact_info,
+        "address_text": user.address_text,
+        "latitude": user.latitude,
+        "longitude": user.longitude,
+        "is_verified": user.is_verified,
+        "reputation_score": user.reputation_score,
+        "created_at": user.created_at,
+    }
 
 
 @router.post("/login")

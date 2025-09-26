@@ -35,18 +35,26 @@ async def create_user(db: AsyncSession, user: UserCreate, password_hash: str) ->
         longitude=user.longitude,
     )
     try:
-        # Use a transaction for atomicity if there isn't one already. Tests and
-        # some frameworks may provide an outer transaction, so avoid starting
-        # a nested top-level transaction which raises an InvalidRequestError.
+        # Add and flush so the instance becomes persistent in the session
+        # (this works whether or not there's an outer transaction). We then
+        # commit only if there isn't an outer transaction so tests that wrap
+        # the session in their own transaction still control commit/rollback.
+        db.add(db_user)
+        await db.flush()
+
         if not db.in_transaction():
-            async with db.begin():
-                db.add(db_user)
-        else:
-            db.add(db_user)
-        # refresh after commit (or after the outer transaction completes)
+            await db.commit()
+
         await db.refresh(db_user)
         return db_user
     except IntegrityError as exc:
+        # Ensure we rollback the current transaction if we started one here
+        try:
+            if not db.in_transaction():
+                await db.rollback()
+        except Exception:
+            # best-effort rollback; continue to raise the original error
+            pass
         # Likely unique constraint on email
         raise HTTPException(status_code=409, detail="Email already registered") from exc
 
@@ -67,12 +75,13 @@ async def update_user(db: AsyncSession, user_id: UUID, user_update: UserUpdate) 
     for field, value in update_data.items():
         setattr(db_user, field, value)
 
-    # Use transaction for update if needed
+    # Add/flush and commit only if there's no outer transaction. This makes
+    # the instance persistent so refresh will succeed and avoids nested
+    # transaction errors when tests manage transactions externally.
+    db.add(db_user)
+    await db.flush()
     if not db.in_transaction():
-        async with db.begin():
-            db.add(db_user)
-    else:
-        db.add(db_user)
+        await db.commit()
 
     await db.refresh(db_user)
     return db_user
@@ -86,12 +95,11 @@ async def verify_user(db: AsyncSession, user_id: UUID) -> User:
         raise HTTPException(status_code=404, detail="User not found")
 
     db_user.is_verified = True
-    # Use transaction for update if needed
+
+    db.add(db_user)
+    await db.flush()
     if not db.in_transaction():
-        async with db.begin():
-            db.add(db_user)
-    else:
-        db.add(db_user)
+        await db.commit()
 
     await db.refresh(db_user)
     return db_user
