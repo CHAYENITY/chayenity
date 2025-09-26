@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from app.database.session import get_db
 from app.models import User
 from app.configs.app_config import app_config
+from uuid import UUID as _UUID
 
 
 # Helper to ensure input is bytes for bcrypt APIs
@@ -87,11 +88,17 @@ async def get_current_user_with_refresh_token(
         user_id = payload.get("sub")
         if user_id is None:
             raise credentials_exception
+        # coerce to UUID where possible so DB comparisons match column type
+        try:
+            user_id = _UUID(user_id)
+        except Exception:
+            # leave as-is (fallback to string) if it isn't a UUID
+            pass
     except JWTError:
         raise credentials_exception
 
-    result = await db.execute(select(User).filter(User.id == user_id))
-    user = result.scalars().first()
+    # AsyncSession.get handles primary-key lookups and accepts UUID or str
+    user = await db.get(User, user_id)
 
     if user is None:
         raise credentials_exception
@@ -113,11 +120,16 @@ async def get_current_user_with_access_token(
         user_id = payload.get("sub")
         if user_id is None:
             raise credentials_exception
+        # coerce to UUID where possible so DB comparisons match column type
+        try:
+            user_id = _UUID(user_id)
+        except Exception:
+            pass
     except JWTError:
         raise credentials_exception
 
-    result = await db.execute(select(User).filter(User.id == user_id))
-    user = result.scalars().first()
+    # AsyncSession.get handles primary-key lookups and accepts UUID or str
+    user = await db.get(User, user_id)
 
     if user is None:
         raise credentials_exception

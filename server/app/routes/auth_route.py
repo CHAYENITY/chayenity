@@ -14,6 +14,7 @@ from app.security import (
     get_current_user_with_refresh_token,
     get_current_user_with_access_token,
 )
+from app.configs.app_config import app_config
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -44,11 +45,14 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # For marketplace app, we'll use access tokens directly for simplicity
+    # Issue both access and refresh tokens
     access_token = create_access_token(data={"sub": str(user.id)})
+    refresh_token = create_refresh_token(data={"sub": str(user.id)})
     return {
         "access_token": access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer",
+        "expires_in_minutes": app_config.ACCESS_TOKEN_EXPIRE,
     }
 
 
