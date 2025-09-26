@@ -1,24 +1,32 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from sqlalchemy.exc import IntegrityError
+from sqlmodel import select
 from uuid import UUID
 from app.models import User
 from app.schemas.user_schema import UserCreate, UserUpdate
 
 
 async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
-    result = await db.execute(select(User).filter(User.email == email.lower()))
-    return result.scalars().first()
+    if not email:
+        return None
+    # normalize email and query using sqlmodel.select + where
+    stmt = select(User).where(User.email == email.lower())
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
 
 
 async def get_user_by_id(db: AsyncSession, user_id: UUID) -> User | None:
-    result = await db.execute(select(User).filter(User.id == user_id))
-    return result.scalars().first()
+    stmt = select(User).where(User.id == user_id)
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
 
 
 async def create_user(db: AsyncSession, user: UserCreate, password_hash: str) -> User:
+    # Normalize email to avoid case-duplicate users
+    normalized_email = user.email.lower() if user.email else user.email
     db_user = User(
-        email=user.email,
+        email=normalized_email,
         hashed_password=password_hash,
         full_name=user.full_name,
         contact_info=user.contact_info,
@@ -26,37 +34,52 @@ async def create_user(db: AsyncSession, user: UserCreate, password_hash: str) ->
         latitude=user.latitude,
         longitude=user.longitude,
     )
-    db.add(db_user)
-    await db.commit()
-    await db.refresh(db_user)
-    return db_user
+    try:
+        # Use a transaction for atomicity
+        async with db.begin():
+            db.add(db_user)
+        # refresh after commit
+        await db.refresh(db_user)
+        return db_user
+    except IntegrityError as exc:
+        # Likely unique constraint on email
+        raise HTTPException(status_code=409, detail="Email already registered") from exc
 
 
 async def update_user(db: AsyncSession, user_id: UUID, user_update: UserUpdate) -> User:
-    result = await db.execute(select(User).where(User.id == user_id))
+    stmt = select(User).where(User.id == user_id)
+    result = await db.execute(stmt)
     db_user = result.scalar_one_or_none()
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Update fields that are provided
+    # Update fields that are provided (disallow direct hashed_password updates)
     update_data = user_update.model_dump(exclude_unset=True)
+    # Prevent accidental overwrite of password hash via this endpoint
+    update_data.pop("hashed_password", None)
+    update_data.pop("password", None)
+
     for field, value in update_data.items():
         setattr(db_user, field, value)
 
-    db.add(db_user)
-    await db.commit()
+    # Use transaction for update
+    async with db.begin():
+        db.add(db_user)
+
     await db.refresh(db_user)
     return db_user
 
 
 async def verify_user(db: AsyncSession, user_id: UUID) -> User:
-    result = await db.execute(select(User).where(User.id == user_id))
+    stmt = select(User).where(User.id == user_id)
+    result = await db.execute(stmt)
     db_user = result.scalar_one_or_none()
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
 
     db_user.is_verified = True
-    db.add(db_user)
-    await db.commit()
+    async with db.begin():
+        db.add(db_user)
+
     await db.refresh(db_user)
     return db_user

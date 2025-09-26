@@ -158,7 +158,7 @@ Transaction:
 ## Core Features to Implement
 
 ### 1. User Registration & Verification
-- Firebase Auth integration
+- JWT Auth
 - Location-based verification
 - User profiles with contact info and address
 - ID verification system (simulated)

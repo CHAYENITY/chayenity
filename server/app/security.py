@@ -1,9 +1,10 @@
+
 # security.py
+import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 
@@ -12,27 +13,41 @@ from app.models import User
 from app.configs.app_config import app_config
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Helper to ensure input is bytes for bcrypt APIs
+def _to_bytes(s: str | bytes) -> bytes:
+    return s.encode("utf-8") if isinstance(s, str) else s
+
+
+# Use bcrypt directly for hashing and verification. This avoids relying on
+# Passlib (which is unmaintained and has compatibility issues with newer
+# bcrypt releases). We return encoded UTF-8 strings for storage in the DB.
+def get_password_hash(password: str) -> str:
+    hashed = bcrypt.hashpw(_to_bytes(password), bcrypt.gensalt())
+    return hashed.decode("utf-8")
+
+
+def get_pin_hash(pin: str) -> str:
+    hashed = bcrypt.hashpw(_to_bytes(pin), bcrypt.gensalt())
+    return hashed.decode("utf-8")
+
+
+def verify_password(plain_password: str, password_hash: str) -> bool:
+    try:
+        return bcrypt.checkpw(_to_bytes(plain_password), _to_bytes(password_hash))
+    except Exception:
+        return False
+
+
+def verify_pin(plain_pin: str, pin_hash: str) -> bool:
+    try:
+        return bcrypt.checkpw(_to_bytes(plain_pin), _to_bytes(pin_hash))
+    except Exception:
+        return False
 
 
 refresh_token_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 access_token_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
-
-def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
-
-
-def get_pin_hash(pin: str) -> str:
-    return pwd_context.hash(pin)
-
-
-def verify_password(plain_password: str, password_hash: str) -> bool:
-    return pwd_context.verify(plain_password, password_hash)
-
-
-def verify_pin(plain_pin: str, pin_hash: str) -> bool:
-    return pwd_context.verify(plain_pin, pin_hash)
 
 
 def create_refresh_token(
