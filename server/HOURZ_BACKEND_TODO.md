@@ -3,27 +3,27 @@
 ## Phase 1: Core Foundation & MVP
 
 ### 1. Database Schema & Models ✅ (In Progress)
-- [ ] **User Model Updates**
+- [x] **User Model Updates**
   - [x] Remove unused UserTypeEnum 
-  - [ ] Add location fields (fixed_location as PostGIS Point)
-  - [ ] Add is_available boolean for Helper status
-  - [ ] Add profile fields: name, photo_url, contact_info
-  - [ ] Add reputation_score field
-  - [ ] Remove marketplace-specific fields (items, reviews, etc.)
+  - [x] Add location fields (fixed_location as PostGIS Point)
+  - [x] Add is_available boolean for Helper status
+  - [x] Add profile fields: name, photo_url, contact_info
+  - [x] Add reputation_score field
+  - [x] Remove marketplace-specific fields (items, reviews, etc.)
 
-- [ ] **New Core Models**
-  - [ ] Create Gig/Request model (title, description, duration, budget, location, status)
-  - [ ] Create GigStatus enum (PENDING, ACCEPTED, IN_PROGRESS, COMPLETED, CANCELLED)
-  - [ ] Create ChatRoom model (gig_id, participants)
-  - [ ] Create Message model (room_id, sender_id, content, timestamp, image_url)
-  - [ ] Create BuddyList/Favorites model (user_id, buddy_id)
-  - [ ] Create Review model (gig_id, reviewer_id, reviewee_id, rating, comment)
-  - [ ] Create Transaction model (gig_id, amount, status, service_fee)
+- [x] **New Core Models**
+  - [x] Create Gig/Request model (title, description, duration, budget, location, status)
+  - [x] Create GigStatus enum (PENDING, ACCEPTED, IN_PROGRESS, COMPLETED, CANCELLED)
+  - [x] Create ChatRoom model (gig_id, participants)
+  - [x] Create Message model (room_id, sender_id, content, timestamp, image_url)
+  - [x] Create BuddyList/Favorites model (user_id, buddy_id)
+  - [x] Create Review model (gig_id, reviewer_id, reviewee_id, rating, comment)
+  - [x] Create Transaction model (gig_id, amount, status, service_fee)
 
-- [ ] **Remove Marketplace Models**
-  - [ ] Remove Item, Category, ItemImage models
-  - [ ] Remove marketplace-specific relationships
-  - [ ] Clean up unused enums (ItemStatus, ItemCondition)
+- [x] **Remove Marketplace Models**
+  - [x] Remove Item, Category, ItemImage models
+  - [x] Remove marketplace-specific relationships
+  - [x] Clean up unused enums (ItemStatus, ItemCondition)
 
 ### 2. Database Migrations
 - [ ] Create Alembic migration to drop marketplace tables
@@ -33,7 +33,7 @@
 
 ### 3. Authentication & User Management
 - [x] JWT authentication (already implemented)
-- [ ] Update user registration for dual-role (Helper/Seeker)
+- [x] Update user registration for dual-role (Helper/Seeker)
 - [ ] Add location setting endpoints
 - [ ] Add availability toggle endpoint
 - [ ] Update user profile endpoints
@@ -63,11 +63,11 @@
 ## Phase 2: Communication & Advanced Features
 
 ### 6. Real-time Chat System
-- [ ] **WebSocket Setup**
-  - [ ] Install websockets dependencies (fastapi websockets)
-  - [ ] Create WebSocket connection manager
-  - [ ] Implement room-based chat routing
-  - [ ] Add connection authentication (JWT in WebSocket)
+- [x] **WebSocket Setup**
+  - [x] Install websockets dependencies (fastapi websockets)
+  - [x] Create WebSocket connection manager
+  - [x] Implement room-based chat routing
+  - [x] Add connection authentication (JWT in WebSocket)
 
 - [ ] **Chat APIs**
   - [ ] GET /api/chat/rooms - List user's chat rooms
@@ -106,8 +106,10 @@
   - [ ] Service fee calculation logic
 
 ### 11. Testing & Quality
-- [ ] **Unit Tests**
-  - [ ] Update existing auth tests
+- [x] **Unit Tests**
+  - [x] Update existing auth tests
+  - [x] Add basic model tests
+  - [x] Add password security tests
   - [ ] Add gig CRUD tests
   - [ ] Add geospatial query tests
   - [ ] Add WebSocket chat tests
@@ -132,8 +134,8 @@
 - [ ] Create API testing guide
 
 ### 14. Infrastructure & Deployment
-- [ ] Update Docker Compose for new dependencies
-- [ ] Add PostGIS to Docker setup
+- [x] Update Docker Compose for new dependencies
+- [x] Add PostGIS to Docker setup
 - [ ] Configure WebSocket support in deployment
 - [ ] Environment variable management
 
@@ -145,11 +147,13 @@
 
 ## Immediate Next Steps (Priority Order)
 1. ✅ Clean up old marketplace models and enums
-2. 🔄 Update User model for Helper/Seeker functionality  
-3. ⏳ Create new Gig and Chat models
-4. ⏳ Set up PostGIS and spatial queries
-5. ⏳ Implement core gig CRUD APIs
-6. ⏳ Set up WebSocket chat system
+2. ✅ Update User model for Helper/Seeker functionality  
+3. ✅ Create new Gig and Chat models
+4. ✅ Set up PostGIS and spatial queries
+5. ⏳ Implement core gig CRUD APIs (NEXT PRIORITY)
+6. ✅ Set up WebSocket chat system
+7. ⏳ Create Alembic migrations for new schema
+8. ⏳ Add geospatial endpoints for nearby gig search
 
 ## Notes
 - **PostGIS Setup**: Need to ensure PostGIS extension is available in Docker
