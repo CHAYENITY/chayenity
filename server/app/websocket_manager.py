@@ -2,7 +2,7 @@
 WebSocket connection manager for real-time chat in Hourz app
 """
 import json
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Optional
 from uuid import UUID
 from fastapi import WebSocket, WebSocketDisconnect
 from app.models import User, ChatRoom, Message, MessageType
@@ -57,7 +57,7 @@ class ConnectionManager:
             # Connection might be closed
             pass
 
-    async def broadcast_to_room(self, room_id: str, message: dict, exclude_websocket: WebSocket = None):
+    async def broadcast_to_room(self, room_id: str, message: dict, exclude_websocket: Optional[WebSocket] = None):
         """Send message to all connections in a room"""
         if room_id not in self.active_connections:
             return
@@ -85,7 +85,7 @@ class ConnectionManager:
         sender_id: UUID, 
         content: str, 
         message_type: MessageType = MessageType.TEXT,
-        image_url: str = None
+        image_url: Optional[str] = None
     ):
         """Save message to database and broadcast to room"""
         async with AsyncSessionLocal() as db:
