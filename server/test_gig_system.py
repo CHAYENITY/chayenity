@@ -34,6 +34,29 @@ async def create_test_user():
         break
 
 
+async def create_helper_user():
+    """Create a helper user for testing gig acceptance"""
+    async for session in get_db():
+        from sqlmodel import select
+        stmt = select(User).where(User.email == "helper@example.com")
+        result = await session.execute(stmt)
+        existing_user = result.scalar_one_or_none()
+        
+        if not existing_user:
+            user = User(
+                email="helper@example.com", 
+                hashed_password=get_password_hash("password"),
+                full_name="Helper User",
+                is_available=True
+            )
+            session.add(user)
+            await session.commit()
+            print("✅ Created helper user")
+        else:
+            print("✅ Helper user already exists")
+        break
+
+
 async def test_gig_system():
     """Test the complete gig system"""
     
@@ -136,7 +159,7 @@ async def test_gig_system():
         # Update gig
         update_data = {
             "title": "Updated Test Gig",
-            "hourly_rate": 30.0
+            "budget": 75.0
         }
         
         update_response = await client.put(f"/api/gigs/{gig_id}", json=update_data, headers=headers)
@@ -147,12 +170,106 @@ async def test_gig_system():
             
         print("✅ Successfully updated gig")
         
+        print("\n🤝 Testing Gig Acceptance...")
+        
+        # Create a second user to test gig acceptance
+        await create_helper_user()
+        
+        # Login as helper
+        helper_login_data = {
+            "username": "helper@example.com",
+            "password": "password"
+        }
+        
+        helper_login_response = await client.post("/api/auth/login", data=helper_login_data)
+        
+        if helper_login_response.status_code != 200:
+            print(f"❌ Helper login failed: {helper_login_response.status_code} - {helper_login_response.text}")
+            return False
+            
+        helper_token_data = helper_login_response.json()
+        helper_access_token = helper_token_data["access_token"]
+        helper_headers = {"Authorization": f"Bearer {helper_access_token}"}
+        
+        # Helper accepts the gig
+        accept_response = await client.post(f"/api/gigs/{gig_id}/accept", headers=helper_headers)
+        
+        if accept_response.status_code != 200:
+            print(f"❌ Gig acceptance failed: {accept_response.status_code} - {accept_response.text}")
+            return False
+            
+        print("✅ Successfully accepted gig as helper")
+        
+        print("\n📊 Testing Gig Status Updates...")
+        
+        # Update gig status to in_progress
+        status_update_data = {
+            "status": "in_progress"
+        }
+        
+        status_response = await client.put(f"/api/gigs/{gig_id}/status", json=status_update_data, headers=helper_headers)
+        
+        if status_response.status_code != 200:
+            print(f"❌ Status update failed: {status_response.status_code} - {status_response.text}")
+            return False
+            
+        print("✅ Successfully updated gig status to in_progress")
+        
+        # Update gig status to completed
+        status_update_data = {
+            "status": "completed"
+        }
+        
+        status_response = await client.put(f"/api/gigs/{gig_id}/status", json=status_update_data, headers=helper_headers)
+        
+        if status_response.status_code != 200:
+            print(f"❌ Status completion failed: {status_response.status_code} - {status_response.text}")
+            return False
+            
+        print("✅ Successfully completed gig")
+        
+        print("\n🗑️ Testing Gig Deletion...")
+        
+        # Create another gig to test deletion
+        delete_gig_data = {
+            "title": "Gig to Delete",
+            "description": "This gig will be deleted",
+            "duration_hours": 1,
+            "budget": 25.0,
+            "location": {
+                "latitude": 40.730610,
+                "longitude": -73.935242
+            },
+            "address_text": "New York, NY",
+        }
+        
+        delete_create_response = await client.post("/api/gigs/", json=delete_gig_data, headers=headers)
+        
+        if delete_create_response.status_code != 201:
+            print(f"❌ Delete test gig creation failed: {delete_create_response.status_code}")
+            return False
+            
+        delete_gig_id = delete_create_response.json()["id"]
+        
+        # Delete the gig
+        delete_response = await client.delete(f"/api/gigs/{delete_gig_id}", headers=headers)
+        
+        if delete_response.status_code != 204:
+            print(f"❌ Gig deletion failed: {delete_response.status_code} - {delete_response.text}")
+            return False
+            
+        print("✅ Successfully deleted gig")
+        
         print(f"\n🎉 ALL TESTS PASSED! Complete Gig CRUD system is working perfectly!")
         print(f"✅ 9 API endpoints tested successfully")
         print(f"✅ PostGIS geospatial search working")
         print(f"✅ JWT authentication working") 
         print(f"✅ SQLModel + SQLAlchemy hybrid architecture working")
         print(f"✅ Pydantic V2 validation working")
+        print(f"✅ Gig acceptance workflow tested")
+        print(f"✅ Gig status management tested")
+        print(f"✅ Gig deletion tested")
+        print(f"✅ Multi-user workflow tested")
         
         return True
 
