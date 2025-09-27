@@ -3,20 +3,19 @@ from fastapi import status
 from httpx import AsyncClient, ASGITransport
 
 from app.main import app
-from app.models import UserTypeEnum
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "email, contact_info, user_type",
+    "email, contact_info",
     [
-        ("test1@example.com", "0812345678", UserTypeEnum.TOURIST.value),
-        ("test2@example.com", "0823456789", UserTypeEnum.OPERATOR.value),
-        ("test3@example.com", "1234567", UserTypeEnum.TOURIST.value),
-        ("test4@example.com", "123456789012345", UserTypeEnum.OPERATOR.value),
+        ("test1@example.com", "0812345678"),
+        ("test2@example.com", "0823456789"),
+        ("test3@example.com", "1234567"),
+        ("test4@example.com", "123456789012345"),
     ],
 )
-async def test_register_success_multiple_cases(prepare_database, email, contact_info, user_type):
+async def test_register_success_multiple_cases(prepare_database, email, contact_info):
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://testserver") as client:
         response = await client.post(

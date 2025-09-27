@@ -40,13 +40,6 @@ class NotificationType(str, enum.Enum):
     PRICE_CHANGE = "price_change"
     REVIEW_RECEIVED = "review_received"
     REPORT_RESPONSE = "report_response"
-
-
-class UserTypeEnum(str, enum.Enum):
-    TOURIST = "tourist"
-    OPERATOR = "operator"
-
-
 class TransactionStatus(str, enum.Enum):
     PENDING = "pending"
     COMPLETED = "completed"
