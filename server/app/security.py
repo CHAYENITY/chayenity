@@ -98,6 +98,20 @@ def create_access_token(
     return jwt.encode(to_encode, app_config.ACCESS_SECRET_KEY, algorithm=app_config.ALGORITHM)
 
 
+def decode_access_token(token: str) -> dict:
+    """Decode and validate access token, return payload"""
+    try:
+        payload = jwt.decode(
+            token, app_config.ACCESS_SECRET_KEY, algorithms=[app_config.ALGORITHM]
+        )
+        return payload
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials"
+        )
+
+
 async def get_current_user_with_refresh_token(
     refresh_token: str = Depends(refresh_token_scheme), db: AsyncSession = Depends(get_db)
 ) -> User:
