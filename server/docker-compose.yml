@@ -2,7 +2,7 @@ name: chayenity
 
 services:
   db_pg:
-    image: postgres:15
+    image: postgis/postgis:15-3.4
     container_name: chayenity-pg
     restart: always
     environment:

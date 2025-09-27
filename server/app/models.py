@@ -1,5 +1,5 @@
 import enum
-from typing import Optional, List
+from typing import Optional, List, Any
 from datetime import datetime
 from uuid import UUID, uuid4
 
@@ -50,7 +50,7 @@ class User(SQLModel, table=True):
     contact_info: Optional[str] = None  # phone or LINE ID
     
     # Location for Helper mode (fixed location)
-    fixed_location: Optional[str] = Field(
+    fixed_location: Optional[Any] = Field(
         default=None, sa_column=Column(Geometry("POINT", srid=4326))
     )
     address_text: Optional[str] = None
@@ -105,7 +105,7 @@ class Gig(SQLModel, table=True):
     budget: float = Field(index=True)  # Budget in local currency
     
     # Location where gig needs to be done (GPS pinned by Seeker)
-    location: str = Field(sa_column=Column(Geometry("POINT", srid=4326)))
+    location: Any = Field(sa_column=Column(Geometry("POINT", srid=4326)))
     address_text: str
     
     status: GigStatus = Field(default=GigStatus.PENDING, index=True)
