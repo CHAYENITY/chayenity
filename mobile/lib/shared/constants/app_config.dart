@@ -1,6 +1,6 @@
 class AppConfig {
   // App Strings
-  static const String appName = 'Chayenity';
+  static const String appName = 'Hourz';
   static const String appVersion = '1.0.0';
 
   // Network

@@ -4,12 +4,9 @@ class ApiEndpoints {
   // TODO ดึงจาก env
   static final String apiUrl = '${EnvConfig.serverUrl}/api';
 
-  // Auth
-  static final String login = '$apiUrl/auth/register';
-  static final String register = '$apiUrl/auth/login';
     // 🔐 Auth endpoints
-  static const String login = '/auth/login';
   static const String register = '/auth/register';
+  static const String login = '/auth/login';
   static const String logout = '/auth/logout';
   static const String refreshToken = '/auth/refresh';
 
