@@ -7,24 +7,43 @@ and provides a test client fixture for API tests.
 import asyncio
 import pytest
 import pytest_asyncio
+import sys
+if sys.platform.startswith("win"):
+    # Use selector event loop on Windows to avoid asyncpg loop issues
+    try:
+        from asyncio import WindowsSelectorEventLoopPolicy
+        asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())
+    except Exception:
+        pass
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy import text
 from sqlmodel import SQLModel
 
-from app.database.session import get_db
-from app.main import app
+# Import app_config early so we can construct the test DB URL before
+# importing the application module which creates the production engine.
 from app.configs.app_config import app_config
-
 
 # Build a safe test database URL by appending _test to the database name
 TEST_DATABASE_URL = str(app_config.SQLALCHEMY_DATABASE_URI).replace(
     app_config.POSTGRES_DB, f"{app_config.POSTGRES_DB}_test"
 )
 
-# Test engine and session factory
+# Create the test engine and session factory before importing the app so we
+# can patch the application's DB session to use the test engine during tests.
 engine_test = create_async_engine(TEST_DATABASE_URL, echo=False, future=True)
 TestingSessionLocal = async_sessionmaker(bind=engine_test, class_=AsyncSession, expire_on_commit=False)
+
+# Now import the app and the production get_db so we can override it.
+from app.database import session as prod_session
+from app.main import app
+from app.database.session import get_db
+
+
+# Patch the application's DB session objects to use the test engine/sessionmaker
+# This prevents the app lifespan from connecting to the real DB during tests.
+prod_session.engine = engine_test
+prod_session.AsyncSessionLocal = TestingSessionLocal
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
