@@ -39,21 +39,23 @@
 - [ ] 🎯 Add availability toggle endpoint (NEXT PRIORITY)
 - [ ] 🎯 Update user profile endpoints (NEXT PRIORITY)
 
-### 4. Core API Endpoints - Gigs
-- [ ] **Gig Management**
-  - [ ] POST /api/gigs - Create new gig (Seeker)
-  - [ ] GET /api/gigs - List nearby gigs (geospatial query)
-  - [ ] GET /api/gigs/{id} - Get gig details
-  - [ ] PUT /api/gigs/{id} - Update gig
-  - [ ] DELETE /api/gigs/{id} - Cancel gig
-  - [ ] POST /api/gigs/{id}/accept - Helper accepts gig
-  - [ ] PUT /api/gigs/{id}/status - Update gig status
+### 4. Core API Endpoints - Gigs ✅
+- [x] **Gig Management**
+  - [x] POST /api/gigs - Create new gig (Seeker)
+  - [x] GET /api/gigs/search - List nearby gigs (geospatial query)
+  - [x] GET /api/gigs/{id} - Get gig details
+  - [x] PUT /api/gigs/{id} - Update gig
+  - [x] DELETE /api/gigs/{id} - Cancel gig
+  - [x] POST /api/gigs/{id}/accept - Helper accepts gig
+  - [x] PUT /api/gigs/{id}/status - Update gig status
+  - [x] GET /api/gigs/my-gigs - Get user's gigs (as seeker or helper)
+  - [x] GET /api/gigs/{id}/details - Get detailed gig information
 
-- [ ] **Geospatial Queries**
-  - [ ] Implement PostGIS distance queries
-  - [ ] Add radius-based gig search
-  - [ ] Add map bounds-based search
-  - [ ] Optimize with spatial indexes
+- [x] **Geospatial Queries**
+  - [x] Implement PostGIS distance queries
+  - [x] Add radius-based gig search
+  - [x] Add location-based filtering
+  - [x] Proper SQLModel + PostGIS integration
 
 ### 5. User Location & Availability
 - [ ] **Location APIs**
@@ -158,12 +160,14 @@
 6. ✅ Database initialization with all tables
 7. ✅ Comprehensive test suite (8/8 passing)
 8. ✅ Docker environment with PostGIS
+9. ✅ **Core Gig CRUD APIs** - Complete with 9 endpoints and geospatial search
+10. ✅ **SQLModel + SQLAlchemy Hybrid Architecture** - Proper type-safe patterns
 
 ## 🎯 IMMEDIATE NEXT PRIORITIES (Ready to Implement):
-1. **🚀 Core Gig CRUD APIs** - Foundation for all gig functionality
-2. **📍 Geospatial Search APIs** - Location-based gig discovery  
-3. **👤 User Profile Management** - Location setting, availability toggle
-4. **💬 Chat REST APIs** - Message history, room management
+1. **👤 User Profile Management** - Location setting, availability toggle endpoints
+2. **💬 Chat REST APIs** - Message history, room management endpoints
+3. **🧪 API Integration Testing** - End-to-end gig workflow tests
+4. **📱 Mobile App Backend Integration** - CORS, validation for Flutter
 5. **🔄 Create Clean Alembic Migrations** - Production-ready migrations
 
 ## Notes
@@ -172,6 +176,41 @@
 - **File Storage**: Start with local file storage, plan for cloud storage later
 - **Testing Strategy**: Update test database to include PostGIS extension
 - **Performance**: Consider caching strategies for frequently accessed data
+
+## 🏗️ Architecture & Technology Decisions
+
+### SQLModel + SQLAlchemy Hybrid Approach ✅
+**ESTABLISHED PATTERN** - Use this approach consistently throughout the project:
+
+- **SQLModel**: Primary framework for model definitions and ORM queries
+  ```python
+  from sqlmodel import SQLModel, Field, Relationship, select, col
+  # Use for: Model classes, queries, column references
+  ```
+
+- **SQLAlchemy**: For database session management and advanced features
+  ```python
+  from sqlalchemy.ext.asyncio import AsyncSession, AsyncSessionLocal, create_async_engine
+  from sqlalchemy import and_, func, or_, text
+  # Use for: Session management, complex query functions, raw SQL
+  ```
+
+**Key Benefits:**
+- Type safety with SQLModel's Pydantic integration
+- Proper type checking without `# type: ignore` comments
+- Clean separation of concerns
+- Future-proof architecture
+
+**Implementation Examples:**
+- ✅ `gig_crud.py` - Proper SQLModel patterns with `col()` function
+- ✅ `security.py` - Hybrid approach for session management
+- ✅ All models in `models.py` - SQLModel table definitions
+
+### Type Checking Best Practices ✅
+- Always use `col()` function for column references in queries
+- Import `select` from `sqlmodel`, not `sqlalchemy.future`
+- Use proper type annotations instead of `# type: ignore`
+- Handle nullable returns with `or 0` pattern for counts
 
 ---
 **Legend:** ✅ Done | 🔄 In Progress | ⏳ Planned | ❌ Blocked

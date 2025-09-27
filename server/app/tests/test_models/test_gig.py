@@ -2,6 +2,7 @@
 Test the Gig model and gig-related functionality for Hourz app
 """
 import pytest
+import pytest_asyncio
 from uuid import uuid4
 from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,7 +12,7 @@ from app.models import User, Gig, GigStatus, ChatRoom, Review
 from app.security import get_password_hash
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def seeker_user(db_session: AsyncSession):
     """Create a seeker user for testing"""
     user = User(
@@ -25,7 +26,7 @@ async def seeker_user(db_session: AsyncSession):
     return user
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def helper_user(db_session: AsyncSession):
     """Create a helper user for testing"""
     user = User(
@@ -72,6 +73,7 @@ class TestGigModel:
         assert gig.seeker_id == seeker_user.id
         assert gig.helper_id is None
         assert isinstance(gig.created_at, datetime)
+        assert gig.image_urls is not None
         assert len(gig.image_urls) == 2
 
     @pytest.mark.asyncio
@@ -160,6 +162,7 @@ class TestGigModel:
         # Test relationships are loaded correctly
         assert gig.seeker.id == seeker_user.id
         assert gig.seeker.full_name == "Seeker User"
+        assert gig.helper is not None
         assert gig.helper.id == helper_user.id
         assert gig.helper.full_name == "Helper User"
 

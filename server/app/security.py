@@ -4,11 +4,9 @@ import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, timezone
 import hashlib
-import calendar
 
 from app.database.session import get_db
 from app.models import User

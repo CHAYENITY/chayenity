@@ -5,8 +5,6 @@ import json
 from typing import Dict, List, Set
 from uuid import UUID
 from fastapi import WebSocket, WebSocketDisconnect
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.models import User, ChatRoom, Message, MessageType
 from app.database.session import AsyncSessionLocal
 
