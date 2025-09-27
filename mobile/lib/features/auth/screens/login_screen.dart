@@ -1,227 +1,314 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../controllers/login_form_controller.dart';
+import '../providers/auth_providers.dart';
+import '../../../shared/widgets/custom_text_field.dart';
+import '../../../shared/widgets/custom_button.dart';
+import '../../../shared/widgets/loading_overlay.dart';
 
-import 'package:chayenity/main.dart';
-import 'package:chayenity/shared/theme/color_schemas.dart';
-
-import '../widgets/login_form.dart';
-
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return _LoginScreenContent;
-  }
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenContent extends StatelessWidget {
-  const _LoginScreenContent();
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
 
-  void _handleSocialSignIn(BuildContext context, String method) async {
-    try {
-      // switch (method) {
-      //   case 'google':
-      //     await provider.signInWithGoogle();
-      //     break;
-      //   case 'facebook':
-      //     await provider.signInWithFacebook();
-      //     break;
-      //   case 'apple':
-      //     await provider.signInWithApple();
-      //     break;
-      // }
+  @override
+  void initState() {
+    super.initState();
+    // Controllers will be updated directly in onChanged callbacks
+  }
 
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Center(child: Text('เข้าสู่ระบบสำเร็จ!')),
-            backgroundColor: AppColors.success,
-          ),
-        );
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MainApp()),
-        );
-      }
-    } catch (error) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Center(child: Text('เกิดข้อผิดพลาด: ${error.toString()}')),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<LoginProvider>(context, listen: false);
+    final theme = Theme.of(context);
+    final formState = ref.watch(loginFormControllerProvider);
+    final authState = ref.watch(authProvider);
+    final isLoading = authState.isLoading;
+
+    // Listen to auth errors and show snackbar
+    ref.listen<String?>(authErrorProvider, (previous, next) {
+      if (next != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next),
+            backgroundColor: theme.colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              label: 'ปิด',
+              textColor: theme.colorScheme.onError,
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                ref.read(authProvider.notifier).clearError();
+              },
+            ),
+          ),
+        );
+      }
+    });
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: IntrinsicHeight(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 20),
-                        _buildHeader(context),
-                        const SizedBox(height: 40),
-                        LoginForm(provider: provider),
-                        const SizedBox(height: 20),
-                        _buildDivider(),
+      body: LoadingOverlay(
+        isLoading: isLoading,
+        message: 'กำลังเข้าสู่ระบบ...',
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 60),
 
-                        //   // * GOOGLE
-                        //   const SizedBox(height: 24),
-                        //   _buildSocialButton(
-                        //     icon: Icons.g_mobiledata,
-                        //     text: 'เข้าใช้งานด้วย Google',
-                        //     backgroundColor: Colors.white,
-                        //     textColor: Colors.black87,
-                        //     onPressed: () =>
-                        //         _handleSocialSignIn(context, provider, 'google'),
-                        //   ),
+                // Logo and Title
+                _buildHeader(theme),
 
-                        //   // * FACEBOOK
-                        //   const SizedBox(height: 12),
-                        //   _buildSocialButton(
-                        //     icon: Icons.facebook,
-                        //     text: 'เข้าใช้งานด้วย Facebook',
-                        //     backgroundColor: const Color(0xFF1877F2),
-                        //     textColor: Colors.white,
-                        //     onPressed: () => _handleSocialSignIn(
-                        //       context,
-                        //       provider,
-                        //       'facebook',
-                        //     ),
-                        //   ),
+                const SizedBox(height: 48),
 
-                        //   const SizedBox(height: 12),
-                        //   _buildSocialButton(
-                        //     icon: Icons.apple,
-                        //     text: 'เข้าใช้งานด้วย Apple',
-                        //     backgroundColor: Colors.black,
-                        //     textColor: Colors.white,
-                        //     onPressed: () =>
-                        //         _handleSocialSignIn(context, provider, 'apple'),
-                        //   ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+                // Login Form
+                _buildLoginForm(formState),
+
+                const SizedBox(height: 24),
+
+                // Login Button
+                _buildLoginButton(formState, isLoading),
+
+                const SizedBox(height: 16),
+
+                // Demo Credentials Info
+                _buildDemoInfo(theme),
+
+                const SizedBox(height: 32),
+
+                // Footer Links
+                _buildFooter(theme),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
-}
 
-Widget _buildHeader(BuildContext context) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        'Community Marketplace',
-        style: Theme.of(context).textTheme.displayLarge?.copyWith(
-          color: AppColors.primary,
-          fontWeight: FontWeight.bold,
+  Widget _buildHeader(ThemeData theme) {
+    return Column(
+      children: [
+        // Logo placeholder
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Icon(
+            Icons.storefront_rounded,
+            size: 40,
+            color: theme.colorScheme.primary,
+          ),
         ),
-      ),
-      const SizedBox(height: 40),
-      Text(
-        'สมัครบัญชีใหม่ หรือเข้าสู่ระบบ',
-        style: Theme.of(context).textTheme.displayLarge!.copyWith(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
+
+        const SizedBox(height: 24),
+
+        Text(
+          'ยินดีต้อนรับ',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
+          ),
         ),
-      ),
-    ],
-  );
-}
 
-Widget _buildDivider() {
-  return Row(
-    children: [
-      Expanded(child: Container(height: 1, color: Colors.grey[300])),
-      const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16),
-        child: Text('หรือ', style: TextStyle(color: Colors.grey, fontSize: 14)),
-      ),
-      Expanded(child: Container(height: 1, color: Colors.grey[300])),
-    ],
-  );
-}
+        const SizedBox(height: 8),
 
-Widget _buildSocialButton({
-  required IconData icon,
-  required String text,
-  required Color backgroundColor,
-  required Color textColor,
-  required VoidCallback onPressed,
-}) {
-  return SizedBox(
-    width: double.infinity,
-    height: 50,
-    child: ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor,
-        foregroundColor: textColor,
-        elevation: 0,
-        side: backgroundColor == Colors.white
-            ? BorderSide(color: Colors.grey[300]!, width: 1)
-            : null,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        Text(
+          'เข้าสู่ระบบเพื่อเริ่มใช้งาน Chayenity',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoginForm(LoginFormState formState) {
+    return Column(
+      children: [
+        CustomTextField(
+          label: 'อีเมล',
+          hintText: 'กรุณากรอกอีเมลของคุณ',
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.next,
+          controller: _emailController,
+          focusNode: _emailFocusNode,
+          errorText: formState.emailError,
+          prefixIcon: const Icon(Icons.email_outlined),
+          onChanged: (value) {
+            ref.read(loginFormControllerProvider.notifier).updateEmail(value);
+          },
+        ),
+
+        const SizedBox(height: 20),
+
+        CustomTextField(
+          label: 'รหัสผ่าน',
+          hintText: 'กรุณากรอกรหัสผ่านของคุณ',
+          obscureText: !formState.isPasswordVisible,
+          textInputAction: TextInputAction.done,
+          controller: _passwordController,
+          focusNode: _passwordFocusNode,
+          errorText: formState.passwordError,
+          prefixIcon: const Icon(Icons.lock_outline),
+          suffixIcon: IconButton(
+            icon: Icon(
+              formState.isPasswordVisible
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+            ),
+            onPressed: () {
+              ref
+                  .read(loginFormControllerProvider.notifier)
+                  .togglePasswordVisibility();
+            },
+          ),
+          onChanged: (value) {
+            ref
+                .read(loginFormControllerProvider.notifier)
+                .updatePassword(value);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoginButton(LoginFormState formState, bool isLoading) {
+    return CustomButton(
+      text: 'เข้าสู่ระบบ',
+      onPressed: formState.isFormValid && !isLoading
+          ? () {
+              // Dismiss keyboard
+              FocusScope.of(context).unfocus();
+
+              // Submit form
+              ref.read(loginFormControllerProvider.notifier).submitForm();
+            }
+          : null,
+      variant: ButtonVariant.primary,
+      size: ButtonSize.large,
+      isFullWidth: true,
+      isLoading: isLoading,
+    );
+  }
+
+  Widget _buildDemoInfo(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2)),
       ),
-      child: Stack(
-        alignment: Alignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const SizedBox(width: 16),
-              if (icon == Icons.g_mobiledata) ...[
-                Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage(
-                        'https://developers.google.com/identity/images/g-logo.png',
-                      ),
-                      fit: BoxFit.contain,
-                    ),
-                  ),
+              Icon(
+                Icons.info_outline,
+                size: 20,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'ข้อมูลสำหรับทดสอบ',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.primary,
                 ),
-              ] else ...[
-                Icon(icon, size: 20, color: textColor),
-              ],
+              ),
             ],
           ),
+          const SizedBox(height: 8),
           Text(
-            text,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: textColor,
+            'อีเมล: demo@chayenity.com\nรหัสผ่าน: password123',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.8),
+              fontFamily: 'monospace',
             ),
           ),
         ],
       ),
-    ),
-  );
+    );
+  }
+
+  Widget _buildFooter(ThemeData theme) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'ยังไม่มีบัญชี? ',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                // Navigate to register screen
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('หน้าสมัครสมาชิกยังไม่พร้อมใช้งาน'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+              child: Text(
+                'สมัครสมาชิก',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        GestureDetector(
+          onTap: () {
+            // Navigate to forgot password screen
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('หน้าลืมรหัสผ่านยังไม่พร้อมใช้งาน'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          },
+          child: Text(
+            'ลืมรหัสผ่าน?',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
