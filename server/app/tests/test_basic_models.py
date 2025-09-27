@@ -76,9 +76,9 @@ class TestModelStructure:
             "full_name": "Test User"
         }
         
-        # This should not raise an error
-        user = User(**user_data)
-        
+        # This should not raise an error (use model_validate to build model from dict in tests)
+        user = User.model_validate(user_data)
+
         # Check that required fields are set
         assert user.email == "test@hourz.app"
         assert user.full_name == "Test User"
@@ -101,9 +101,9 @@ class TestModelStructure:
             "seeker_id": uuid4()
         }
         
-        # This should not raise an error
-        gig = Gig(**gig_data)
-        
+        # This should not raise an error (use model_validate to build model from dict in tests)
+        gig = Gig.model_validate(gig_data)
+
         # Check that required fields are set
         assert gig.title == "Test Gig"
         assert gig.duration_hours == 2
