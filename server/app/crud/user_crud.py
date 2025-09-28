@@ -38,26 +38,15 @@ async def create_user(db: AsyncSession, user: UserCreate, password_hash: str) ->
         # longitude=user.longitude,
     )
     try:
-        # Add and flush so the instance becomes persistent in the session
-        # (this works whether or not there's an outer transaction). We then
-        # commit only if there isn't an outer transaction so tests that wrap
-        # the session in their own transaction still control commit/rollback.
+        # Add, flush, and commit the user to the database
         db.add(db_user)
         await db.flush()
-
-        if not db.in_transaction():
-            await db.commit()
-
+        await db.commit()
         await db.refresh(db_user)
         return db_user
     except IntegrityError as exc:
-        # Ensure we rollback the current transaction if we started one here
-        try:
-            if not db.in_transaction():
-                await db.rollback()
-        except Exception:
-            # best-effort rollback; continue to raise the original error
-            pass
+        # Rollback the transaction on error
+        await db.rollback()
         # Likely unique constraint on email
         raise HTTPException(status_code=409, detail="Email already registered") from exc
 

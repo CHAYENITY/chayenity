@@ -10,21 +10,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db
 from app.crud.buddy_crud import buddy_crud
-from app.crud.user_crud import user_crud
+from app.crud import user_crud
 from app.schemas.buddy_schemas import (
     BuddyCreate,
     BuddyResponse,
     BuddyListResponse,
     BuddyUpdate,
 )
-from app.security import get_current_user
+from app.security import get_current_user_with_access_token as get_current_user
 from app.models import User
 
 
-router = APIRouter()
+router = APIRouter(prefix="/buddies", tags=["Buddies"])
 
 
-@router.post("/buddies", response_model=BuddyResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=BuddyResponse, status_code=status.HTTP_201_CREATED)
 async def add_buddy(
     buddy_create: BuddyCreate,
     db: AsyncSession = Depends(get_db),
@@ -53,6 +53,13 @@ async def add_buddy(
             detail="User is already in your buddy list",
         )
 
+    # Store buddy user details before CRUD operation
+    buddy_full_name = buddy_user.full_name
+    buddy_email = buddy_user.email
+    buddy_is_available = buddy_user.is_available
+    buddy_reputation_score = buddy_user.reputation_score
+    buddy_profile_image_url = buddy_user.profile_image_url
+
     # Add buddy
     buddy_entry = await buddy_crud.add_buddy(db, buddy_create, current_user.id)
 
@@ -63,15 +70,15 @@ async def add_buddy(
         buddy_id=buddy_entry.buddy_id,
         created_at=buddy_entry.created_at,
         notes=buddy_entry.notes,
-        buddy_full_name=buddy_user.full_name,
-        buddy_email=buddy_user.email,
-        buddy_is_available=buddy_user.is_available,
-        buddy_reputation_score=buddy_user.reputation_score,
-        buddy_profile_image_url=buddy_user.profile_image_url,
+        buddy_full_name=buddy_full_name,
+        buddy_email=buddy_email,
+        buddy_is_available=buddy_is_available,
+        buddy_reputation_score=buddy_reputation_score,
+        buddy_profile_image_url=buddy_profile_image_url,
     )
 
 
-@router.get("/buddies", response_model=BuddyListResponse)
+@router.get("/", response_model=BuddyListResponse)
 async def get_buddy_list(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
@@ -110,7 +117,7 @@ async def get_buddy_list(
     )
 
 
-@router.get("/buddies/available", response_model=BuddyListResponse)
+@router.get("/available", response_model=BuddyListResponse)
 async def get_available_buddies(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
@@ -151,7 +158,7 @@ async def get_available_buddies(
     )
 
 
-@router.delete("/buddies/{buddy_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{buddy_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_buddy(
     buddy_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -166,7 +173,7 @@ async def remove_buddy(
         )
 
 
-@router.get("/buddies/{buddy_id}", response_model=BuddyResponse)
+@router.get("/{buddy_id}", response_model=BuddyResponse)
 async def get_buddy_details(
     buddy_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -202,7 +209,7 @@ async def get_buddy_details(
     )
 
 
-@router.put("/buddies/{buddy_id}", response_model=BuddyResponse)
+@router.put("/{buddy_id}", response_model=BuddyResponse)
 async def update_buddy_notes(
     buddy_id: UUID,
     buddy_update: BuddyUpdate,
