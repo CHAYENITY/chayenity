@@ -93,6 +93,7 @@ class User(SQLModel, table=True):
     transactions_as_payee: List["Transaction"] = Relationship(
         back_populates="payee", sa_relationship_kwargs={"foreign_keys": "Transaction.payee_id"}
     )
+    uploaded_files: List["UploadedFile"] = Relationship(back_populates="uploader")
 
 
 class Gig(SQLModel, table=True):
@@ -267,3 +268,23 @@ class Transaction(SQLModel, table=True):
         back_populates="transactions_as_payee",
         sa_relationship_kwargs={"foreign_keys": "Transaction.payee_id"},
     )
+
+
+class UploadedFile(SQLModel, table=True):
+    """File upload tracking and metadata"""
+
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    filename: str = Field(index=True)  # Generated filename
+    original_filename: str  # User's original filename
+    file_path: str  # Server file path
+    file_size: int  # File size in bytes
+    content_type: str  # MIME type
+    upload_category: str = Field(index=True)  # 'profile', 'gig', etc.
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow, index=True)
+    is_active: bool = Field(default=True, index=True)
+    
+    # Foreign Keys
+    uploaded_by: UUID = Field(foreign_key="user.id", index=True)
+    
+    # Relationships
+    uploader: User = Relationship(back_populates="uploaded_files")

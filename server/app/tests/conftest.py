@@ -85,3 +85,46 @@ async def client(setup_test_database) -> AsyncGenerator:
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
+
+
+@pytest_asyncio.fixture
+async def async_client(setup_test_database) -> AsyncGenerator:
+    """Async HTTP client bound to FastAPI app (alias for client fixture)"""
+    from httpx import AsyncClient, ASGITransport
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac
+
+
+@pytest_asyncio.fixture
+async def user_token_headers(async_client) -> dict:
+    """Create a user and return auth headers with access token"""
+    from uuid import uuid4
+    
+    # Create unique user data
+    email = f"test_{uuid4().hex[:8]}@example.com"
+    password = "testpass123"
+    
+    # Register user
+    register_data = {
+        "email": email,
+        "password": password,
+        "full_name": "Test User"
+    }
+    
+    register_response = await async_client.post("/api/auth/register", json=register_data)
+    assert register_response.status_code in (200, 201), f"Registration failed: {register_response.text}"
+    
+    # Login to get token
+    login_data = {
+        "username": email,
+        "password": password
+    }
+    
+    login_response = await async_client.post("/api/auth/login", data=login_data)
+    assert login_response.status_code == 200, f"Login failed: {login_response.text}"
+    
+    token_data = login_response.json()
+    access_token = token_data["access_token"]
+    
+    return {"Authorization": f"Bearer {access_token}"}
