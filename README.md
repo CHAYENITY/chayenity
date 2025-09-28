@@ -1,4 +1,4 @@
-# 🛍️ Chayenity
+# 🛍️ Hourz
 
 [![Status: Final Project](https://img.shields.io/badge/Status-Final%20Project-blue)]()
 [![Status: Development](https://img.shields.io/badge/Status-Development-yellow)]()

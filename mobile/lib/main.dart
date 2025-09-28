@@ -38,7 +38,7 @@ class _MainAppState extends ConsumerState<MainApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Chayenity',
+      title: 'Hourz',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
