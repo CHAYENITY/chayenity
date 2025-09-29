@@ -1,5 +1,5 @@
 class AppConfig {
-  // App Strings
+  // App
   static const String appName = 'Hourz';
   static const String appVersion = '1.0.0';
 

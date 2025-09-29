@@ -13,7 +13,7 @@ class AppConfig(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
 
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
-    PROJECT_NAME: str = "CHAYENITY"
+    PROJECT_NAME: str = "HOURZ"
     API_STR: str = "/api"
 
     REFRESH_SECRET_KEY: str = "refresh_secret_key"

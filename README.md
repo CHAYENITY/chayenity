@@ -19,38 +19,6 @@
 
 ---
 
-## 🚀 Getting Started
-
-### ⬇️ Get dependencies
-
-```bash
-cd mobile
-flutter pub get
-```
-
-### 🚀 Run the app
-
-- `macOS, iOS`
-
-```bash
-open ios/Runner.xcworkspace
-```
-
-```bash
-xcrun simctl list devices
-xcrun simctl boot "iPhone 16"
-```
-
-```bash
-open -a Simulator
-```
-
-```bash
-flutter run
-```
-
----
-
 ### 🧾 Check OpenRouter API Credit
 
 ```bash

@@ -6,10 +6,12 @@
   "description": "Archives BIA",
   "license": "UNLICENSED",
   "scripts": {
+    "format:mobile": "cd mobile && dart format .",
+    "lint:mobile": "cd mobile && dart analyze",
     "format:server": "cd server && poetry run black .",
     "lint:server": "cd server && poetry run ruff check . --fix",
-    "format": "prettier -w . --ignore-unknown && pnpm format:server",
-    "lint": "pnpm lint:server && node scripts/cross/clean-branches.js || true",
+    "format": "prettier -w . --ignore-unknown && pnpm format:mobile && pnpm format:server",
+    "lint": "pnpm lint:mobile && pnpm lint:server && node scripts/cross/clean-branches.js || true",
     "prepare": "husky",
     "check:credit": "node ./scripts/cross/check-credit.js"
   },

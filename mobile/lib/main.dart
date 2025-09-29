@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// * SCREEN
-import 'package:chayenity/shared/screens/error_screen.dart';
-import 'package:chayenity/features/auth/screens/login_screen.dart';
-import 'package:chayenity/features/home/screens/home_screen.dart';
-import 'package:chayenity/features/auth/providers/auth_providers.dart';
-import 'package:chayenity/features/auth/models/auth_state.dart';
+// * GLOBAL PROVIDERS
+import 'package:hourz/shared/providers/index.dart';
+
+// * ROUTER
+import 'package:hourz/shared/routing/app_router.dart';
+
+// * SCREENS
+import 'package:hourz/shared/screens/error_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,44 +29,20 @@ class MainApp extends ConsumerStatefulWidget {
 
 class _MainAppState extends ConsumerState<MainApp> {
   @override
-  void initState() {
-    super.initState();
-    // Initialize auth state
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(authProvider.notifier).initialize();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Hourz',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.light,
-        ),
-      ),
-      home: Consumer(
-        builder: (context, ref, child) {
-          final authState = ref.watch(authProvider);
+    // Watch theme providers
+    final themeMode = ref.watch(themeModeProvider);
+    final lightTheme = ref.watch(lightThemeProvider);
+    final darkTheme = ref.watch(darkThemeProvider);
 
-          // Show loading screen during initial auth check
-          if (authState.status == AuthStatus.initial) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
+    return MaterialApp.router(
+      title: AppConfig.appName,
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: themeMode,
 
-          // Navigate based on authentication status
-          if (authState.isAuthenticated) {
-            return const HomeScreen();
-          } else {
-            return const LoginScreen();
-          }
-        },
-      ),
+      // Use Go Router
+      routerConfig: AppRouter.router,
     );
   }
 }

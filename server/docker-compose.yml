@@ -1,9 +1,9 @@
-name: chayenity
+name: hourz
 
 services:
   db_pg:
     image: postgres:15
-    container_name: chayenity-pg
+    container_name: hourz-pg
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
