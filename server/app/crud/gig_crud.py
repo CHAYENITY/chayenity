@@ -2,7 +2,7 @@
 CRUD operations for Gig model.
 Handles database operations for gig management including geospatial queries.
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional, Tuple, Sequence
 from uuid import UUID
 
@@ -45,8 +45,8 @@ class GigCRUD:
             image_urls=gig_data.image_urls or [],
             starts_at=gig_data.starts_at,
             seeker_id=seeker_id,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc)
         )
         
         session.add(gig)
@@ -96,7 +96,7 @@ class GigCRUD:
             if hasattr(gig, field):
                 setattr(gig, field, value)
         
-        gig.updated_at = datetime.utcnow()
+        gig.updated_at = datetime.now(timezone.utc)
         await session.commit()
         await session.refresh(gig)
         return gig
@@ -144,7 +144,7 @@ class GigCRUD:
         
         gig.helper_id = helper_id
         gig.status = GigStatus.ACCEPTED
-        gig.updated_at = datetime.utcnow()
+        gig.updated_at = datetime.now(timezone.utc)
         
         await session.commit()
         await session.refresh(gig)
@@ -171,11 +171,11 @@ class GigCRUD:
             return None
         
         gig.status = new_status
-        gig.updated_at = datetime.utcnow()
+        gig.updated_at = datetime.now(timezone.utc)
         
         # Set completion time if marked as completed
         if new_status == GigStatus.COMPLETED:
-            gig.completed_at = datetime.utcnow()
+            gig.completed_at = datetime.now(timezone.utc)
         
         await session.commit()
         await session.refresh(gig)

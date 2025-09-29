@@ -4,7 +4,7 @@ Test the Gig model and gig-related functionality for Hourz app
 import pytest
 import pytest_asyncio
 from uuid import uuid4
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 from geoalchemy2 import WKTElement
 
@@ -57,7 +57,7 @@ class TestGigModel:
             location=WKTElement("POINT(100.5018 13.7563)", srid=4326),
             address_text="123 Sukhumvit Road, Bangkok",
             seeker_id=seeker_user.id,
-            starts_at=datetime.utcnow() + timedelta(hours=24),
+            starts_at=datetime.now(timezone.utc) + timedelta(hours=24),
             image_urls=["https://example.com/faucet1.jpg", "https://example.com/faucet2.jpg"]
         )
         
@@ -97,7 +97,7 @@ class TestGigModel:
         # Accept the gig
         gig.helper_id = helper_user.id
         gig.status = GigStatus.ACCEPTED
-        gig.updated_at = datetime.utcnow()
+        gig.updated_at = datetime.now(timezone.utc)
         
         await db_session.commit()
         await db_session.refresh(gig)
@@ -134,7 +134,7 @@ class TestGigModel:
         
         # Complete gig
         gig.status = GigStatus.COMPLETED
-        gig.completed_at = datetime.utcnow()
+        gig.completed_at = datetime.now(timezone.utc)
         await db_session.commit()
         await db_session.refresh(gig)
         
