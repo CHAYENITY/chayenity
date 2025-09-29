@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.routes import auth_route, user_route, gig_routes, chat_route, buddy_routes, upload_routes
+from app.routes import auth_route, user_route, gig_routes, chat_route, buddy_routes, upload_routes, review_routes
 
 api_router = APIRouter()
 
@@ -9,3 +9,4 @@ api_router.include_router(gig_routes.router)
 api_router.include_router(chat_route.router)
 api_router.include_router(buddy_routes.router)
 api_router.include_router(upload_routes.router)
+api_router.include_router(review_routes.router)
