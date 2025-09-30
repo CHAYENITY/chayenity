@@ -121,7 +121,6 @@ class _CitizenIdUploadWidgetState extends ConsumerState<CitizenIdUploadWidget> {
             : Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
-                  color: AppColors.mutedForeground,
                 ),
                 child: const Center(
                   child: Column(

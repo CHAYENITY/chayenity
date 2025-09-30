@@ -3,13 +3,10 @@ from typing import Optional, List, Any
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import Column, text as sa_text
+from sqlalchemy import Column
 from sqlalchemy import JSON
-from sqlalchemy.dialects.postgresql import JSONB
 from geoalchemy2 import Geometry
 from sqlmodel import SQLModel, Field, Relationship
-
-from app.database.base import Base
 
 
 # === Enum Definitions ===
@@ -48,21 +45,21 @@ class User(SQLModel, table=True):
     full_name: str
     profile_image_url: Optional[str] = None
     contact_info: Optional[str] = None  # phone or LINE ID
-    
+
     # Location for Helper mode (fixed location)
     fixed_location: Optional[Any] = Field(
         default=None, sa_column=Column(Geometry("POINT", srid=4326))
     )
     address_text: Optional[str] = None
-    
+
     # Helper availability
     is_available: bool = Field(default=False)  # Helper availability toggle
-    
+
     # Profile and reputation
     is_verified: bool = Field(default=False)
     reputation_score: float = Field(default=5.0)
     total_reviews: int = Field(default=0)
-    
+
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -104,16 +101,16 @@ class Gig(SQLModel, table=True):
     description: str
     duration_hours: int  # Expected duration in hours
     budget: float = Field(index=True)  # Budget in local currency
-    
+
     # Location where gig needs to be done (GPS pinned by Seeker)
     location: Any = Field(sa_column=Column(Geometry("POINT", srid=4326)))
     address_text: str
-    
+
     status: GigStatus = Field(default=GigStatus.PENDING, index=True)
-    
+
     # Images for the gig
     image_urls: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
-    
+
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     starts_at: Optional[datetime] = None  # When gig should start
@@ -121,7 +118,9 @@ class Gig(SQLModel, table=True):
 
     # Foreign Keys
     seeker_id: UUID = Field(foreign_key="user.id", index=True)  # User who posted the gig
-    helper_id: Optional[UUID] = Field(default=None, foreign_key="user.id", index=True)  # User who accepted
+    helper_id: Optional[UUID] = Field(
+        default=None, foreign_key="user.id", index=True
+    )  # User who accepted
 
     # Relationships
     seeker: User = Relationship(
@@ -245,10 +244,10 @@ class Transaction(SQLModel, table=True):
     net_amount: float  # Amount after service fee
     currency: str = Field(default="THB")
     status: TransactionStatus = Field(default=TransactionStatus.PENDING, index=True)
-    
+
     created_at: datetime = Field(default_factory=datetime.utcnow)
     completed_at: Optional[datetime] = None
-    
+
     # Mock payment details
     payment_method: Optional[str] = None
     transaction_ref: Optional[str] = None
@@ -282,9 +281,9 @@ class UploadedFile(SQLModel, table=True):
     upload_category: str = Field(index=True)  # 'profile', 'gig', etc.
     uploaded_at: datetime = Field(default_factory=datetime.utcnow, index=True)
     is_active: bool = Field(default=True, index=True)
-    
+
     # Foreign Keys
     uploaded_by: UUID = Field(foreign_key="user.id", index=True)
-    
+
     # Relationships
     uploader: User = Relationship(back_populates="uploaded_files")

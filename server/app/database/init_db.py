@@ -32,6 +32,9 @@ async def init(db_engine: AsyncEngine) -> None:
             await conn.execute(text("CREATE SCHEMA public"))
             await conn.execute(text("GRANT ALL ON SCHEMA public TO public"))
 
+            # Enable PostGIS extension for geometry type
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
+
             logger.info("🛠 Creating all tables...")
             await conn.run_sync(SQLModel.metadata.create_all)
 
