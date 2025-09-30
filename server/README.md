@@ -1,4 +1,6 @@
-# ✨ Quickstart ✨
+# ✨ Hourz Backend - Local Helper Marketplace ✨
+
+Hourz is a local helper marketplace connecting Seekers who need help with Helpers who provide hourly services. Built with FastAPI, PostGIS, and real-time WebSocket chat.
 
 ## 🛠️ Project setup 🛠️
 
@@ -101,50 +103,123 @@ poetry env info --path
 .venv\Scripts\activate.bat
 ```
 
-### 🛢 First Initial Database 🛢
+---
+
+## � Database Setup 🐳
+
+### Start PostgreSQL with PostGIS using Docker Compose
 
 ```bash
-./alembic/init_db.sh
+# In the root directory (chayenity/)
+docker-compose up -d
 ```
 
-### ⚙️ Alembic Revision ⚙️
+This starts a PostgreSQL database with PostGIS extension for geospatial functionality.
+
+### 🛢 Initialize Database 🛢
 
 ```bash
-alembic revision --autogenerate -m "add initial tables"
+poetry run python scripts/init_db_directly.py
 ```
 
-### 💾 Alembic Upgrade 💾
+This creates all Hourz tables directly using SQLModel:
+
+- User (dual Helper/Seeker roles)
+- Gig (location-based tasks)  
+- ChatRoom & Message (real-time chat)
+- BuddyList (trusted connections)
+- Review & Transaction (feedback and payments)
+
+### 🔍 Verify Database Setup
+
+Check that all tables were created:
 
 ```bash
+docker exec -it chayenity-pg psql -U admin -d chayenity -c "\dt"
+```
+
+---
+
+### ⚙️ Alternative: Alembic Migrations (if needed) ⚙️
+
+If you prefer using Alembic migrations:
+
+```bash
+alembic revision --autogenerate -m "Initial Hourz schema"
 alembic upgrade head
 ```
 
+## 🚀 Run the Application 🚀
+
+### 🧪 Development Mode
+
+```bash
+poetry run fastapi dev app/main.py
+```
+
+### 🚀 Production Mode
+
+```bash
+poetry run fastapi run app/main.py
+```
+
+The API will be available at:
+
+- **API**: <http://localhost:8000>
+- **Interactive Docs**: <http://localhost:8000/docs>
+- **Alternative Docs**: <http://localhost:8000/redoc>
+
 ---
 
-## 🚀 Compile and run 🚀
-
-### 🧪 development
+## 🧹 Code Formatting 🧹
 
 ```bash
-fastapi dev
-```
-
-### 🚀 production
-
-```bash
-fastapi run
+poetry run black .
 ```
 
 ---
 
-## 🧹 Format documents 🧹
+## 🧪 Testing 🧪
+
+Run all tests:
 
 ```bash
-black .
+poetry run pytest
 ```
+
+Run specific test file:
+
+```bash
+poetry run pytest app/tests/test_basic_models.py -v
+```
+
+---
+
+## 📡 WebSocket Chat 📡
+
+The application includes real-time chat functionality:
+
+- JWT-authenticated WebSocket connections
+- Room-based messaging tied to gigs
+- Message persistence to database
+
+Connect to WebSocket at: `ws://localhost:8000/ws/chat/{room_id}?token=your_jwt_token`
+
+---
+
+## 🗺️ PostGIS Features 🗺️
+
+Location-based functionality using PostGIS:
+
+- Store user and gig locations as geographic points
+- Distance-based gig discovery
+- Geospatial indexing for performance
 
 ---
 
 ## 📚 Documentation 📚
 
-[FastAPI](https://fastapi.tiangolo.com/tutorial/bigger-applications/)
+- [FastAPI](https://fastapi.tiangolo.com/)
+- [SQLModel](https://sqlmodel.tiangolo.com/)
+- [PostGIS](https://postgis.net/)
+- [Alembic](https://alembic.sqlalchemy.org/)

@@ -14,6 +14,7 @@ from app.security import (
     get_current_user_with_refresh_token,
     get_current_user_with_access_token,
 )
+from app.configs.app_config import app_config
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -26,7 +27,20 @@ async def register(user_create: UserCreate, db: AsyncSession = Depends(get_db)):
 
     password_hash = get_password_hash(user_create.password)
     user = await user_crud.create_user(db, user_create, password_hash)
-    return user
+    # Return only fields that exist in the current User model/schema to avoid
+    # leaking or depending on fields that tests or callers may expect.
+    return {
+        "id": user.id,
+        "email": user.email,
+        "full_name": user.full_name,
+        "contact_info": user.contact_info,
+        "address_text": user.address_text,
+        # "latitude": user.latitude,
+        # "longitude": user.longitude,
+        "is_verified": user.is_verified,
+        "reputation_score": user.reputation_score,
+        "created_at": user.created_at,
+    }
 
 
 @router.post("/login")
@@ -44,11 +58,14 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # For marketplace app, we'll use access tokens directly for simplicity
+    # Issue both access and refresh tokens
     access_token = create_access_token(data={"sub": str(user.id)})
+    refresh_token = create_refresh_token(data={"sub": str(user.id)})
     return {
         "access_token": access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer",
+        "expires_in_minutes": app_config.ACCESS_TOKEN_EXPIRE,
     }
 
 
