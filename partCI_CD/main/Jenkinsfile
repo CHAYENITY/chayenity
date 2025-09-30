@@ -116,7 +116,7 @@ EOF
                 ACCESS_SECRET_KEY = 'test_access_secret_key_for_ci'
                 FRONTEND_URL = 'http://localhost:3000'
                 BACKEND_URL = 'http://localhost:8000'
-                ENVIRONMENT = 'test'
+                ENVIRONMENT = 'test'  // Now supported in app_config.py
             }
             steps {
                 dir('server') {
