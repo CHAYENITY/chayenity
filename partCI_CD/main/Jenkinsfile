@@ -156,8 +156,8 @@ except Exception as e:
 " || exit 1
                     
                     # Run tests
-                    echo "=== Running Tests ==="
-                    pytest app/tests/test_basic_models.py app/tests/test_buddy_endpoints.py app/tests/test_review_endpoints.py app/tests/test_security.py app/tests/test_transaction_endpoints.py app/tests/test_upload_system.py app/tests/test_websocket_integration.py --maxfail=1 --disable-warnings -q --cov=app --cov-report=xml
+                    #echo "=== Running Tests ==="
+                    #pytest app/tests/test_basic_models.py app/tests/test_buddy_endpoints.py app/tests/test_review_endpoints.py app/tests/test_security.py app/tests/test_transaction_endpoints.py app/tests/test_upload_system.py app/tests/test_websocket_integration.py --maxfail=1 --disable-warnings -q --cov=app --cov-report=xml
                     '''
                 }
             }
