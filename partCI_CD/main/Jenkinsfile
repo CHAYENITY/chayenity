@@ -3,18 +3,24 @@ pipeline {
 
     environment {
         SONARQUBE = credentials('sonarqube_token')
-        // Database configuration for tests
+        // Database configuration for tests (matches app_config.py requirements)
         POSTGRES_DB = 'chayenity_test'
         POSTGRES_USER = 'postgres'
         POSTGRES_PASSWORD = 'password'
-        POSTGRES_HOST = 'localhost'
+        POSTGRES_SERVER = 'localhost'  // Fixed: was POSTGRES_HOST, now POSTGRES_SERVER
         POSTGRES_PORT = '5432'
+        
+        // Additional required config variables
+        REFRESH_SECRET_KEY = 'test_refresh_secret_key_for_ci'
+        ACCESS_SECRET_KEY = 'test_access_secret_key_for_ci'
+        FRONTEND_URL = 'http://localhost:3000'
+        BACKEND_URL = 'http://localhost:8000'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'feat/srv/buddy-system', url: 'https://github.com/CHAYENITY/hourz.git'
+                git branch: 'feat/CI-CD', url: 'https://github.com/CHAYENITY/hourz.git'
             }
         }
 
@@ -35,6 +41,32 @@ pipeline {
                     pip list
                     '''
                 }
+            }
+        }
+
+        stage('Setup Test Database') {
+            steps {
+                sh '''
+                echo "===== Setting up PostgreSQL for tests ====="
+                # Start PostgreSQL container for testing
+                docker run -d --name postgres-test \
+                    -e POSTGRES_USER=postgres \
+                    -e POSTGRES_PASSWORD=password \
+                    -e POSTGRES_DB=chayenity_test \
+                    -p 5432:5432 \
+                    postgis/postgis:13-3.1
+                
+                # Wait for PostgreSQL to be ready
+                echo "Waiting for PostgreSQL to be ready..."
+                for i in {1..30}; do
+                    if docker exec postgres-test pg_isready -U postgres; then
+                        echo "PostgreSQL is ready!"
+                        break
+                    fi
+                    echo "Waiting... ($i/30)"
+                    sleep 2
+                done
+                '''
             }
         }
 
@@ -90,10 +122,14 @@ pipeline {
                     docker stop chayenity-server-container || true
                     docker rm chayenity-server-container || true
                     docker run -d --name chayenity-server-container -p 8000:8000 \
-                        -e POSTGRES_HOST=host.docker.internal \
+                        -e POSTGRES_SERVER=host.docker.internal \
                         -e POSTGRES_DB=chayenity \
                         -e POSTGRES_USER=postgres \
                         -e POSTGRES_PASSWORD=password \
+                        -e REFRESH_SECRET_KEY=production_refresh_secret \
+                        -e ACCESS_SECRET_KEY=production_access_secret \
+                        -e FRONTEND_URL=http://localhost:3000 \
+                        -e BACKEND_URL=http://localhost:8000 \
                         chayenity-server:latest
                     '''
                 }
@@ -124,7 +160,15 @@ pipeline {
     post {
         always {
             echo "Pipeline execution finished."
-             // Optional cleanup
+            
+            // Cleanup test database
+            sh '''
+            echo "===== Cleaning up test database ====="
+            docker stop postgres-test || true
+            docker rm postgres-test || true
+            '''
+            
+            // Optional cleanup
             // sh 'docker rmi fastapi-app:latest $DOCKER_USER/fastapi-app:latest || true'
         }
     }
