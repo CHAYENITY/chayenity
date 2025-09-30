@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional
+from jose import jwt, JWTError
 
 from app.models import User
 from app.schemas.user_schema import UserCreate, UserOut
@@ -67,6 +69,69 @@ async def login(
         "token_type": "bearer",
         "expires_in_minutes": app_config.ACCESS_TOKEN_EXPIRE,
     }
+
+
+@router.post("/refresh")
+async def refresh_access_token(
+    x_access_token: Optional[str] = Header(None, alias="X-Access-Token"),
+    current_user: User = Depends(get_current_user_with_refresh_token)
+):
+    """
+    Refresh access token using BOTH refresh token and old access token for enhanced security.
+    
+    Headers required:
+    - Authorization: Bearer <refresh_token>
+    - X-Access-Token: <old_access_token>
+    
+    This ensures that an attacker needs both tokens to refresh the session.
+    """
+    if not x_access_token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Old access token required in X-Access-Token header"
+        )
+    
+    try:
+        # Verify the old access token belongs to the same user
+        # We allow expired tokens here since that's the point of refresh
+        payload = jwt.decode(
+            x_access_token, 
+            app_config.SECRET_KEY, 
+            algorithms=[app_config.ALGORITHM],
+            options={"verify_exp": False}  # Allow expired tokens
+        )
+        old_token_user_id = payload.get("sub")
+        
+        # Ensure the refresh token and old access token belong to the same user
+        if str(current_user.id) != old_token_user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token mismatch: refresh and access tokens belong to different users"
+            )
+            
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid access token format"
+        )
+    
+    # Create new access token with fresh expiration
+    access_token = create_access_token(data={"sub": str(current_user.id)})
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "expires_in_minutes": app_config.ACCESS_TOKEN_EXPIRE,
+    }
+
+
+@router.post("/logout")
+async def logout(current_user: User = Depends(get_current_user_with_access_token)):
+    """
+    Logout endpoint. In a stateless JWT system, this is mainly for client-side cleanup.
+    For enhanced security, you could implement a token blacklist here.
+    """
+    return {"message": "Successfully logged out"}
 
 
 @router.get("/me", response_model=UserOut)
