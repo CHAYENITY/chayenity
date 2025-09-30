@@ -87,6 +87,60 @@ password: securepassword123
 
 ---
 
+### Refresh Access Token
+**POST** `/api/auth/refresh`
+
+Refreshes the access token using both refresh token and old access token for enhanced security.
+
+**Headers:** 
+```
+Authorization: Bearer <refresh_token>
+X-Access-Token: <old_access_token>
+```
+
+**Request Body:** None
+
+**Response (200):**
+```json
+{
+  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+  "token_type": "bearer",
+  "expires_in_minutes": 30
+}
+```
+
+**Security Notes:**
+- Requires **both** refresh token (in Authorization header) and old access token (in X-Access-Token header)
+- Validates that both tokens belong to the same user
+- Accepts expired access tokens (which is normal for refresh scenarios)
+- Provides enhanced security against token theft
+
+**Errors:**
+- `400 Bad Request` - Missing X-Access-Token header
+- `401 Unauthorized` - Invalid tokens or token mismatch
+
+---
+
+### Logout
+**POST** `/api/auth/logout`
+
+Logs out the current user. In a stateless JWT system, this is mainly for client-side cleanup.
+
+**Headers:** `Authorization: Bearer <access_token>`
+
+**Request Body:** None
+
+**Response (200):**
+```json
+{
+  "message": "Successfully logged out"
+}
+```
+
+**Note:** For enhanced security in production, consider implementing a token blacklist.
+
+---
+
 ### Get Current User
 **GET** `/api/auth/me`
 
@@ -1190,10 +1244,12 @@ interface ApiResponse<T> {
 }
 
 class ApiClient {
-  private token: string | null = null;
+  private accessToken: string | null = null;
+  private refreshToken: string | null = null;
 
-  setToken(token: string) {
-    this.token = token;
+  setTokens(accessToken: string, refreshToken: string) {
+    this.accessToken = accessToken;
+    this.refreshToken = refreshToken;
   }
 
   private getHeaders(): HeadersInit {
@@ -1201,8 +1257,8 @@ class ApiClient {
       'Content-Type': 'application/json',
     };
     
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
+    if (this.accessToken) {
+      headers.Authorization = `Bearer ${this.accessToken}`;
     }
     
     return headers;
@@ -1220,7 +1276,9 @@ class ApiClient {
 
     if (response.ok) {
       const data = await response.json();
-      this.setToken(data.access_token);
+      this.setTokens(data.access_token, data.refresh_token);
+      // Store refresh token securely (e.g., secure cookie or encrypted storage)
+      localStorage.setItem('refresh_token', data.refresh_token);
       return { data };
     } else {
       const error = await response.json();
@@ -1228,12 +1286,63 @@ class ApiClient {
     }
   }
 
-  async createGig(gigData: CreateGigRequest): Promise<ApiResponse<Gig>> {
-    const response = await fetch(`${API_BASE}/gigs/`, {
-      method: 'POST',
-      headers: this.getHeaders(),
-      body: JSON.stringify(gigData),
+  async refreshAccessToken(): Promise<boolean> {
+    if (!this.accessToken || !this.refreshToken) {
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.refreshToken}`,
+          'X-Access-Token': this.accessToken,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        this.accessToken = data.access_token;
+        return true;
+      }
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+    }
+    
+    return false;
+  }
+
+  async secureApiCall<T>(
+    url: string, 
+    options: RequestInit = {}
+  ): Promise<ApiResponse<T>> {
+    let response = await fetch(url, {
+      ...options,
+      headers: {
+        ...this.getHeaders(),
+        ...options.headers,
+      },
     });
+
+    // If 401, try to refresh tokens and retry
+    if (response.status === 401) {
+      const refreshSuccess = await this.refreshAccessToken();
+      
+      if (refreshSuccess) {
+        // Retry with new access token
+        response = await fetch(url, {
+          ...options,
+          headers: {
+            ...this.getHeaders(),
+            ...options.headers,
+          },
+        });
+      } else {
+        // Refresh failed, redirect to login
+        this.logout();
+        return { error: 'Session expired. Please login again.' };
+      }
+    }
 
     if (response.ok) {
       const data = await response.json();
@@ -1242,40 +1351,57 @@ class ApiClient {
       const error = await response.json();
       return { error: error.detail };
     }
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await fetch(`${API_BASE}/auth/logout`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+      });
+    } catch (error) {
+      console.error('Logout request failed:', error);
+    } finally {
+      // Always clear tokens locally
+      this.accessToken = null;
+      this.refreshToken = null;
+      localStorage.removeItem('refresh_token');
+      // Redirect to login page
+      window.location.href = '/login';
+    }
+  }
+
+  async createGig(gigData: CreateGigRequest): Promise<ApiResponse<Gig>> {
+    return this.secureApiCall(`${API_BASE}/gigs/`, {
+      method: 'POST',
+      body: JSON.stringify(gigData),
+    });
   }
 
   async uploadProfileImage(file: File): Promise<ApiResponse<FileUploadResponse>> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${API_BASE}/upload/profile`, {
+    return this.secureApiCall(`${API_BASE}/upload/profile`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${this.token}`,
+        Authorization: `Bearer ${this.accessToken}`,
       },
       body: formData,
     });
-
-    if (response.ok) {
-      const data = await response.json();
-      return { data };
-    } else {
-      const error = await response.json();
-      return { error: error.detail };
-    }
   }
 }
 
 // Usage
 const api = new ApiClient();
 
-// Login
+// Login with automatic token storage
 const loginResult = await api.login('user@example.com', 'password');
 if (loginResult.data) {
-  console.log('Logged in:', loginResult.data.access_token);
+  console.log('Logged in successfully');
 }
 
-// Create gig
+// All API calls now have automatic token refresh
 const gigResult = await api.createGig({
   title: 'Help move furniture',
   description: 'Need help moving',
@@ -1292,12 +1418,17 @@ const gigResult = await api.createGig({
 
 ```dart
 // api_service.dart
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 class ApiService {
   static const String baseUrl = 'http://localhost:8000/api';
-  String? _token;
+  String? _accessToken;
+  String? _refreshToken;
   
-  void setToken(String token) {
-    _token = token;
+  void setTokens(String accessToken, String refreshToken) {
+    _accessToken = accessToken;
+    _refreshToken = refreshToken;
   }
   
   Map<String, String> get _headers {
@@ -1305,8 +1436,8 @@ class ApiService {
       'Content-Type': 'application/json',
     };
     
-    if (_token != null) {
-      headers['Authorization'] = 'Bearer $_token';
+    if (_accessToken != null) {
+      headers['Authorization'] = 'Bearer $_accessToken';
     }
     
     return headers;
@@ -1325,7 +1456,11 @@ class ApiService {
       
       if (response.statusCode == 200) {
         final data = LoginResponse.fromJson(jsonDecode(response.body));
-        setToken(data.accessToken);
+        setTokens(data.accessToken, data.refreshToken);
+        
+        // Store refresh token securely
+        await _secureStorage.write(key: 'refresh_token', value: data.refreshToken);
+        
         return ApiResult.success(data);
       } else {
         final error = jsonDecode(response.body);
@@ -1336,53 +1471,179 @@ class ApiService {
     }
   }
   
+  Future<bool> _refreshAccessToken() async {
+    if (_accessToken == null || _refreshToken == null) {
+      return false;
+    }
+    
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/refresh'),
+        headers: {
+          'Authorization': 'Bearer $_refreshToken',
+          'X-Access-Token': _accessToken!,
+        },
+      );
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        _accessToken = data['access_token'];
+        return true;
+      }
+    } catch (e) {
+      print('Token refresh failed: $e');
+    }
+    
+    return false;
+  }
+  
+  Future<ApiResult<T>> _secureApiCall<T>(
+    String endpoint,
+    T Function(Map<String, dynamic>) fromJson, {
+    String method = 'GET',
+    Map<String, dynamic>? body,
+    Map<String, String>? additionalHeaders,
+  }) async {
+    final uri = Uri.parse('$baseUrl$endpoint');
+    final headers = {..._headers, ...?additionalHeaders};
+    
+    http.Response response;
+    
+    switch (method.toUpperCase()) {
+      case 'GET':
+        response = await http.get(uri, headers: headers);
+        break;
+      case 'POST':
+        response = await http.post(
+          uri,
+          headers: headers,
+          body: body != null ? jsonEncode(body) : null,
+        );
+        break;
+      case 'PUT':
+        response = await http.put(
+          uri,
+          headers: headers,
+          body: body != null ? jsonEncode(body) : null,
+        );
+        break;
+      case 'DELETE':
+        response = await http.delete(uri, headers: headers);
+        break;
+      default:
+        throw ArgumentError('Unsupported HTTP method: $method');
+    }
+    
+    // Handle 401 with token refresh
+    if (response.statusCode == 401) {
+      final refreshSuccess = await _refreshAccessToken();
+      
+      if (refreshSuccess) {
+        // Retry with new access token
+        final newHeaders = {..._headers, ...?additionalHeaders};
+        
+        switch (method.toUpperCase()) {
+          case 'GET':
+            response = await http.get(uri, headers: newHeaders);
+            break;
+          case 'POST':
+            response = await http.post(
+              uri,
+              headers: newHeaders,
+              body: body != null ? jsonEncode(body) : null,
+            );
+            break;
+          case 'PUT':
+            response = await http.put(
+              uri,
+              headers: newHeaders,
+              body: body != null ? jsonEncode(body) : null,
+            );
+            break;
+          case 'DELETE':
+            response = await http.delete(uri, headers: newHeaders);
+            break;
+        }
+      } else {
+        // Refresh failed, logout
+        await logout();
+        return ApiResult.error('Session expired. Please login again.');
+      }
+    }
+    
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final data = fromJson(jsonDecode(response.body));
+      return ApiResult.success(data);
+    } else {
+      final error = jsonDecode(response.body);
+      return ApiResult.error(error['detail'] ?? 'Unknown error');
+    }
+  }
+  
+  Future<void> logout() async {
+    try {
+      await http.post(
+        Uri.parse('$baseUrl/auth/logout'),
+        headers: _headers,
+      );
+    } catch (e) {
+      print('Logout request failed: $e');
+    } finally {
+      // Always clear tokens
+      _accessToken = null;
+      _refreshToken = null;
+      await _secureStorage.delete(key: 'refresh_token');
+      // Navigate to login screen
+      // Navigator.of(context).pushReplacementNamed('/login');
+    }
+  }
+  
   Future<ApiResult<List<Gig>>> searchGigs({
     required double latitude,
     required double longitude,
     double radius = 10.0,
     String? status,
   }) async {
-    try {
-      final queryParams = {
-        'latitude': latitude.toString(),
-        'longitude': longitude.toString(),
-        'radius': radius.toString(),
-        if (status != null) 'status': status,
-      };
-      
-      final uri = Uri.parse('$baseUrl/gigs/search').replace(
-        queryParameters: queryParams,
-      );
-      
-      final response = await http.get(uri, headers: _headers);
-      
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final gigs = (data['gigs'] as List)
-            .map((json) => Gig.fromJson(json))
-            .toList();
-        return ApiResult.success(gigs);
-      } else {
-        final error = jsonDecode(response.body);
-        return ApiResult.error(error['detail']);
-      }
-    } catch (e) {
-      return ApiResult.error(e.toString());
-    }
+    final queryParams = {
+      'latitude': latitude.toString(),
+      'longitude': longitude.toString(),
+      'radius': radius.toString(),
+      if (status != null) 'status': status,
+    };
+    
+    final uri = Uri.parse('$baseUrl/gigs/search').replace(
+      queryParameters: queryParams,
+    );
+    
+    return _secureApiCall(
+      uri.toString().replaceFirst(baseUrl, ''),
+      (json) => (json['gigs'] as List)
+          .map((gigJson) => Gig.fromJson(gigJson))
+          .toList(),
+    );
+  }
+  
+  Future<ApiResult<Gig>> createGig(CreateGigRequest gigData) async {
+    return _secureApiCall(
+      '/gigs/',
+      (json) => Gig.fromJson(json),
+      method: 'POST',
+      body: gigData.toJson(),
+    );
   }
 }
 
 // Usage
 final apiService = ApiService();
 
-// Login
+// Login with automatic token storage
 final loginResult = await apiService.login('user@example.com', 'password');
 loginResult.when(
-  success: (data) => print('Access token: ${data.accessToken}'),
+  success: (data) => print('Logged in successfully'),
   error: (error) => print('Login failed: $error'),
 );
 
-// Search gigs
+// All API calls now have automatic token refresh
 final gigsResult = await apiService.searchGigs(
   latitude: 13.7563,
   longitude: 100.5018,
@@ -1393,6 +1654,18 @@ gigsResult.when(
   success: (gigs) => print('Found ${gigs.length} gigs'),
   error: (error) => print('Search failed: $error'),
 );
+
+// Create gig with automatic token management
+final createResult = await apiService.createGig(CreateGigRequest(
+  title: 'Help move furniture',
+  description: 'Need help moving',
+  durationHours: 3,
+  budget: 1500,
+  latitude: 13.7563,
+  longitude: 100.5018,
+  addressText: '123 Main St',
+  startsAt: DateTime.now().add(Duration(hours: 4)),
+));
 ```
 
 ---
