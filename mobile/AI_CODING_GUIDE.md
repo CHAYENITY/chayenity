@@ -1,8 +1,8 @@
-# 🤖 AI Coding Guide - Hourz Flutter (Condensed)
+# 🤖 AI Coding Guide - Hourz Flutter
 
 ## 📋 Quick Reference
 
-**Tech Stack:** Flutter + Riverpod + Freezed + Go Router + Dio  
+**Tech Stack:** Flutter + Riverpod + Freezed + Go Router + Dio + Lucide Icons
 **Architecture:** Feature-based with shared global services  
 **Pattern:** Immutable models, Type-safe navigation, Centralized error handling
 
@@ -24,6 +24,7 @@ lib/
     ├── providers/          # Global state (theme, loading, error)
     ├── services/           # API service
     ├── constants/          # Routes, configs
+    ├── theme/              # Color schemas
     ├── routing/            # Go Router setup
     └── widgets/            # Reusable widgets
 ```
@@ -231,8 +232,22 @@ final featureRoutes = [
 - Use `ConsumerWidget` for widgets that need state
 
 **Navigation:** `context.go('/path')`, `context.push('/path')`, `context.pop()`  
-**Code Gen:** `scripts\windows\generate-code.bat` (Windows) or `scripts/linux/generate-code.sh` (Linux)
+**Code Gen:** `generate-code.bat` (Windows) or `./generate-code.sh` (Linux)
 
 ---
 
-_Condensed for AI efficiency - follow templates exactly_
+---
+
+## ⚡️ Performance Optimization (Flutter UI)
+
+**Tips for efficient UI and AI code generation:**
+
+- ใช้ `const` widget ให้มากที่สุด เพื่อลดการ rebuild
+- แยก `ConsumerWidget` เฉพาะจุดที่ state เปลี่ยนบ่อย (เช่น field ในฟอร์ม)
+- หลีกเลี่ยงการ rebuild ทั้งหน้าจอหรือ column ใหญ่ ๆ
+- ใช้ provider/selector เฉพาะ field ถ้า state management รองรับ
+- Optimize ภาพ: resize ก่อนแสดง, ใช้ cache ถ้าจำเป็น
+
+ใช้แนวทางนี้เมื่อสร้างหรือปรับ UI เพื่อให้โค้ดมีประสิทธิภาพสูงสุด
+
+หากต้องการดูรายละเอียดเพิ่มเติม ให้ดูที่โฟลเดอร์ `_example`

@@ -10,17 +10,21 @@ flutter pub get
 
 After installing dependencies, generate the required Freezed and JSON serialization files:
 
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
 **Windows:**
 
 ```bash
-scripts\windows\generate-code.bat
+generate-code.bat
 ```
 
 **Linux/macOS:**
 
 ```bash
-chmod +x scripts/linux/generate-code.sh
-./scripts/linux/generate-code.sh
+chmod +x generate-code.sh
+./generate-code.sh
 ```
 
 **Manual:**

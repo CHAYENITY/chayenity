@@ -2,34 +2,50 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Brand & Primary Colors
-  static const Color primary = Color(0xFFC53B6E); // #c53b6e
-  static const Color secondary = Color(0xFFEA9F3A); // #ea9f3a
+  static const Color primary = Color(0xFF14B8A6); // #14B8A6
+  static const Color primaryForeground = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color darkPrimary = Color(0xFF5EEAD4); // #5EEAD4
+  static const Color darkPrimaryForeground = Color(0xFF111827); // #111827
+  static const Color secondary = Color(0xFFF59E0B); // #F59E0B
+  static const Color secondaryForeground = Color(0xFF111827); // #111827
+  static const Color darkSecondary = Color(0xFFFBBD23); // #FBBD23
+  static const Color darkSecondaryForeground = Color(0xFF111827); // #111827
 
   // Accent Colors
-  static const Color accentOrange = Color(0xFFCD8334); // #cd8334
-  static const Color accentGreen1 = Color(0xFF21A06B); // #21a06b
-  static const Color accentGreen2 = Color(0xFF3FB379); // #3fb379
-  static const Color accentBlue1 = Color(0xFF022648); // #022648
-  static const Color accentBlue2 = Color(0xFF2F7AB3); // #2f7ab3
-  static const Color accentBlue3 = Color(0xFFA4D9FF); // #a4d9ff
+  static const Color accent = Color(0xFF0D9488); // #0D9488
+  static const Color accentForeground = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color darkAccent = Color(0xFF2DD4BF); // #2DD4BF
+  static const Color darkAccentForeground = Color(0xFF111827); // #111827
 
-  // Background & Surface
-  static const Color background = Color(0xFFF5F5F5);
-  static const Color surface = Colors.white;
+  // Background
+  static const Color background = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color foreground = Color(0xFF111827); // #111827
+  static const Color darkBackground = Color(0xFF1E293B); // #1e293b
+  static const Color darkForeground = Color(0xFFFFFFFF); // #FFFFFF
+
+  // Surface
+  static const Color surface = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color darkSurface = Color(0xFF1E293B); // #1e293b
+
+  // Border
+  static const Color border = Color(0xFFE5E7EB); // #E5E7EB
+  static const Color darkBorder = Color(0xFF374151); // #374151
 
   // Text Colors
   static const Color textPrimary = Color(0xFFC53B6E); // #c53b6e
   static const Color textSecondary = Color(0xFFEA9F3A); // #ea9f3a
-  static const Color textWhite = Color.fromARGB(255, 255, 255, 255);
+  static const Color textWhite = Color(0xFFFFFFFF); // #FFFFFF
   static const Color textMuted = Colors.grey; // #6B7280
 
   // Muted
-  static const Color mutedBorder = Color(0xFF9CA3AF); // #9ca3af
-  static const Color mutedBackground = Color(0xFFF3F4F6); // #f3f4f6
-  static const Color mutedIcon = Color.fromRGBO(158, 158, 158, 0.4);
+  static const Color muted = Color(0xFFE5E7EB); // #E5E7EB
+  static const Color mutedForeground = Color(0xFF6B7280); // #6B7280
+  static const Color darkMuted = Color(0xFF4B5563); // #4B5563
+  static const Color darkMutedForeground = Color(0xFFD1D5DB); // #D1D5DB
 
   // Status
-  static const Color success = Color(0xFF4CAF50);
-  static const Color warning = Color(0xFFFFC107);
-  static const Color error = Color(0xFFF44336);
+  static const Color destructive = Color(0xFFEF4444); // #EF4444
+  static const Color destructiveForeground = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color darkDestructive = Color(0xFFF87171); // #F87171
+  static const Color darkDestructiveForeground = Color(0xFF111827); // #111827
 }

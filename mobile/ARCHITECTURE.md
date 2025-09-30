@@ -13,6 +13,7 @@
 - **Go Router** - Declarative routing and navigation
 - **Dio** - HTTP client for API communication
 - **JSON Annotation** - JSON serialization/deserialization
+- **Icons** - Lucide Icons
 
 ## 📁 Project Structure Overview
 

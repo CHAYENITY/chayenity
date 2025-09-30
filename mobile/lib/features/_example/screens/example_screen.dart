@@ -133,13 +133,13 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
                   icon: Icons.check_circle,
                   label: 'Completed',
                   value: taskStats['completed'].toString(),
-                  color: AppColors.accentGreen1,
+                  color: AppColors.primary,
                 ),
                 _StatItem(
                   icon: Icons.radio_button_unchecked,
                   label: 'Pending',
                   value: taskStats['pending'].toString(),
-                  color: AppColors.accentOrange,
+                  color: AppColors.secondaryForeground,
                 ),
               ],
             ),
@@ -407,7 +407,7 @@ class _EditTaskScreenState extends ConsumerState<EditTaskScreen> {
               _showDeleteConfirmation(context);
             },
             icon: const Icon(Icons.delete),
-            color: AppColors.error,
+            color: AppColors.destructive,
             tooltip: 'Delete Task',
           ),
         ],
@@ -442,7 +442,7 @@ class _EditTaskScreenState extends ConsumerState<EditTaskScreen> {
               context.pop(); // Close edit screen using Go Router
               ref.read(taskListProvider.notifier).deleteTask(_editedTask.id);
             },
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            style: TextButton.styleFrom(foregroundColor: AppColors.destructive),
             child: const Text('Delete'),
           ),
         ],

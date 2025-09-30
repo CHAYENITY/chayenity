@@ -29,6 +29,16 @@ dependencies:
   # Immutable Data Classes
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
+  flutter_launcher_icons: ^0.14.4
+
+  # Image Picker
+  image_picker: ^1.0.4
+
+  # Location Services
+  location: ^5.0.3
+  lucide_icons: ^0.257.0
+  # Maps (Optional for future)
+  # flutter_map: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -45,3 +55,21 @@ flutter:
 
   assets:
     - .env
+    - assets/
+    - assets/bg/
+    - assets/icons/
+    - assets/images/
+
+  fonts:
+    - family: IBM_Plex_Sans_Thai
+      fonts:
+        - asset: assets/fonts/IBM_Plex_Sans_Thai/IBMPlexSansThai-Light.ttf
+        - asset: assets/fonts/IBM_Plex_Sans_Thai/IBMPlexSansThai-Regular.ttf
+        - asset: assets/fonts/IBM_Plex_Sans_Thai/IBMPlexSansThai-Medium.ttf
+        - asset: assets/fonts/IBM_Plex_Sans_Thai/IBMPlexSansThai-SemiBold.ttf
+        - asset: assets/fonts/IBM_Plex_Sans_Thai/IBMPlexSansThai-Bold.ttf
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: 'assets/icons/hourz_icon_light.png'

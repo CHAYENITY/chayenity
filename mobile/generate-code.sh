@@ -3,10 +3,6 @@
 echo "🧊 Generating Freezed and JSON Serialization files..."
 echo
 
-# Get script directory
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-cd "$SCRIPT_DIR/../.."
-
 echo "📦 Installing dependencies..."
 flutter pub get
 

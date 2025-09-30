@@ -22,12 +22,12 @@ class TaskCard extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: task.isCompleted
-            ? AppColors.accentGreen1.withAlpha(10)
+            ? AppColors.primary.withAlpha(10)
             : theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: task.isCompleted
-              ? AppColors.accentGreen1.withAlpha(30)
+              ? AppColors.primary.withAlpha(30)
               : Colors.grey.withAlpha(20),
         ),
         boxShadow: [
@@ -64,7 +64,7 @@ class TaskCard extends ConsumerWidget {
                                 .read(taskListProvider.notifier)
                                 .toggleTaskCompletion(task.id);
                           },
-                    activeColor: AppColors.accentGreen1,
+                    activeColor: AppColors.primary,
                   ),
 
                   // Title
@@ -90,8 +90,8 @@ class TaskCard extends ConsumerWidget {
                     ),
                     decoration: BoxDecoration(
                       color: task.isCompleted
-                          ? AppColors.accentGreen1
-                          : AppColors.accentOrange,
+                          ? AppColors.primary
+                          : AppColors.secondary,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -146,13 +146,13 @@ class TaskCard extends ConsumerWidget {
                     Icon(
                       Icons.check_circle,
                       size: 16,
-                      color: AppColors.accentGreen1,
+                      color: AppColors.primary,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       'Done ${app_utils.DateUtils.formatDateTime(task.completedAt!)}',
                       style: TextStyle(
-                        color: AppColors.accentGreen1,
+                        color: AppColors.primary,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -188,7 +188,7 @@ class TaskCard extends ConsumerWidget {
                         icon: const Icon(Icons.delete),
                         iconSize: 20,
                         tooltip: 'Delete Task',
-                        color: AppColors.error,
+                        color: AppColors.destructive,
                       ),
                     ],
                   ),
@@ -231,7 +231,7 @@ class TaskCard extends ConsumerWidget {
               Navigator.pop(context);
               ref.read(taskListProvider.notifier).deleteTask(task.id);
             },
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            style: TextButton.styleFrom(foregroundColor: AppColors.destructive),
             child: const Text('Delete'),
           ),
         ],
@@ -272,8 +272,8 @@ class TaskActionSheet extends ConsumerWidget {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: task.isCompleted
-                      ? AppColors.accentGreen1.withAlpha(20)
-                      : AppColors.accentOrange.withAlpha(20),
+                      ? AppColors.primary.withAlpha(20)
+                      : AppColors.secondary.withAlpha(20),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -281,8 +281,8 @@ class TaskActionSheet extends ConsumerWidget {
                       ? Icons.check_circle
                       : Icons.radio_button_unchecked,
                   color: task.isCompleted
-                      ? AppColors.accentGreen1
-                      : AppColors.accentOrange,
+                      ? AppColors.primary
+                      : AppColors.secondary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -323,8 +323,8 @@ class TaskActionSheet extends ConsumerWidget {
                 leading: Icon(
                   task.isCompleted ? Icons.undo : Icons.check_circle,
                   color: task.isCompleted
-                      ? AppColors.accentOrange
-                      : AppColors.accentGreen1,
+                      ? AppColors.secondary
+                      : AppColors.primary,
                 ),
                 title: Text(
                   task.isCompleted ? 'Mark as Pending' : 'Mark as Complete',
@@ -349,7 +349,7 @@ class TaskActionSheet extends ConsumerWidget {
 
               // Delete
               ListTile(
-                leading: Icon(Icons.delete, color: AppColors.error),
+                leading: Icon(Icons.delete, color: AppColors.destructive),
                 title: const Text('Delete Task'),
                 onTap: () {
                   Navigator.pop(context);
@@ -381,7 +381,7 @@ class TaskActionSheet extends ConsumerWidget {
               Navigator.pop(context);
               ref.read(taskListProvider.notifier).deleteTask(task.id);
             },
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            style: TextButton.styleFrom(foregroundColor: AppColors.destructive),
             child: const Text('Delete'),
           ),
         ],

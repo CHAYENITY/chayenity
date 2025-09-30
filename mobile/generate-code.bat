@@ -2,8 +2,6 @@
 echo 🧊 Generating Freezed and JSON Serialization files...
 echo.
 
-cd /d "%~dp0.."
-
 echo 📦 Installing dependencies...
 call flutter pub get
 
