@@ -22,6 +22,9 @@ This directory contains different types of tests organized by purpose and scope.
 - `test_chat_apis.py` - **✅ Chat system API tests (COMPLETE)**
 - `test_user_profile_system.py` - **✅ User profile API tests (COMPLETE)**
 - `test_profile_apis.py` - Profile management API tests
+- `test_end_to_end_gig_flow.py` - **✅ End-to-end gig workflows (COMPLETE)**
+- `test_chat_room_functionality.py` - **✅ Chat room functionality tests (COMPLETE)**
+- `test_file_upload_integration.py` - **✅ File upload integration tests (COMPLETE)**
 
 ### `app/tests/test_websocket/` - WebSocket Tests
 - `test_chat.py` - **✅ Real-time chat WebSocket tests (COMPLETE)**
