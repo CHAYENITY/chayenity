@@ -77,6 +77,61 @@ pipeline {
                     echo "===== Running Tests ====="
                     . venv/bin/activate
                     
+                    # Create .env file for tests
+                    cat > .env << EOF
+ENVIRONMENT=local
+POSTGRES_SERVER=localhost
+POSTGRES_DB=chayenity_test
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=password
+POSTGRES_PORT=5432
+REFRESH_SECRET_KEY=test_refresh_secret_key_for_ci
+ACCESS_SECRET_KEY=test_access_secret_key_for_ci
+FRONTEND_URL=http://localhost:3000
+BACKEND_URL=http://localhost:8000
+EOF
+                    
+                    # Export environment variables explicitly for the test session
+                    export POSTGRES_SERVER=localhost
+                    export POSTGRES_DB=chayenity_test
+                    export POSTGRES_USER=postgres
+                    export POSTGRES_PASSWORD=password
+                    export POSTGRES_PORT=5432
+                    export REFRESH_SECRET_KEY=test_refresh_secret_key_for_ci
+                    export ACCESS_SECRET_KEY=test_access_secret_key_for_ci
+                    export FRONTEND_URL=http://localhost:3000
+                    export BACKEND_URL=http://localhost:8000
+                    export ENVIRONMENT=local
+                    
+                    # Debug: Print environment variables and .env file
+                    echo "=== Environment variables set ==="
+                    echo "POSTGRES_SERVER=$POSTGRES_SERVER"
+                    echo "POSTGRES_DB=$POSTGRES_DB"
+                    echo "POSTGRES_USER=$POSTGRES_USER"
+                    echo "POSTGRES_PORT=$POSTGRES_PORT"
+                    echo ""
+                    echo "=== .env file contents ==="
+                    cat .env
+                    echo ""
+                    
+                    # Test configuration loading
+                    echo "=== Testing app_config loading ==="
+                    python -c "
+import os
+print('Python environment variables:')
+for key in ['POSTGRES_SERVER', 'POSTGRES_DB', 'POSTGRES_USER', 'POSTGRES_PASSWORD', 'POSTGRES_PORT']:
+    print(f'{key}={os.environ.get(key, \"NOT_SET\")}')
+    
+print('\\nTesting app_config import...')
+try:
+    from app.configs.app_config import app_config
+    print('✅ app_config loaded successfully!')
+    print(f'Database URI: {app_config.SQLALCHEMY_DATABASE_URI}')
+except Exception as e:
+    print(f'❌ Failed to load app_config: {e}')
+    exit(1)
+"
+                    
                     # Run unit tests first
                     pytest app/tests/test_*.py --maxfail=1 --disable-warnings -q --cov=app --cov-report=xml
                     
