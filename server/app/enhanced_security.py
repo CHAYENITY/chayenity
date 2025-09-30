@@ -1,10 +1,17 @@
 # Enhanced Authentication with Token Rotation
 # This addresses the critical security vulnerability: "If hacker steals both tokens, unlimited access"
 
-from sqlalchemy import Column, String, DateTime, Integer, Boolean
+from sqlalchemy import Column, String, DateTime, Integer, Boolean, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+from fastapi import HTTPException, status
+from jose import jwt, JWTError
+from typing import Optional
+from collections import defaultdict
 import uuid
+
+from app.configs.app_config import app_config
 
 Base = declarative_base()
 
@@ -51,9 +58,9 @@ async def create_user_session(
     db: AsyncSession,
     user_id: str,
     refresh_token_jti: str,
-    device_info: str = None,
-    ip_address: str = None,
-    expires_at: datetime = None
+    device_info: Optional[str] = None,
+    ip_address: Optional[str] = None,
+    expires_at: Optional[datetime] = None
 ) -> UserSession:
     """Create a new user session record."""
     session = UserSession(
@@ -88,7 +95,7 @@ async def get_active_user_sessions(db: AsyncSession, user_id: str) -> list[UserS
         .where(UserSession.is_active == True)
         .where(UserSession.expires_at > datetime.now(timezone.utc))
     )
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 async def blacklist_token(
@@ -97,7 +104,7 @@ async def blacklist_token(
     token_type: str,
     user_id: str,
     reason: str = "logout",
-    expires_at: datetime = None
+    expires_at: Optional[datetime] = None
 ) -> BlacklistedToken:
     """Add token to blacklist for immediate invalidation."""
     blacklisted = BlacklistedToken(
@@ -124,7 +131,7 @@ async def is_token_blacklisted(db: AsyncSession, jti: str) -> bool:
 
 # Enhanced Token Creation with JTI (JWT ID)
 
-def create_access_token_with_jti(data: dict, expires_delta: timedelta = None) -> tuple[str, str]:
+def create_access_token_with_jti(data: dict, expires_delta: Optional[timedelta] = None) -> tuple[str, str]:
     """Create access token with unique JTI for tracking."""
     to_encode = data.copy()
     jti = str(uuid.uuid4())
@@ -149,7 +156,7 @@ def create_access_token_with_jti(data: dict, expires_delta: timedelta = None) ->
     return encoded_jwt, jti
 
 
-def create_refresh_token_with_jti(data: dict, expires_delta: timedelta = None) -> tuple[str, str]:
+def create_refresh_token_with_jti(data: dict, expires_delta: Optional[timedelta] = None) -> tuple[str, str]:
     """Create refresh token with unique JTI for tracking."""
     to_encode = data.copy()
     jti = str(uuid.uuid4())
@@ -205,9 +212,6 @@ async def verify_token_not_blacklisted(token: str, secret_key: str, db: AsyncSes
 
 
 # Rate Limiting for Refresh Endpoint
-from collections import defaultdict
-from datetime import datetime, timedelta
-
 # In-memory rate limiting (use Redis in production)
 refresh_attempts = defaultdict(list)
 MAX_REFRESH_ATTEMPTS = 5  # Max attempts per IP per hour

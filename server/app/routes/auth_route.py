@@ -163,7 +163,7 @@ async def refresh_access_token(
 async def logout(
     current_user: User = Depends(get_current_user_with_access_token),
     x_refresh_token: Optional[str] = Header(None, alias="X-Refresh-Token"),
-    request: Request = None
+    request: Optional[Request] = None
 ):
     """
     🔐 Enhanced logout with token invalidation.
@@ -179,7 +179,10 @@ async def logout(
     # Extract token JTIs for blacklisting
     # This prevents stolen tokens from being used after logout
     try:
-        auth_header = request.headers.get("authorization", "")
+        auth_header = ""
+        if request is not None:
+            # Safe access: request may be None in some callers
+            auth_header = request.headers.get("authorization", "")
         access_token = auth_header.replace("Bearer ", "") if auth_header.startswith("Bearer ") else ""
         
         if access_token:
