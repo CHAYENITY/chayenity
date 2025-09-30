@@ -8,27 +8,47 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Python 3.11 and build tools (Python 3.11 should already be available in Jenkins LTS JDK17)
+# Install Python 3.11 from source (most reliable method)
 RUN apt-get update && \
     apt-get install -y \
-        python3.11 \
-        python3.11-pip \
-        python3.11-venv \
-        python3.11-dev \
-        python3-pip \
         build-essential \
-        curl \
-        unzip \
+        zlib1g-dev \
+        libncurses5-dev \
+        libgdbm-dev \
+        libnss3-dev \
+        libssl-dev \
+        libreadline-dev \
+        libffi-dev \
+        libsqlite3-dev \
+        libbz2-dev \
+        liblzma-dev \
         wget \
-        ca-certificates \
-        gnupg \
-        lsb-release && \
+        curl \
+        unzip && \
+    cd /tmp && \
+    wget https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz && \
+    tar -xf Python-3.11.9.tgz && \
+    cd Python-3.11.9 && \
+    ./configure \
+        --enable-optimizations \
+        --with-ensurepip=install \
+        --enable-shared \
+        LDFLAGS="-Wl,-rpath /usr/local/lib" && \
+    make -j$(nproc) && \
+    make altinstall && \
+    cd / && \
+    rm -rf /tmp/Python-3.11.9* && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Create symlinks to make python3.11 the default python3
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 && \
+# Create symlinks for python3.11
+RUN ln -sf /usr/local/bin/python3.11 /usr/bin/python3.11 && \
+    ln -sf /usr/local/bin/pip3.11 /usr/bin/pip3.11 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.11 1 && \
     python3.11 -m pip install --upgrade pip
+
+# Install Poetry
+RUN python3.11 -m pip install poetry
 
 # --- Install SonarQube Scanner CLI ---
 ENV SONAR_SCANNER_VERSION=5.0.1.3006
@@ -48,5 +68,5 @@ ENV PATH=${SONAR_SCANNER_HOME}/bin:${PATH}
 RUN usermod -aG docker jenkins
 USER jenkins
 
-# (Optional) Set the default SONAR_SCANNER_HOME for the jenkins user
-# ENV SONAR_SCANNER_HOME=/opt/sonar-scanner
+# Verify Python installation
+RUN python3.11 --version && pip3.11 --version && poetry --version

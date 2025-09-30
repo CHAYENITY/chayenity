@@ -40,32 +40,14 @@ Before starting, ensure you have:
    docker build -t jenkins-chayenity:latest -f Dockerfile .
    ```
    
-   **If you encounter Python 3.11 installation errors**, try this alternative Dockerfile content:
-   ```dockerfile
-   FROM jenkins/jenkins:lts-jdk17
-   USER root
+   This builds a custom Jenkins image using **Python 3.11 compiled from source** (most reliable method) that includes:
+   - Jenkins LTS with JDK 17
+   - Python 3.11.9 compiled with optimizations
+   - Docker CLI
+   - SonarQube Scanner
+   - Poetry (Python dependency management)
    
-   # Update system and install Docker
-   RUN apt-get update && \
-       apt-get upgrade -y && \
-       curl -fsSL https://get.docker.com | sh && \
-       apt-get clean
-   
-   # Install Python 3.11 from source (fallback method)
-   RUN apt-get update && \
-       apt-get install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev \
-       libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget curl && \
-       cd /tmp && \
-       wget https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz && \
-       tar -xf Python-3.11.9.tgz && \
-       cd Python-3.11.9 && \
-       ./configure --enable-optimizations && \
-       make -j 4 && \
-       make altinstall && \
-       cd / && rm -rf /tmp/Python-3.11.9*
-   
-   # Continue with the rest of the Dockerfile...
-   ```
+   **Build time:** ~10-15 minutes (due to Python compilation, but guaranteed to work)
    
    This builds a custom Jenkins image that includes:
    - Jenkins LTS with JDK 17

@@ -10,6 +10,7 @@ Use this checklist alongside the detailed [JENKINS_SETUP_GUIDE.md](./JENKINS_SET
   cd c:\Users\phats\WorkOnly\chayenity\partCI_CD
   docker build -t jenkins-chayenity:latest -f Dockerfile .
   ```
+  ⏱️ **Build time: ~10-15 minutes** (Python 3.11 compiled from source for reliability)
 
 - [ ] **Start Jenkins container**
   ```bash
