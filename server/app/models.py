@@ -287,3 +287,41 @@ class UploadedFile(SQLModel, table=True):
 
     # Relationships
     uploader: User = Relationship(back_populates="uploaded_files")
+
+
+# === Enhanced Security Models ===
+
+
+class UserSession(SQLModel, table=True):
+    """
+    🔐 Track active user sessions for enhanced security.
+    Enables token rotation and session management.
+    """
+    
+    id: str = Field(default_factory=lambda: str(uuid4()), primary_key=True)
+    user_id: str = Field(index=True)  # References User.id
+    refresh_token_jti: str = Field(unique=True)  # JWT ID for refresh token
+    device_info: Optional[str] = None  # User agent, device type
+    ip_address: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_used: datetime = Field(default_factory=datetime.utcnow)
+    expires_at: datetime  # Required - when session expires
+    is_active: bool = Field(default=True)
+    
+    # Optional security features
+    login_location: Optional[str] = None  # City/Country
+    is_suspicious: bool = Field(default=False)
+
+
+class BlacklistedToken(SQLModel, table=True):
+    """
+    🚫 Store blacklisted/revoked tokens for immediate invalidation.
+    Critical for logout and security breaches.
+    """
+    
+    jti: str = Field(primary_key=True)  # JWT ID
+    token_type: str  # 'access' or 'refresh'
+    user_id: str = Field(index=True)  # References User.id
+    blacklisted_at: datetime = Field(default_factory=datetime.utcnow)
+    reason: Optional[str] = None  # 'logout', 'security_breach', 'expired'
+    expires_at: datetime  # When to clean up this record

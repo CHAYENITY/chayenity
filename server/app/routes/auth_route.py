@@ -15,8 +15,11 @@ from app.security import (
     verify_password,
     create_refresh_token,
     create_access_token,
+    create_refresh_token_with_jti,  # Enhanced version
+    create_access_token_with_jti,   # Enhanced version
     get_current_user_with_refresh_token,
     get_current_user_with_access_token,
+    check_refresh_rate_limit,       # Rate limiting
 )
 from app.configs.app_config import app_config
 
@@ -62,19 +65,16 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Issue both access and refresh tokens with JTI for tracking
-    access_jti = str(uuid.uuid4())
-    refresh_jti = str(uuid.uuid4())
-    
-    access_token = create_access_token(
-        data={"sub": str(user.id), "jti": access_jti, "type": "access"}
+    # 🔑 Issue ENHANCED tokens with JTI for security tracking
+    access_token, access_jti = create_access_token_with_jti(
+        data={"sub": str(user.id)}
     )
-    refresh_token = create_refresh_token(
-        data={"sub": str(user.id), "jti": refresh_jti, "type": "refresh"}
+    refresh_token, refresh_jti = create_refresh_token_with_jti(
+        data={"sub": str(user.id)}
     )
     
-    # TODO: Store refresh_jti in user_sessions table for tracking
-    # This enables session management and token rotation
+    # TODO: Store refresh_jti in user_sessions table for session tracking
+    # await create_user_session(db, str(user.id), refresh_jti, device_info, ip_address, expires_at)
     
     return {
         "access_token": access_token,
@@ -86,6 +86,7 @@ async def login(
 
 @router.post("/refresh")
 async def refresh_access_token(
+    request: Request,
     x_access_token: Optional[str] = Header(None, alias="X-Access-Token"),
     current_user: User = Depends(get_current_user_with_refresh_token)
 ):
@@ -131,24 +132,26 @@ async def refresh_access_token(
     # 🔄 CRITICAL SECURITY FIX: TOKEN ROTATION
     # This solves "if hacker steals both tokens, unlimited access" problem
     
-    # Create NEW tokens with NEW JTIs (prevents token reuse)
-    new_access_jti = str(uuid.uuid4())
-    new_refresh_jti = str(uuid.uuid4())
+    # Rate limiting check
+    client_ip = getattr(request, 'client', {}).get('host', 'unknown') if request else 'unknown'
+    if not check_refresh_rate_limit(client_ip):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many refresh attempts. Please try again later."
+        )
     
-    # Issue NEW access token
-    access_token = create_access_token(
-        data={"sub": str(current_user.id), "jti": new_access_jti, "type": "access"}
+    # 🔑 Create NEW tokens with enhanced security (JTI rotation)
+    access_token, new_access_jti = create_access_token_with_jti(
+        data={"sub": str(current_user.id)}
+    )
+    new_refresh_token, new_refresh_jti = create_refresh_token_with_jti(
+        data={"sub": str(current_user.id)}
     )
     
-    # 🔑 Issue NEW refresh token (TOKEN ROTATION)
-    new_refresh_token = create_refresh_token(
-        data={"sub": str(current_user.id), "jti": new_refresh_jti, "type": "refresh"}
-    )
-    
-    # TODO for complete security:
-    # 1. Invalidate old refresh token in user_sessions table
-    # 2. Add old tokens to blacklist table
-    # 3. Create new session record
+    # TODO for complete security (database operations):
+    # 1. Invalidate old refresh token: await invalidate_user_session(db, old_refresh_jti)
+    # 2. Create new session: await create_user_session(db, str(current_user.id), new_refresh_jti, ...)
+    # 3. Add old tokens to blacklist: await blacklist_token(db, old_access_jti, "access", ...)
     
     return {
         "access_token": access_token,
