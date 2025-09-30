@@ -14,7 +14,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'feat/srv/buddy-system', url: 'https://github.com/CHAYENITY/chayenity.git'
+                git branch: 'feat/srv/buddy-system', url: 'https://github.com/CHAYENITY/hourz.git'
             }
         }
 

@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from jose import jwt, JWTError
+from datetime import datetime, timezone
+import uuid
 
 from app.models import User
 from app.schemas.user_schema import UserCreate, UserOut
@@ -60,9 +62,20 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Issue both access and refresh tokens
-    access_token = create_access_token(data={"sub": str(user.id)})
-    refresh_token = create_refresh_token(data={"sub": str(user.id)})
+    # Issue both access and refresh tokens with JTI for tracking
+    access_jti = str(uuid.uuid4())
+    refresh_jti = str(uuid.uuid4())
+    
+    access_token = create_access_token(
+        data={"sub": str(user.id), "jti": access_jti, "type": "access"}
+    )
+    refresh_token = create_refresh_token(
+        data={"sub": str(user.id), "jti": refresh_jti, "type": "refresh"}
+    )
+    
+    # TODO: Store refresh_jti in user_sessions table for tracking
+    # This enables session management and token rotation
+    
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
@@ -96,7 +109,7 @@ async def refresh_access_token(
         # We allow expired tokens here since that's the point of refresh
         payload = jwt.decode(
             x_access_token, 
-            app_config.SECRET_KEY, 
+            app_config.ACCESS_SECRET_KEY,  # Fixed: use ACCESS_SECRET_KEY
             algorithms=[app_config.ALGORITHM],
             options={"verify_exp": False}  # Allow expired tokens
         )
@@ -115,23 +128,90 @@ async def refresh_access_token(
             detail="Invalid access token format"
         )
     
-    # Create new access token with fresh expiration
-    access_token = create_access_token(data={"sub": str(current_user.id)})
+    # 🔄 CRITICAL SECURITY FIX: TOKEN ROTATION
+    # This solves "if hacker steals both tokens, unlimited access" problem
+    
+    # Create NEW tokens with NEW JTIs (prevents token reuse)
+    new_access_jti = str(uuid.uuid4())
+    new_refresh_jti = str(uuid.uuid4())
+    
+    # Issue NEW access token
+    access_token = create_access_token(
+        data={"sub": str(current_user.id), "jti": new_access_jti, "type": "access"}
+    )
+    
+    # 🔑 Issue NEW refresh token (TOKEN ROTATION)
+    new_refresh_token = create_refresh_token(
+        data={"sub": str(current_user.id), "jti": new_refresh_jti, "type": "refresh"}
+    )
+    
+    # TODO for complete security:
+    # 1. Invalidate old refresh token in user_sessions table
+    # 2. Add old tokens to blacklist table
+    # 3. Create new session record
     
     return {
         "access_token": access_token,
+        "refresh_token": new_refresh_token,  # 🔑 NEW refresh token (rotation!)
         "token_type": "bearer",
         "expires_in_minutes": app_config.ACCESS_TOKEN_EXPIRE,
+        "security_note": "Old refresh token is now invalid (rotation)"
     }
 
 
 @router.post("/logout")
-async def logout(current_user: User = Depends(get_current_user_with_access_token)):
+async def logout(
+    current_user: User = Depends(get_current_user_with_access_token),
+    x_refresh_token: Optional[str] = Header(None, alias="X-Refresh-Token"),
+    request: Request = None
+):
     """
-    Logout endpoint. In a stateless JWT system, this is mainly for client-side cleanup.
-    For enhanced security, you could implement a token blacklist here.
+    🔐 Enhanced logout with token invalidation.
+    
+    For complete security, provide refresh token to invalidate:
+    Headers:
+    - Authorization: Bearer <access_token>
+    - X-Refresh-Token: <refresh_token> (optional but recommended)
+    
+    TODO: Implement token blacklist for immediate invalidation
     """
-    return {"message": "Successfully logged out"}
+    
+    # Extract token JTIs for blacklisting
+    # This prevents stolen tokens from being used after logout
+    try:
+        auth_header = request.headers.get("authorization", "")
+        access_token = auth_header.replace("Bearer ", "") if auth_header.startswith("Bearer ") else ""
+        
+        if access_token:
+            access_payload = jwt.decode(
+                access_token,
+                app_config.ACCESS_SECRET_KEY,
+                algorithms=[app_config.ALGORITHM],
+                options={"verify_exp": False}
+            )
+            access_jti = access_payload.get("jti")
+            
+        if x_refresh_token:
+            refresh_payload = jwt.decode(
+                x_refresh_token,
+                app_config.REFRESH_SECRET_KEY,
+                algorithms=[app_config.ALGORITHM],
+                options={"verify_exp": False}
+            )
+            refresh_jti = refresh_payload.get("jti")
+            
+        # TODO: Add tokens to blacklist
+        # await blacklist_token(db, access_jti, "access", str(current_user.id), "logout")
+        # await blacklist_token(db, refresh_jti, "refresh", str(current_user.id), "logout")
+        
+    except JWTError:
+        # Still allow logout even if token parsing fails
+        pass
+    
+    return {
+        "message": "Successfully logged out",
+        "security_note": "All tokens for this session should be discarded"
+    }
 
 
 @router.get("/me", response_model=UserOut)

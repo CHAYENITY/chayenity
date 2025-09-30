@@ -44,9 +44,9 @@ class AppConfig(BaseSettings):
     API_STR: str = "/api"
 
     REFRESH_SECRET_KEY: str = "refresh_secret_key"
-    REFRESH_TOKEN_EXPIRE: int = 10080
+    REFRESH_TOKEN_EXPIRE: int = 10080  # 7 days (7 * 24 * 60 minutes)
     ACCESS_SECRET_KEY: str = "access_secret_key"
-    ACCESS_TOKEN_EXPIRE: int = 10080
+    ACCESS_TOKEN_EXPIRE: int = 30      # 30 minutes (SHORT-lived for security)
     ALGORITHM: str = "HS256"
 
     FRONTEND_URL: str = ""
