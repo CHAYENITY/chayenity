@@ -1,58 +1,48 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:chayenity/shared/constants/env_config.dart';
+// * GLOBAL PROVIDERS
+import 'package:hourz/shared/providers/index.dart';
 
-// * SCREEN
-import 'package:chayenity/shared/screens/error_screen.dart';
-import 'package:chayenity/features/auth/screens/login_screen.dart';
+// * ROUTER
+import 'package:hourz/shared/routing/app_router.dart';
+
+// * SCREENS
+import 'package:hourz/shared/screens/error_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    await dotenv.load(fileName: ".env");
-
-    // Validate Firebase configuration
-    EnvConfig.validateConfiguration();
-
-    runApp(const MainApp());
+    runApp(const ProviderScope(child: MainApp()));
   } catch (e) {
     runApp(ErrorScreen(error: e.toString()));
   }
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends ConsumerStatefulWidget {
   const MainApp({super.key});
 
   @override
+  ConsumerState<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends ConsumerState<MainApp> {
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('อะไรนะ World!'),
+    // Watch theme providers
+    final themeMode = ref.watch(themeModeProvider);
+    final lightTheme = ref.watch(lightThemeProvider);
+    final darkTheme = ref.watch(darkThemeProvider);
 
-              const SizedBox(height: 20),
+    return MaterialApp.router(
+      title: AppConfig.appName,
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: themeMode,
 
-              ElevatedButton(
-                onPressed: () {
-                  // กดแล้ว navigate ไป LoginScreen
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
-                    ),
-                  );
-                },
-                child: const Text("ไปหน้า Login"),
-              ),
-            ],
-          ),
-        ),
-      ),
+      // Use Go Router
+      routerConfig: AppRouter.router,
     );
   }
 }

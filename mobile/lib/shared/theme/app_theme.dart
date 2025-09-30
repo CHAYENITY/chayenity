@@ -4,6 +4,8 @@ import './color_schemas.dart';
 import './typography.dart';
 
 class AppTheme {
+  static TextStyle get richText => AppTypography.bodyMedium;
+
   static ThemeData get light => ThemeData(
     useMaterial3: true,
     fontFamily: AppTypography.fontFamily,
@@ -15,33 +17,55 @@ class AppTheme {
     ),
     scaffoldBackgroundColor: AppColors.background,
     appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.primary,
-      foregroundColor: Colors.white,
+      backgroundColor: AppColors.background,
+      foregroundColor: AppColors.foreground,
       elevation: 0,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        foregroundColor: AppColors.primaryForeground,
+        textStyle: AppTypography.textTheme.bodyMedium,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primary,
-        backgroundColor: AppColors.surface,
-        textStyle: AppTypography.textTheme.headlineSmall,
-        side: const BorderSide(color: AppColors.mutedBorder, width: 1),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: AppColors.background,
+        textStyle: AppTypography.textTheme.bodyMedium,
+        side: const BorderSide(color: AppColors.muted, width: 1),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: AppTypography.textTheme.headlineSmall!.copyWith(
-          color: AppColors.textWhite,
-        ),
+        textStyle: AppTypography.textTheme.bodyMedium,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       ),
     ),
+    inputDecorationTheme: InputDecorationTheme(
+      hintStyle: TextStyle(
+        fontSize: 12,
+        color: AppColors.mutedForeground,
+        fontWeight: FontWeight.w500,
+        fontFamily: AppTypography.fontFamily,
+      ),
+      border: const UnderlineInputBorder(
+        borderSide: BorderSide(color: AppColors.mutedForeground),
+      ),
+      enabledBorder: const UnderlineInputBorder(
+        borderSide: BorderSide(color: AppColors.mutedForeground),
+      ),
+      focusedBorder: const UnderlineInputBorder(
+        borderSide: BorderSide(color: AppColors.mutedForeground, width: 2),
+      ),
+      contentPadding: EdgeInsets.symmetric(vertical: 16),
+    ),
+  );
+
+  static ThemeData get dark => ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    fontFamily: AppTypography.fontFamily,
   );
 }

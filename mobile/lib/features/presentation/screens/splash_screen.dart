@@ -1,103 +1,135 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hourz/shared/constants/assets.dart';
 
-import 'package:community_marketplace/features/presentation/screens/terms_screen.dart';
-import 'package:community_marketplace/features/presentation/screens/onboarding_screen.dart';
-import 'package:community_marketplace/features/auth/screens/sign_in_screen.dart';
-import 'package:community_marketplace/features/dashboard/screens/dashboard_screen.dart';
-
-class SplashScreen extends StatefulWidget {
-  final bool isFreshInstall;
-
-  const SplashScreen({super.key, this.isFreshInstall = true});
+class SplashScreen extends ConsumerStatefulWidget {
+  const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-
-class _SplashScreenState extends State<SplashScreen> {
-  bool termsAccepted = false; // จำลองว่ายังไม่ยืนยัน terms
-  bool onboardingSeen = false; // จำลองว่ายังไม่เคยเปิดหน้า onboarding
-  bool isSignedIn = false; // จำลองว่ายังไม่ได้ SignIn
+class _SplashScreenState extends ConsumerState<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
-    _checkAndNavigate();
+
+    // Initialize animations
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
+    );
+
+    // Start animation and navigate after delay
+    _startSplashSequence();
   }
 
-  void _checkAndNavigate() async {
+  void _startSplashSequence() async {
+    // Start animations
+    _animationController.forward();
+
+    // Wait for splash duration
     await Future.delayed(const Duration(seconds: 3));
 
-    if (!mounted) return;
-
-    if (widget.isFreshInstall) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const TermsScreen()),
-      );
-    } else {
-      if (!termsAccepted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const TermsScreen()),
-        );
-      } else if (!onboardingSeen) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-        );
-      } else if (!isSignedIn) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const SignInScreen()),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const DashboardScreen()),
-        );
-      }
+    // Navigate to next screen
+    if (mounted) {
+      context.go('/onboarding'); // Adjust route as needed
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isPortrait = size.height > size.width;
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // * Background
-          Padding(
-            padding: const EdgeInsets.only(top: 70.0, right: 70.0),
-            child: Transform.rotate(
-              angle: isPortrait ? math.pi / 2 : 0,
-              child: FittedBox(
-                fit: BoxFit.cover,
-                child: Image.asset(
-                  'assets/bg/community-marketplace-logo-bg-16-9.png',
+      backgroundColor: Colors.white,
+      body: AnimatedBuilder(
+        animation: _animationController,
+        builder: (context, child) {
+          return Center(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Logo Section
+                    _buildLogo(),
+
+                    const SizedBox(height: 18),
+
+                    // Tagline
+                    _buildTagline(),
+
+                    const SizedBox(height: 36),
+
+                    // Loading Indicator
+                    _buildLoadingIndicator(),
+                  ],
                 ),
               ),
             ),
-          ),
+          );
+        },
+      ),
+    );
+  }
 
-          // * Logo
-          Center(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                double logoWidth = constraints.maxWidth * 0.4;
-                return Image.asset(
-                  'assets/logo/community-marketplace-logo.png',
-                  width: logoWidth,
-                );
-              },
-            ),
-          ),
-        ],
+  Widget _buildLogo() {
+    return Column(
+      children: [
+        // Logo Image
+        Image.asset(
+          Assets.hourzLightImage,
+          width: 130,
+          height: 50,
+          fit: BoxFit.contain,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTagline() {
+    return Text(
+      'เพื่อนช่วยงานง่าย ได้ทุกชั่วโมง',
+      style: TextStyle(
+        fontSize: 14,
+        color: const Color(0xFF111827),
+        fontWeight: FontWeight.w500,
+        height: 1.0,
+        letterSpacing: 0.0,
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return SizedBox(
+      width: 40,
+      height: 40,
+      child: CircularProgressIndicator(
+        strokeCap: StrokeCap.round,
+        strokeWidth: 4,
+        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF14B8A6)),
       ),
     );
   }

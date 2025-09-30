@@ -1,0 +1,16 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          # Configuration for JSON serialization
+          explicit_to_json: true
+          field_rename: snake
+          include_if_null: false
+      freezed:
+        options:
+          # Configuration for Freezed
+          map_factory: true
+          copy_with: true
+          equal: true
+          to_string: true

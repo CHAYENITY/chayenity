@@ -1,4 +1,4 @@
-# 🛍️ Chayenity
+# 🛍️ Hourz
 
 [![Status: Final Project](https://img.shields.io/badge/Status-Final%20Project-blue)]()
 [![Status: Development](https://img.shields.io/badge/Status-Development-yellow)]()
@@ -16,38 +16,6 @@
 | FastAPI    | ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)          |
 | PostgreSQL | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white) |
 | Docker     | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)             |
-
----
-
-## 🚀 Getting Started
-
-### ⬇️ Get dependencies
-
-```bash
-cd mobile
-flutter pub get
-```
-
-### 🚀 Run the app
-
-- `macOS, iOS`
-
-```bash
-open ios/Runner.xcworkspace
-```
-
-```bash
-xcrun simctl list devices
-xcrun simctl boot "iPhone 16"
-```
-
-```bash
-open -a Simulator
-```
-
-```bash
-flutter run
-```
 
 ---
 

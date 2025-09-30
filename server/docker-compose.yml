@@ -1,9 +1,9 @@
-name: chayenity
+name: hourz
 
 services:
   db_pg:
+    container_name: hourz-pg
     image: postgis/postgis:15-3.4
-    container_name: chayenity-pg
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -12,9 +12,9 @@ services:
       TZ: Asia/Bangkok
       PGTZ: Asia/Bangkok
     ports:
-      - '5432:5432'
+      - "5432:5432"
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 30s
       timeout: 5s
       retries: 3
