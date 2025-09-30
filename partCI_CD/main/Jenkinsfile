@@ -178,6 +178,63 @@ except Exception as e:
             }
         }
 
+        // ===== DEPLOYMENT STAGES (COMMENTED OUT) =====
+        // Uncomment these stages when you want to enable deployment
+        
+        /*
+        stage('Build Docker Image') {
+            steps {
+                dir('server') {
+                    sh '''
+                    echo "===== Building Docker Image ====="
+                    docker build -t chayenity-server:latest .
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy Container') {
+            steps {
+                dir('server') {
+                    sh '''
+                    echo "===== Deploying Container ====="
+                    docker stop chayenity-server-container || true
+                    docker rm chayenity-server-container || true
+                    docker run -d --name chayenity-server-container -p 8000:8000 \
+                        -e POSTGRES_SERVER=host.docker.internal \
+                        -e POSTGRES_DB=chayenity \
+                        -e POSTGRES_USER=postgres \
+                        -e POSTGRES_PASSWORD=password \
+                        -e REFRESH_SECRET_KEY=production_refresh_secret \
+                        -e ACCESS_SECRET_KEY=production_access_secret \
+                        -e FRONTEND_URL=http://localhost:3000 \
+                        -e BACKEND_URL=http://localhost:8000 \
+                        chayenity-server:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Push to Registry') {
+            steps {
+                dir('server') {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'dockerhub-cred',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        sh '''
+                        echo "===== Pushing to Docker Registry ====="
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:latest
+                        docker push $DOCKER_USER/chayenity-server:latest
+                        '''
+                    }
+                }
+            }
+        }
+        */
+
     }
 
     post {
