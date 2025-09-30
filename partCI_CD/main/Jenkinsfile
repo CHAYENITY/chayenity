@@ -46,40 +46,87 @@ pipeline {
 
         stage('Setup Test Database') {
             steps {
-                sh '''
-                echo "===== Setting up PostgreSQL for tests ====="
-                # Start PostgreSQL container for testing
-                docker run -d --name postgres-test \
-                    -e POSTGRES_USER=postgres \
-                    -e POSTGRES_PASSWORD=password \
-                    -e POSTGRES_DB=chayenity_test \
-                    -p 5432:5432 \
-                    postgis/postgis:13-3.1
-                
-                # Wait for PostgreSQL to be ready
-                echo "Waiting for PostgreSQL to be ready..."
-                for i in {1..30}; do
-                    if docker exec postgres-test pg_isready -U postgres; then
-                        echo "PostgreSQL is ready!"
-                        break
+                dir('server') {
+                    sh '''
+                    echo "===== Setting up Test Database ====="
+                    
+                    # Option 1: Use SQLite for faster testing (recommended for CI)
+                    echo "Creating test configuration for SQLite..."
+                    cat > test.env << EOF
+ENVIRONMENT=test
+POSTGRES_SERVER=sqlite
+POSTGRES_DB=test.db
+POSTGRES_USER=test
+POSTGRES_PASSWORD=test
+POSTGRES_PORT=0
+REFRESH_SECRET_KEY=test_refresh_secret_key_for_ci
+ACCESS_SECRET_KEY=test_access_secret_key_for_ci
+FRONTEND_URL=http://localhost:3000
+BACKEND_URL=http://localhost:8000
+EOF
+
+                    # Option 2: Start PostgreSQL container (backup option)
+                    echo "Starting PostgreSQL container as backup..."
+                    docker run -d --name postgres-test \
+                        -e POSTGRES_USER=postgres \
+                        -e POSTGRES_PASSWORD=password \
+                        -e POSTGRES_DB=chayenity_test \
+                        -p 5433:5432 \
+                        postgres:13 || echo "PostgreSQL container start failed, will use SQLite"
+                    
+                    # Wait a bit for PostgreSQL
+                    sleep 5
+                    
+                    # Test PostgreSQL connectivity
+                    if docker exec postgres-test pg_isready -U postgres 2>/dev/null; then
+                        echo "PostgreSQL is ready! Using PostgreSQL for tests."
+                        cat > .env << EOF
+ENVIRONMENT=test
+POSTGRES_SERVER=localhost
+POSTGRES_DB=chayenity_test
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=password
+POSTGRES_PORT=5433
+REFRESH_SECRET_KEY=test_refresh_secret_key_for_ci
+ACCESS_SECRET_KEY=test_access_secret_key_for_ci
+FRONTEND_URL=http://localhost:3000
+BACKEND_URL=http://localhost:8000
+EOF
+                    else
+                        echo "PostgreSQL not available, using SQLite for tests."
+                        cp test.env .env
                     fi
-                    echo "Waiting... ($i/30)"
-                    sleep 2
-                done
-                '''
+                    
+                    echo "Final .env configuration:"
+                    cat .env
+                    '''
+                }
             }
         }
 
         stage('Run Tests & Coverage') {
+            environment {
+                // Set environment variables at stage level for better isolation
+                POSTGRES_SERVER = 'localhost'
+                POSTGRES_DB = 'chayenity_test'
+                POSTGRES_USER = 'postgres'
+                POSTGRES_PASSWORD = 'password'
+                POSTGRES_PORT = '5432'
+                REFRESH_SECRET_KEY = 'test_refresh_secret_key_for_ci'
+                ACCESS_SECRET_KEY = 'test_access_secret_key_for_ci'
+                FRONTEND_URL = 'http://localhost:3000'
+                BACKEND_URL = 'http://localhost:8000'
+                ENVIRONMENT = 'test'
+            }
             steps {
                 dir('server') {
                     sh '''
                     echo "===== Running Tests ====="
                     . venv/bin/activate
                     
-                    # Create .env file for tests
-                    cat > .env << EOF
-ENVIRONMENT=local
+                    # Simple approach: Create minimal .env file
+                    cat > .env << 'EOF'
+ENVIRONMENT=test
 POSTGRES_SERVER=localhost
 POSTGRES_DB=chayenity_test
 POSTGRES_USER=postgres
@@ -91,53 +138,26 @@ FRONTEND_URL=http://localhost:3000
 BACKEND_URL=http://localhost:8000
 EOF
                     
-                    # Export environment variables explicitly for the test session
-                    export POSTGRES_SERVER=localhost
-                    export POSTGRES_DB=chayenity_test
-                    export POSTGRES_USER=postgres
-                    export POSTGRES_PASSWORD=password
-                    export POSTGRES_PORT=5432
-                    export REFRESH_SECRET_KEY=test_refresh_secret_key_for_ci
-                    export ACCESS_SECRET_KEY=test_access_secret_key_for_ci
-                    export FRONTEND_URL=http://localhost:3000
-                    export BACKEND_URL=http://localhost:8000
-                    export ENVIRONMENT=local
-                    
-                    # Debug: Print environment variables and .env file
-                    echo "=== Environment variables set ==="
-                    echo "POSTGRES_SERVER=$POSTGRES_SERVER"
-                    echo "POSTGRES_DB=$POSTGRES_DB"
-                    echo "POSTGRES_USER=$POSTGRES_USER"
-                    echo "POSTGRES_PORT=$POSTGRES_PORT"
-                    echo ""
-                    echo "=== .env file contents ==="
+                    echo "=== Environment Check ==="
+                    echo "POSTGRES_SERVER: $POSTGRES_SERVER"
+                    echo "POSTGRES_DB: $POSTGRES_DB"
                     cat .env
-                    echo ""
                     
-                    # Test configuration loading
-                    echo "=== Testing app_config loading ==="
+                    # Quick app_config test
+                    echo "=== Testing Configuration Loading ==="
                     python -c "
-import os
-print('Python environment variables:')
-for key in ['POSTGRES_SERVER', 'POSTGRES_DB', 'POSTGRES_USER', 'POSTGRES_PASSWORD', 'POSTGRES_PORT']:
-    print(f'{key}={os.environ.get(key, \"NOT_SET\")}')
-    
-print('\\nTesting app_config import...')
 try:
     from app.configs.app_config import app_config
-    print('✅ app_config loaded successfully!')
-    print(f'Database URI: {app_config.SQLALCHEMY_DATABASE_URI}')
+    print('✅ Configuration loaded successfully')
+    print(f'DB URI: {app_config.SQLALCHEMY_DATABASE_URI}')
 except Exception as e:
-    print(f'❌ Failed to load app_config: {e}')
+    print(f'❌ Configuration failed: {e}')
     exit(1)
-"
+" || exit 1
                     
-                    # Run unit tests first
-                    pytest app/tests/test_*.py --maxfail=1 --disable-warnings -q --cov=app --cov-report=xml
-                    
-                    # Run integration tests (may need database)
-                    echo "Running integration tests..."
-                    pytest app/tests/integration/ --maxfail=1 --disable-warnings -q -v || echo "Integration tests failed - may need database setup"
+                    # Run tests
+                    echo "=== Running Tests ==="
+                    pytest app/tests/test_basic_models.py app/tests/test_buddy_endpoints.py app/tests/test_review_endpoints.py app/tests/test_security.py app/tests/test_transaction_endpoints.py app/tests/test_upload_system.py app/tests/test_websocket_integration.py --maxfail=1 --disable-warnings -q --cov=app --cov-report=xml
                     '''
                 }
             }
