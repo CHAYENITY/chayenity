@@ -88,11 +88,12 @@ class AddressRead(AddressBase):
 # Base schema with common fields (excluding sensitive fields)
 class UserBase(SQLModel):
     email: EmailStr = "user.name@example.com"
-    first_name: str = "John"  # ชื่อ
-    last_name: str = "Doe"   # นามสกุล
+    first_name: Optional[str] = None  # ชื่อ - Optional for two-step registration
+    last_name: Optional[str] = None   # นามสกุล - Optional for two-step registration
     bio: Optional[str] = None  # แนะนำตัวเอง
-    phone_number: str = "+66-xxx-xxx-xxxx"  # เบอร์โทรศัพท์
+    phone_number: Optional[str] = None  # เบอร์โทรศัพท์ - Optional for two-step registration
     additional_contact: Optional[str] = None  # ช่องทางติดต่อเพิ่มเติม (LINE ID, etc.)
+    is_profile_complete: bool = False  # Track if profile setup is complete
 
 
 # Schema for creating users (includes password and address)
@@ -107,9 +108,9 @@ class UserCreate(UserBase):
 
     @field_validator("phone_number")
     @classmethod
-    def validate_phone_number(cls, v: str) -> str:
-        if not v:
-            raise ValueError("Phone number is required")
+    def validate_phone_number(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return None
         # Allow Thai phone numbers and international format
         if re.fullmatch(r"(\+66|0)[0-9]{8,9}", v) or re.fullmatch(r"\+[0-9]{10,15}", v):
             return v.strip()
@@ -119,16 +120,20 @@ class UserCreate(UserBase):
 
     @field_validator("first_name")
     @classmethod
-    def validate_first_name(cls, v: str) -> str:
-        if not v or len(v.strip()) < 1:
-            raise ValueError("First name is required")
+    def validate_first_name(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return None
+        if len(v.strip()) < 1:
+            raise ValueError("First name cannot be empty")
         return v.strip()
 
     @field_validator("last_name") 
     @classmethod
-    def validate_last_name(cls, v: str) -> str:
-        if not v or len(v.strip()) < 1:
-            raise ValueError("Last name is required")
+    def validate_last_name(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return None
+        if len(v.strip()) < 1:
+            raise ValueError("Last name cannot be empty")
         return v.strip()
 
 
@@ -144,7 +149,14 @@ class UserOut(UserBase):
     # Computed properties
     @property
     def full_name(self) -> str:
-        return f"{self.first_name} {self.last_name}".strip()
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}".strip()
+        elif self.first_name:
+            return self.first_name.strip()
+        elif self.last_name:
+            return self.last_name.strip()
+        else:
+            return ""
     
     @property
     def current_address(self) -> Optional[AddressRead]:
