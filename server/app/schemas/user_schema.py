@@ -7,10 +7,17 @@ from datetime import datetime
 from uuid import UUID
 
 
-# === REGISTRATION FLOW SCHEMAS ===
+class UserBase(SQLModel):
+    email: EmailStr
+    first_name: Optional[str] = None  # ชื่อ - Optional for two-step registration
+    last_name: Optional[str] = None  # นามสกุล - Optional for two-step registration
+    bio: Optional[str] = None  # แนะนำตัวเอง
+    phone_number: Optional[str] = None  # เบอร์โทรศัพท์ - Optional for two-step registration
+    additional_contact: Optional[str] = None  # ช่องทางติดต่อเพิ่มเติม (LINE ID, etc.)
+    is_profile_setup: bool = False  # Track if profile setup is complete
 
-# Step 1: Basic registration (email + password only)
-class UserRegister(SQLModel):
+
+class UserCreate(SQLModel):
     email: EmailStr
     password: str
 
@@ -27,15 +34,14 @@ class UserRegister(SQLModel):
         return v
 
 
-# Step 2: Complete profile setup
 class UserProfileSetup(SQLModel):
-    first_name: str  # ชื่อ
-    last_name: str   # นามสกุล
-    bio: Optional[str] = None  # แนะนำตัวเอง
-    phone_number: str  # เบอร์โทรศัพท์
-    additional_contact: Optional[str] = None  # ช่องทางติดต่อเพิ่มเติม
-    profile_image_url: Optional[str] = None  # รูปประจำตัว
-    address: Optional["AddressCreate"] = None  # ตำแหน่งปัจจุบัน
+    first_name: str
+    last_name: str
+    bio: Optional[str] = None
+    phone_number: str
+    additional_contact: Optional[str] = None
+    profile_image_url: Optional[str] = None
+    address: Optional["AddressCreate"] = None
 
     @field_validator("first_name")
     @classmethod
@@ -85,58 +91,6 @@ class AddressRead(AddressBase):
     user_id: UUID
 
 
-# Base schema with common fields (excluding sensitive fields)
-class UserBase(SQLModel):
-    email: EmailStr = "user.name@example.com"
-    first_name: Optional[str] = None  # ชื่อ - Optional for two-step registration
-    last_name: Optional[str] = None   # นามสกุล - Optional for two-step registration
-    bio: Optional[str] = None  # แนะนำตัวเอง
-    phone_number: Optional[str] = None  # เบอร์โทรศัพท์ - Optional for two-step registration
-    additional_contact: Optional[str] = None  # ช่องทางติดต่อเพิ่มเติม (LINE ID, etc.)
-    is_profile_complete: bool = False  # Track if profile setup is complete
-
-
-# Schema for creating users (includes password and address)
-class UserCreate(UserBase):
-    password: str
-    address: Optional[AddressCreate] = None  # ตำแหน่งปัจจุบัน
-
-    @field_validator("email")
-    @classmethod
-    def validate_email(cls, v: Optional[str]) -> Optional[str]:
-        return v.strip().lower() if v else v
-
-    @field_validator("phone_number")
-    @classmethod
-    def validate_phone_number(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return None
-        # Allow Thai phone numbers and international format
-        if re.fullmatch(r"(\+66|0)[0-9]{8,9}", v) or re.fullmatch(r"\+[0-9]{10,15}", v):
-            return v.strip()
-        raise ValueError(
-            "Phone number must be a valid Thai number (+66xxxxxxxxx or 0xxxxxxxxx) or international format"
-        )
-
-    @field_validator("first_name")
-    @classmethod
-    def validate_first_name(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return None
-        if len(v.strip()) < 1:
-            raise ValueError("First name cannot be empty")
-        return v.strip()
-
-    @field_validator("last_name") 
-    @classmethod
-    def validate_last_name(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return None
-        if len(v.strip()) < 1:
-            raise ValueError("Last name cannot be empty")
-        return v.strip()
-
-
 # Schema for returning user data (excludes sensitive fields)
 class UserOut(UserBase):
     id: UUID
@@ -145,7 +99,7 @@ class UserOut(UserBase):
     reputation_score: float
     created_at: datetime
     addresses: List[AddressRead] = []
-    
+
     # Computed properties
     @property
     def full_name(self) -> str:
@@ -157,7 +111,7 @@ class UserOut(UserBase):
             return self.last_name.strip()
         else:
             return ""
-    
+
     @property
     def current_address(self) -> Optional[AddressRead]:
         if self.addresses:
