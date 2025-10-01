@@ -47,18 +47,12 @@ async def register(user_register: UserRegister, db: AsyncSession = Depends(get_d
     
     user = await user_crud.create_minimal_user(db, user_data)
     
+    # Return a minimal, deterministic response to avoid schema/example
+    # injection and lazy-loading of relationships during serialization.
     return {
         "id": user.id,
         "email": user.email,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "bio": user.bio,
-        "phone_number": user.phone_number,
-        "additional_contact": user.additional_contact,
-        "profile_image_url": user.profile_image_url,
         "is_profile_complete": user.is_profile_complete,
-        "is_verified": user.is_verified,
-        "reputation_score": user.reputation_score,
         "created_at": user.created_at,
     }
 

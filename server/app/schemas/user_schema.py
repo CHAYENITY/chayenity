@@ -87,7 +87,7 @@ class AddressRead(AddressBase):
 
 # Base schema with common fields (excluding sensitive fields)
 class UserBase(SQLModel):
-    email: EmailStr = "user.name@example.com"
+    email: EmailStr
     first_name: Optional[str] = None  # ชื่อ - Optional for two-step registration
     last_name: Optional[str] = None   # นามสกุล - Optional for two-step registration
     bio: Optional[str] = None  # แนะนำตัวเอง
