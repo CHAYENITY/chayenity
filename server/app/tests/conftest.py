@@ -105,11 +105,10 @@ async def user_token_headers(async_client) -> dict:
     email = f"test_{uuid4().hex[:8]}@example.com"
     password = "testpass123"
     
-    # Register user
+    # Register user (Step 1: Basic registration)
     register_data = {
         "email": email,
-        "password": password,
-        "full_name": "Test User"
+        "password": password
     }
     
     register_response = await async_client.post("/api/auth/register", json=register_data)

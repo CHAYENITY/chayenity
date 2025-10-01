@@ -36,21 +36,52 @@ class MessageType(str, enum.Enum):
 # === Core Entities ===
 
 
+class Address(SQLModel, table=True):
+    """Address information for users"""
+    
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    address_text: str  # Full address string
+    district: str  # อำเภอ/เขต
+    province: str  # จังหวัด
+    postal_code: Optional[str] = None
+    country: str = Field(default="Thailand")
+    
+    # Location coordinates (GPS)
+    location: Optional[Any] = Field(
+        default=None, sa_column=Column(Geometry("POINT", srid=4326))
+    )
+    
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Foreign Keys
+    user_id: UUID = Field(foreign_key="user.id", index=True)
+    
+    # Relationships
+    user: "User" = Relationship(back_populates="addresses")
+
+
 class User(SQLModel, table=True):
     """User accounts for Hourz app - can be both Helper and Seeker"""
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     email: str = Field(unique=True, index=True)
     hashed_password: str
-    full_name: str
-    profile_image_url: Optional[str] = None
-    contact_info: Optional[str] = None  # phone or LINE ID
-
-    # Location for Helper mode (fixed location)
-    fixed_location: Optional[Any] = Field(
-        default=None, sa_column=Column(Geometry("POINT", srid=4326))
-    )
-    address_text: Optional[str] = None
+    
+    # Profile fields (optional initially, completed in second step)
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    bio: Optional[str] = None  # แนะนำตัวเอง
+    
+    # Contact information (optional initially)
+    phone_number: Optional[str] = None  # เบอร์โทรศัพท์
+    additional_contact: Optional[str] = None  # ช่องทางติดต่อเพิ่มเติม (LINE ID, etc.)
+    
+    # Profile image
+    profile_image_url: Optional[str] = None  # รูปประจำตัว
+    
+    # Profile completion status
+    is_profile_complete: bool = Field(default=False)  # Track if user completed step 2
 
     # Helper availability
     is_available: bool = Field(default=False)  # Helper availability toggle
@@ -63,7 +94,25 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
+    # Utility properties
+    @property
+    def full_name(self) -> str:
+        """Backward compatibility - combines first_name and last_name"""
+        if not self.first_name and not self.last_name:
+            return "Incomplete Profile"
+        first = self.first_name or ""
+        last = self.last_name or ""
+        return f"{first} {last}".strip() or "Incomplete Profile"
+    
+    @property 
+    def current_address(self) -> Optional["Address"]:
+        """Get the most recent address"""
+        if self.addresses:
+            return max(self.addresses, key=lambda addr: addr.updated_at)
+        return None
+
     # Relationships
+    addresses: List["Address"] = Relationship(back_populates="user")
     gigs_created: List["Gig"] = Relationship(
         back_populates="seeker", sa_relationship_kwargs={"foreign_keys": "Gig.seeker_id"}
     )
@@ -287,3 +336,41 @@ class UploadedFile(SQLModel, table=True):
 
     # Relationships
     uploader: User = Relationship(back_populates="uploaded_files")
+
+
+# === Enhanced Security Models ===
+
+
+class UserSession(SQLModel, table=True):
+    """
+    🔐 Track active user sessions for enhanced security.
+    Enables token rotation and session management.
+    """
+    
+    id: str = Field(default_factory=lambda: str(uuid4()), primary_key=True)
+    user_id: str = Field(index=True)  # References User.id
+    refresh_token_jti: str = Field(unique=True)  # JWT ID for refresh token
+    device_info: Optional[str] = None  # User agent, device type
+    ip_address: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_used: datetime = Field(default_factory=datetime.utcnow)
+    expires_at: datetime  # Required - when session expires
+    is_active: bool = Field(default=True)
+    
+    # Optional security features
+    login_location: Optional[str] = None  # City/Country
+    is_suspicious: bool = Field(default=False)
+
+
+class BlacklistedToken(SQLModel, table=True):
+    """
+    🚫 Store blacklisted/revoked tokens for immediate invalidation.
+    Critical for logout and security breaches.
+    """
+    
+    jti: str = Field(primary_key=True)  # JWT ID
+    token_type: str  # 'access' or 'refresh'
+    user_id: str = Field(index=True)  # References User.id
+    blacklisted_at: datetime = Field(default_factory=datetime.utcnow)
+    reason: Optional[str] = None  # 'logout', 'security_breach', 'expired'
+    expires_at: datetime  # When to clean up this record

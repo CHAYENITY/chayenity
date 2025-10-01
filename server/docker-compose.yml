@@ -1,6 +1,29 @@
 name: hourz
 
 services:
+  app:
+    container_name: hourz-server
+    build: .
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist uploaded files
+      - uploads_data:/app/uploads
+    environment:
+      - POSTGRES_SERVER=db_pg
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REFRESH_SECRET_KEY=${REFRESH_SECRET_KEY}
+      - ACCESS_SECRET_KEY=${ACCESS_SECRET_KEY}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - BACKEND_URL=${BACKEND_URL}
+    depends_on:
+      - db_pg
+    networks:
+      - app_network
+
   db_pg:
     container_name: hourz-pg
     image: postgis/postgis:15-3.4
@@ -18,13 +41,14 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    # volumes:
-    #   - postgres_data:/var/lib/postgresql/data
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - app_network
 
-# volumes:
-#   postgres_data:
+volumes:
+  postgres_data:
+  uploads_data:
 
 networks:
   app_network:
