@@ -250,8 +250,3 @@ async def logout(
         "message": "Successfully logged out",
         "security_note": "All tokens for this session should be discarded"
     }
-
-
-@router.get("/me", response_model=UserOut)
-async def get_current_user(current_user: User = Depends(get_current_user_with_access_token)):
-    return current_user
