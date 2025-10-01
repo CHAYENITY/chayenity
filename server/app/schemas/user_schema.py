@@ -2,47 +2,133 @@
 import re
 from sqlmodel import SQLModel
 from pydantic import EmailStr, field_validator
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from uuid import UUID
+
+
+# === REGISTRATION FLOW SCHEMAS ===
+
+# Step 1: Basic registration (email + password only)
+class UserRegister(SQLModel):
+    email: EmailStr
+    password: str
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        return v.strip().lower()
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if len(v) < 6:
+            raise ValueError("Password must be at least 6 characters long")
+        return v
+
+
+# Step 2: Complete profile setup
+class UserProfileSetup(SQLModel):
+    first_name: str  # ชื่อ
+    last_name: str   # นามสกุล
+    bio: Optional[str] = None  # แนะนำตัวเอง
+    phone_number: str  # เบอร์โทรศัพท์
+    additional_contact: Optional[str] = None  # ช่องทางติดต่อเพิ่มเติม
+    profile_image_url: Optional[str] = None  # รูปประจำตัว
+    address: Optional["AddressCreate"] = None  # ตำแหน่งปัจจุบัน
+
+    @field_validator("first_name")
+    @classmethod
+    def validate_first_name(cls, v: str) -> str:
+        if not v or len(v.strip()) < 1:
+            raise ValueError("First name is required")
+        return v.strip()
+
+    @field_validator("last_name")
+    @classmethod
+    def validate_last_name(cls, v: str) -> str:
+        if not v or len(v.strip()) < 1:
+            raise ValueError("Last name is required")
+        return v.strip()
+
+    @field_validator("phone_number")
+    @classmethod
+    def validate_phone_number(cls, v: str) -> str:
+        if not v:
+            raise ValueError("Phone number is required")
+        # Allow Thai phone numbers and international format
+        if re.fullmatch(r"(\+66|0)[0-9]{8,9}", v) or re.fullmatch(r"\+[0-9]{10,15}", v):
+            return v.strip()
+        raise ValueError(
+            "Phone number must be a valid Thai number (+66xxxxxxxxx or 0xxxxxxxxx) or international format"
+        )
+
+
+# === ADDRESS SCHEMAS ===
+class AddressBase(SQLModel):
+    address_text: str
+    district: str  # อำเภอ/เขต
+    province: str  # จังหวัด
+    postal_code: Optional[str] = None
+    country: str = "Thailand"
+
+
+class AddressCreate(AddressBase):
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+
+
+class AddressRead(AddressBase):
+    id: UUID
+    created_at: datetime
+    updated_at: datetime
+    user_id: UUID
 
 
 # Base schema with common fields (excluding sensitive fields)
 class UserBase(SQLModel):
     email: EmailStr = "user.name@example.com"
-    full_name: str = "John Doe"
-    contact_info: Optional[str] = None  # phone or LINE ID
-    address_text: Optional[str] = None
+    first_name: str = "John"  # ชื่อ
+    last_name: str = "Doe"   # นามสกุล
+    bio: Optional[str] = None  # แนะนำตัวเอง
+    phone_number: str = "+66-xxx-xxx-xxxx"  # เบอร์โทรศัพท์
+    additional_contact: Optional[str] = None  # ช่องทางติดต่อเพิ่มเติม (LINE ID, etc.)
 
 
-# Schema for creating users (includes password)
+# Schema for creating users (includes password and address)
 class UserCreate(UserBase):
     password: str
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
+    address: Optional[AddressCreate] = None  # ตำแหน่งปัจจุบัน
 
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: Optional[str]) -> Optional[str]:
         return v.strip().lower() if v else v
 
-    @field_validator("contact_info")
+    @field_validator("phone_number")
     @classmethod
-    def validate_contact_info(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return None
-        # Allow phone numbers or LINE IDs
-        if re.fullmatch(r"[0-9]{7,15}", v) or re.fullmatch(r"[a-zA-Z0-9._-]{3,30}", v):
+    def validate_phone_number(cls, v: str) -> str:
+        if not v:
+            raise ValueError("Phone number is required")
+        # Allow Thai phone numbers and international format
+        if re.fullmatch(r"(\+66|0)[0-9]{8,9}", v) or re.fullmatch(r"\+[0-9]{10,15}", v):
             return v.strip()
         raise ValueError(
-            "Contact info must be a valid phone number (7-15 digits) or LINE ID (3-30 characters)"
+            "Phone number must be a valid Thai number (+66xxxxxxxxx or 0xxxxxxxxx) or international format"
         )
 
-    @field_validator("full_name")
+    @field_validator("first_name")
     @classmethod
-    def validate_full_name(cls, v: str) -> str:
-        if not v or len(v.strip()) < 2:
-            raise ValueError("Full name must be at least 2 characters long")
+    def validate_first_name(cls, v: str) -> str:
+        if not v or len(v.strip()) < 1:
+            raise ValueError("First name is required")
+        return v.strip()
+
+    @field_validator("last_name") 
+    @classmethod
+    def validate_last_name(cls, v: str) -> str:
+        if not v or len(v.strip()) < 1:
+            raise ValueError("Last name is required")
         return v.strip()
 
 
@@ -53,53 +139,76 @@ class UserOut(UserBase):
     is_verified: bool
     reputation_score: float
     created_at: datetime
+    addresses: List[AddressRead] = []
+    
+    # Computed properties
+    @property
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}".strip()
+    
+    @property
+    def current_address(self) -> Optional[AddressRead]:
+        if self.addresses:
+            return max(self.addresses, key=lambda addr: addr.updated_at)
+        return None
 
 
 # Schema for updating user profile
 class UserUpdate(SQLModel):
-    full_name: Optional[str] = None
-    contact_info: Optional[str] = None
-    address_text: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    bio: Optional[str] = None
+    phone_number: Optional[str] = None
+    additional_contact: Optional[str] = None
     profile_image_url: Optional[str] = None
+    address: Optional[AddressCreate] = None
 
-    @field_validator("contact_info")
+    @field_validator("phone_number")
     @classmethod
-    def validate_contact_info(cls, v: Optional[str]) -> Optional[str]:
+    def validate_phone_number(cls, v: Optional[str]) -> Optional[str]:
         if v is None:
             return None
-        if re.fullmatch(r"[0-9]{7,15}", v) or re.fullmatch(r"[a-zA-Z0-9._-]{3,30}", v):
+        if re.fullmatch(r"(\+66|0)[0-9]{8,9}", v) or re.fullmatch(r"\+[0-9]{10,15}", v):
             return v.strip()
         raise ValueError(
-            "Contact info must be a valid phone number (7-15 digits) or LINE ID (3-30 characters)"
+            "Phone number must be a valid Thai number (+66xxxxxxxxx or 0xxxxxxxxx) or international format"
         )
 
-    @field_validator("full_name")
+    @field_validator("first_name")
     @classmethod
-    def validate_full_name(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None and len(v.strip()) < 2:
-            raise ValueError("Full name must be at least 2 characters long")
+    def validate_first_name(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and len(v.strip()) < 1:
+            raise ValueError("First name must be at least 1 character long")
+        return v.strip() if v else v
+
+    @field_validator("last_name")
+    @classmethod
+    def validate_last_name(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and len(v.strip()) < 1:
+            raise ValueError("Last name must be at least 1 character long")
         return v.strip() if v else v
 
 
-# Schema for updating user location
+# Schema for updating user location (now creates a new address)
 class LocationUpdate(SQLModel):
-    latitude: float
-    longitude: float
-    address_text: Optional[str] = None
+    address_text: str
+    district: str
+    province: str
+    postal_code: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
     @field_validator("latitude")
     @classmethod
-    def validate_latitude(cls, v: float) -> float:
-        if not -90 <= v <= 90:
+    def validate_latitude(cls, v: Optional[float]) -> Optional[float]:
+        if v is not None and not -90 <= v <= 90:
             raise ValueError("Latitude must be between -90 and 90")
         return v
 
     @field_validator("longitude")
     @classmethod
-    def validate_longitude(cls, v: float) -> float:
-        if not -180 <= v <= 180:
+    def validate_longitude(cls, v: Optional[float]) -> Optional[float]:
+        if v is not None and not -180 <= v <= 180:
             raise ValueError("Longitude must be between -180 and 180")
         return v
 

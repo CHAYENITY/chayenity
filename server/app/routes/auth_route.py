@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 import uuid
 
 from app.models import User
-from app.schemas.user_schema import UserCreate, UserOut
+from app.schemas.user_schema import UserRegister, UserProfileSetup, UserOut
 from app.crud import user_crud
 from app.database.session import get_db
 from app.security import (
@@ -27,27 +27,62 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
-async def register(user_create: UserCreate, db: AsyncSession = Depends(get_db)):
-    existing_user_by_email = await user_crud.get_user_by_email(db, user_create.email)
+async def register(user_register: UserRegister, db: AsyncSession = Depends(get_db)):
+    """
+    Step 1: Basic registration with email and password only.
+    User must complete profile setup in step 2.
+    """
+    existing_user_by_email = await user_crud.get_user_by_email(db, user_register.email)
     if existing_user_by_email:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
 
-    password_hash = get_password_hash(user_create.password)
-    user = await user_crud.create_user(db, user_create, password_hash)
-    # Return only fields that exist in the current User model/schema to avoid
-    # leaking or depending on fields that tests or callers may expect.
+    password_hash = get_password_hash(user_register.password)
+    
+    # Create user with minimal information (email + password only)
+    user_data = {
+        "email": user_register.email,
+        "hashed_password": password_hash,
+        "is_profile_complete": False
+    }
+    
+    user = await user_crud.create_minimal_user(db, user_data)
+    
     return {
         "id": user.id,
         "email": user.email,
-        "full_name": user.full_name,
-        "contact_info": user.contact_info,
-        "address_text": user.address_text,
-        # "latitude": user.latitude,
-        # "longitude": user.longitude,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "bio": user.bio,
+        "phone_number": user.phone_number,
+        "additional_contact": user.additional_contact,
+        "profile_image_url": user.profile_image_url,
+        "is_profile_complete": user.is_profile_complete,
         "is_verified": user.is_verified,
         "reputation_score": user.reputation_score,
         "created_at": user.created_at,
     }
+
+
+@router.put("/profile-setup", response_model=UserOut)
+async def setup_profile(
+    profile_setup: UserProfileSetup,
+    current_user: User = Depends(get_current_user_with_access_token),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Step 2: Complete user profile setup after basic registration.
+    This includes name, phone, bio, address, and profile image.
+    """
+    if current_user.is_profile_complete:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Profile already completed"
+        )
+    
+    # Update user profile with complete information
+    updated_user = await user_crud.complete_user_profile(db, current_user.id, profile_setup)
+    
+    return updated_user
 
 
 @router.post("/login")

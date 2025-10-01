@@ -6,8 +6,8 @@ from sqlmodel import select
 from uuid import UUID
 from typing import List
 from geoalchemy2 import WKTElement
-from app.models import User
-from app.schemas.user_schema import UserCreate, UserUpdate, LocationUpdate, AvailabilityUpdate, NearbyUsersRequest, NearbyUserOut
+from app.models import User, Address
+from app.schemas.user_schema import UserCreate, UserRegister, UserProfileSetup, UserUpdate, LocationUpdate, AvailabilityUpdate, NearbyUsersRequest, NearbyUserOut
 
 
 async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
@@ -25,22 +25,115 @@ async def get_user_by_id(db: AsyncSession, user_id: UUID) -> User | None:
     return result.scalar_one_or_none()
 
 
+async def create_minimal_user(db: AsyncSession, user_data: dict) -> User:
+    """
+    Step 1: Create user with minimal information (email + password only)
+    """
+    db_user = User(
+        email=user_data["email"].lower(),
+        hashed_password=user_data["hashed_password"],
+        is_profile_complete=False
+    )
+    try:
+        db.add(db_user)
+        await db.flush()
+        await db.commit()
+        await db.refresh(db_user)
+        return db_user
+    except IntegrityError as exc:
+        await db.rollback()
+        raise HTTPException(status_code=409, detail="Email already registered") from exc
+
+
+async def complete_user_profile(db: AsyncSession, user_id: UUID, profile_setup: UserProfileSetup) -> User:
+    """
+    Step 2: Complete user profile with all required information
+    """
+    # Get the user
+    user = await get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Update profile fields
+    user.first_name = profile_setup.first_name
+    user.last_name = profile_setup.last_name
+    user.bio = profile_setup.bio
+    user.phone_number = profile_setup.phone_number
+    user.additional_contact = profile_setup.additional_contact
+    user.profile_image_url = profile_setup.profile_image_url
+    user.is_profile_complete = True
+    
+    # Create address if provided
+    if profile_setup.address:
+        from geoalchemy2 import WKTElement
+        
+        address_data = Address(
+            address_text=profile_setup.address.address_text,
+            district=profile_setup.address.district,
+            province=profile_setup.address.province,
+            postal_code=profile_setup.address.postal_code,
+            country=profile_setup.address.country,
+            user_id=user.id
+        )
+        
+        # Add GPS coordinates if provided
+        if profile_setup.address.latitude and profile_setup.address.longitude:
+            point = WKTElement(f'POINT({profile_setup.address.longitude} {profile_setup.address.latitude})', srid=4326)
+            address_data.location = point
+        
+        db.add(address_data)
+    
+    try:
+        await db.commit()
+        await db.refresh(user)
+        return user
+    except IntegrityError as exc:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="Failed to complete profile") from exc
+
+
 async def create_user(db: AsyncSession, user: UserCreate, password_hash: str) -> User:
+    """
+    Legacy method - creates user with complete profile information in one step
+    """
     # Normalize email to avoid case-duplicate users
     normalized_email = user.email.lower() if user.email else user.email
     db_user = User(
         email=normalized_email,
         hashed_password=password_hash,
-        full_name=user.full_name,
-        contact_info=user.contact_info,
-        address_text=user.address_text,
-        # latitude=user.latitude,
-        # longitude=user.longitude,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        bio=user.bio,
+        phone_number=user.phone_number,
+        additional_contact=user.additional_contact,
+        is_profile_complete=True
     )
+    
     try:
-        # Add, flush, and commit the user to the database
+        # Add user to database
         db.add(db_user)
         await db.flush()
+        
+        # Create address if provided
+        if user.address:
+            from geoalchemy2 import WKTElement
+            
+            address_data = Address(
+                address_text=user.address.address_text,
+                district=user.address.district,
+                province=user.address.province,
+                postal_code=user.address.postal_code,
+                country=user.address.country,
+                user_id=db_user.id
+            )
+            
+            # Add GPS coordinates if provided
+            if user.address.latitude and user.address.longitude:
+                point = WKTElement(f'POINT({user.address.longitude} {user.address.latitude})', srid=4326)
+                address_data.location = point
+            
+            db.add(address_data)
+        
         await db.commit()
         await db.refresh(db_user)
         return db_user

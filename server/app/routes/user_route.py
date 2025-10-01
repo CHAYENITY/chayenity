@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
@@ -9,8 +9,7 @@ from app.schemas.user_schema import (
     LocationUpdate, 
     AvailabilityUpdate, 
     NearbyUsersRequest, 
-    NearbyUserOut,
-    UserProfileOut
+    NearbyUserOut
 )
 from app.crud import user_crud
 from app.database.session import get_db
@@ -61,33 +60,18 @@ async def update_availability(
     return await user_crud.update_user_availability(db, current_user.id, availability_update)
 
 
-@router.get("/profile", response_model=UserProfileOut)
+@router.get("/profile", response_model=UserOut)
 async def get_profile(
     current_user: User = Depends(get_current_user_with_access_token),
+    db: AsyncSession = Depends(get_db),
 ):
-    """Get complete user profile including location and availability status"""
-    # Use a fresh database session to get the most current data
-    async for db in get_db():
-        profile = await user_crud.get_user_profile(db, current_user.id)
-        
-        # Check if location exists
-        has_location = profile.fixed_location is not None
-        
-        # Manually construct the response to ensure all fields are included
-        return UserProfileOut(
-            id=profile.id,
-            email=profile.email,
-            full_name=profile.full_name,
-            profile_image_url=profile.profile_image_url,
-            contact_info=profile.contact_info,
-            address_text=profile.address_text,
-            is_verified=profile.is_verified,
-            reputation_score=profile.reputation_score,
-            total_reviews=profile.total_reviews,
-            is_available=profile.is_available,
-            created_at=profile.created_at,
-            has_location=has_location
-        )
+    """Get complete user profile including addresses"""
+    # Get fresh user data with addresses
+    profile = await user_crud.get_user_by_id(db, current_user.id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return profile
 
 
 @router.get("/nearby", response_model=List[NearbyUserOut])
