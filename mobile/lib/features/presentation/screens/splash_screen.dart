@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hourz/shared/constants/assets.dart';
+import 'package:hourz/shared/constants/app_routes.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -47,7 +48,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     // Navigate to next screen
     if (mounted) {
-      context.go('/onboarding'); // Adjust route as needed
+      context.go(AppRoutePath.dashboard); // Adjust route as needed
     }
   }
 

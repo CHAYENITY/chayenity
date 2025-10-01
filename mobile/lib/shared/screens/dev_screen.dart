@@ -31,6 +31,22 @@ class DevScreen extends ConsumerWidget {
               // Header
               _DevHeader(),
 
+              const SizedBox(height: 20),
+
+              // Presentation Section
+              _DevSection(
+                title: '🎯 Presentation',
+                color: Colors.purple,
+                routes: [
+                  _DevRoute(
+                    title: 'Splash Screen',
+                    subtitle: 'หน้า Splash (หน้าแรก)',
+                    path: AppRoutePath.root,
+                    icon: Icons.flash_on,
+                  ),
+                ],
+              ),
+
               const SizedBox(height: 24),
 
               // Auth Section
@@ -55,6 +71,22 @@ class DevScreen extends ConsumerWidget {
 
               const SizedBox(height: 20),
 
+              // Presentation Section
+              _DevSection(
+                title: '🎯 Dashboard',
+                color: Colors.purple,
+                routes: [
+                  _DevRoute(
+                    title: 'Dashboard',
+                    subtitle: 'หน้า Dashboard',
+                    path: AppRoutePath.dashboard,
+                    icon: Icons.home,
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
               // Profile Setup Section
               _DevSection(
                 title: '🔐 Profile Setup',
@@ -64,47 +96,25 @@ class DevScreen extends ConsumerWidget {
                     title: 'Profile Setup Screen',
                     subtitle: 'หน้าเริ่มต้นตั้งค่าโปรไฟล์',
                     path: AppRoutePath.profileSetup,
-                    icon: Icons.login,
+                    icon: Icons.verified_user_outlined,
                   ),
                   _DevRoute(
                     title: 'Profile Setup Step 1 Screen',
                     subtitle: 'หน้าตั้งค่าโปรไฟล์ขั้นตอนที่ 1',
                     path: AppRoutePath.profileSetupStep1,
-                    icon: Icons.login,
+                    icon: Icons.verified_user_outlined,
                   ),
                   _DevRoute(
                     title: 'Profile Setup Step 2 Screen',
                     subtitle: 'หน้าตั้งค่าโปรไฟล์ขั้นตอนที่ 2',
                     path: AppRoutePath.profileSetupStep2,
-                    icon: Icons.login,
+                    icon: Icons.verified_user_outlined,
                   ),
                   _DevRoute(
                     title: 'Profile Setup Step 3 Screen',
                     subtitle: 'หน้าตั้งค่าโปรไฟล์ขั้นตอนที่ 3',
                     path: AppRoutePath.profileSetupStep3,
-                    icon: Icons.login,
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // Presentation Section
-              _DevSection(
-                title: '🎯 Presentation',
-                color: Colors.purple,
-                routes: [
-                  _DevRoute(
-                    title: 'Splash Screen',
-                    subtitle: 'หน้า Splash (หน้าแรก)',
-                    path: AppRoutePath.root,
-                    icon: Icons.flash_on,
-                  ),
-                  _DevRoute(
-                    title: 'Onboarding',
-                    subtitle: 'หน้า Onboarding',
-                    path: AppRoutePath.onboarding,
-                    icon: Icons.swipe,
+                    icon: Icons.verified_user_outlined,
                   ),
                 ],
               ),
@@ -313,7 +323,7 @@ class _DevRouteCard extends ConsumerWidget {
               ? null
               : () {
                   try {
-                    context.pushReplacement(route.path);
+                    context.go(route.path);
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(

@@ -2,12 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hourz/features/dashboard/dashboard_routes.dart';
+import 'package:hourz/features/_example/example_routes.dart';
+import 'package:hourz/features/presentation/presentation_routes.dart';
+import 'package:hourz/features/auth/auth_routes.dart';
+import 'package:hourz/features/profile_setup/profile_setup_routes.dart';
+
 import '../constants/app_routes.dart';
 import '../screens/error_screen.dart';
-import '../../features/_example/example_routes.dart';
-import '../../features/presentation/presentation_routes.dart';
-import '../../features/auth/auth_routes.dart';
-import '../../features/profile_setup/profile_setup_routes.dart';
 import '../screens/dev_screen.dart';
 
 // Key สำหรับ Root Navigator (สำหรับ Full-screen, Overlay)
@@ -50,6 +52,9 @@ class AppRouter {
 
       // Profile Setup Feature Routes (Profile Setup, Step 1, Step 2, Step 3)
       ...profileSetupRoutes,
+
+      // Dashboard Feature Routes (Dashboard)
+      ...dashboardRoutes,
 
       // Future: ShellRoute สำหรับหน้าที่มี BottomNavigationBar
       // ShellRoute(
