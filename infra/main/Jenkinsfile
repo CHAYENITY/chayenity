@@ -225,7 +225,7 @@ except Exception as e:
                                                     echo "===== Pushing to Docker Registry ====="
                                                     
                                                     # Set your Docker Hub username here
-                                                    DOCKER_USER="your-docker-username"
+                                                    DOCKER_USER="psu6510110357"
                                                     
                                                     # Login using personal access token
                                                     echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin
