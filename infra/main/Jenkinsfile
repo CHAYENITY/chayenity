@@ -186,7 +186,7 @@ except Exception as e:
                                             dir('server') {
                                                 sh '''
                                                 echo "===== Building Docker Image ====="
-                                                sudo docker build -t chayenity-server:latest .
+                                                docker build -t chayenity-server:latest .
                                                 '''
                                             }
                                         }
@@ -197,9 +197,9 @@ except Exception as e:
                                             dir('server') {
                                                 sh '''
                                                 echo "===== Deploying Container ====="
-                                                sudo docker stop chayenity-server-container || true
-                                                sudo docker rm chayenity-server-container || true
-                                                sudo docker run -d --name chayenity-server-container -p 8000:8000 \
+                                                docker stop chayenity-server-container || true
+                                                docker rm chayenity-server-container || true
+                                                docker run -d --name chayenity-server-container -p 8000:8000 \
                                                     -e POSTGRES_SERVER=host.docker.internal \
                                                     -e POSTGRES_DB=chayenity \
                                                     -e POSTGRES_USER=postgres \
@@ -228,26 +228,26 @@ except Exception as e:
                                                     DOCKER_USER="your-docker-username"
                                                     
                                                     # Login using personal access token
-                                                    echo "$DOCKER_TOKEN" | sudo docker login -u "$DOCKER_USER" --password-stdin
+                                                    echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin
                                                     
                                                     # Create immutable tags (BUILD_NUMBER + git commit SHA)
                                                     IMAGE_TAG=${BUILD_NUMBER:-latest}
                                                     GIT_SHA=$(git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
                                                     
                                                     # Tag with build number
-                                                    sudo docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${IMAGE_TAG}
-                                                    sudo docker push $DOCKER_USER/chayenity-server:${IMAGE_TAG}
+                                                    docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${IMAGE_TAG}
+                                                    docker push $DOCKER_USER/chayenity-server:${IMAGE_TAG}
                                                     
                                                     # Tag with git commit SHA
-                                                    sudo docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${GIT_SHA}
-                                                    sudo docker push $DOCKER_USER/chayenity-server:${GIT_SHA}
+                                                    docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${GIT_SHA}
+                                                    docker push $DOCKER_USER/chayenity-server:${GIT_SHA}
                                                     
                                                     # Also push latest tag
-                                                    sudo docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:latest
-                                                    sudo docker push $DOCKER_USER/chayenity-server:latest
+                                                    docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:latest
+                                                    docker push $DOCKER_USER/chayenity-server:latest
                                                     
                                                     # Logout for security
-                                                    sudo docker logout
+                                                    docker logout
                                                     
                                                     echo "✅ Pushed images:"
                                                     echo "  - $DOCKER_USER/chayenity-server:${IMAGE_TAG}"
