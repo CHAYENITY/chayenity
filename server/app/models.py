@@ -38,25 +38,23 @@ class MessageType(str, enum.Enum):
 
 class Address(SQLModel, table=True):
     """Address information for users"""
-    
+
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     address_text: str  # Full address string
     district: str  # อำเภอ/เขต
     province: str  # จังหวัด
     postal_code: Optional[str] = None
     country: str = Field(default="Thailand")
-    
+
     # Location coordinates (GPS)
-    location: Optional[Any] = Field(
-        default=None, sa_column=Column(Geometry("POINT", srid=4326))
-    )
-    
+    location: Optional[Any] = Field(default=None, sa_column=Column(Geometry("POINT", srid=4326)))
+
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-    
+
     # Foreign Keys
     user_id: UUID = Field(foreign_key="user.id", index=True)
-    
+
     # Relationships
     user: "User" = Relationship(back_populates="addresses")
 
@@ -66,22 +64,22 @@ class User(SQLModel, table=True):
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     email: str = Field(unique=True, index=True)
-    hashed_password: str
-    
+    hashed_password: str = Field(nullable=False)
+
     # Profile fields (optional initially, completed in second step)
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     bio: Optional[str] = None  # แนะนำตัวเอง
-    
+
     # Contact information (optional initially)
     phone_number: Optional[str] = None  # เบอร์โทรศัพท์
     additional_contact: Optional[str] = None  # ช่องทางติดต่อเพิ่มเติม (LINE ID, etc.)
-    
+
     # Profile image
     profile_image_url: Optional[str] = None  # รูปประจำตัว
-    
+
     # Profile completion status
-    is_profile_complete: bool = Field(default=False)  # Track if user completed step 2
+    is_profile_setup: bool = Field(default=False)  # Track if user completed step 2
 
     # Helper availability
     is_available: bool = Field(default=False)  # Helper availability toggle
@@ -103,8 +101,8 @@ class User(SQLModel, table=True):
         first = self.first_name or ""
         last = self.last_name or ""
         return f"{first} {last}".strip() or "Incomplete Profile"
-    
-    @property 
+
+    @property
     def current_address(self) -> Optional["Address"]:
         """Get the most recent address"""
         if self.addresses:
@@ -346,7 +344,7 @@ class UserSession(SQLModel, table=True):
     🔐 Track active user sessions for enhanced security.
     Enables token rotation and session management.
     """
-    
+
     id: str = Field(default_factory=lambda: str(uuid4()), primary_key=True)
     user_id: str = Field(index=True)  # References User.id
     refresh_token_jti: str = Field(unique=True)  # JWT ID for refresh token
@@ -356,7 +354,7 @@ class UserSession(SQLModel, table=True):
     last_used: datetime = Field(default_factory=datetime.utcnow)
     expires_at: datetime  # Required - when session expires
     is_active: bool = Field(default=True)
-    
+
     # Optional security features
     login_location: Optional[str] = None  # City/Country
     is_suspicious: bool = Field(default=False)
@@ -367,7 +365,7 @@ class BlacklistedToken(SQLModel, table=True):
     🚫 Store blacklisted/revoked tokens for immediate invalidation.
     Critical for logout and security breaches.
     """
-    
+
     jti: str = Field(primary_key=True)  # JWT ID
     token_type: str  # 'access' or 'refresh'
     user_id: str = Field(index=True)  # References User.id

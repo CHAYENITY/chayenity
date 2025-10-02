@@ -5,48 +5,19 @@ from pydantic import (
     computed_field,
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
-import os
-from pathlib import Path
-
-
-# Ensure environment variables from .env are loaded into os.environ so
-# Pydantic Settings can pick them up when instantiating AppConfig. This is a
-# lightweight, dependency-free loader (avoids adding python-dotenv).
-def _load_dotenv_file(dotenv_path: str = ".env") -> None:
-    p = Path(dotenv_path)
-    if not p.exists():
-        return
-    for raw in p.read_text(encoding="utf-8").splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        if "=" not in line:
-            continue
-        key, val = line.split("=", 1)
-        key = key.strip()
-        val = val.strip().strip('"').strip("'")
-        # don't overwrite existing environment variables
-        if key not in os.environ:
-            os.environ[key] = val
-
-
-# load .env early
-_load_dotenv_file()
-
-# TODO: SETUP DB
 
 
 class AppConfig(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
 
-    ENVIRONMENT: Literal["local", "staging", "production", "test"] = "local"
+    ENVIRONMENT: Literal["local", "staging", "production"] = "local"
     PROJECT_NAME: str = "HOURZ"
     API_STR: str = "/api"
 
     REFRESH_SECRET_KEY: str = "refresh_secret_key"
-    REFRESH_TOKEN_EXPIRE: int = 10080  # 7 days (7 * 24 * 60 minutes)
+    REFRESH_TOKEN_EXPIRE: int = 10080
     ACCESS_SECRET_KEY: str = "access_secret_key"
-    ACCESS_TOKEN_EXPIRE: int = 30      # 30 minutes (SHORT-lived for security)
+    ACCESS_TOKEN_EXPIRE: int = 10080
     ALGORITHM: str = "HS256"
 
     FRONTEND_URL: str = ""

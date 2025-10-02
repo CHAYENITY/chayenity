@@ -4,6 +4,7 @@ import './color_schemas.dart';
 import './typography.dart';
 
 class AppTheme {
+  // AppTheme.richText!copyWith
   static TextStyle get richText => AppTypography.bodyMedium;
 
   static ThemeData get light => ThemeData(
@@ -49,6 +50,7 @@ class AppTheme {
         color: AppColors.mutedForeground,
         fontWeight: FontWeight.w500,
         fontFamily: AppTypography.fontFamily,
+        letterSpacing: 0,
       ),
       border: const UnderlineInputBorder(
         borderSide: BorderSide(color: AppColors.mutedForeground),

@@ -84,7 +84,7 @@ def custom_openapi():
     openapi_schema = get_openapi(
         title=app.title,
         version="1.0.0",
-        description="API for THAI TRAVEL CO PAY",
+        description="API for HOURZ",
         routes=app.routes,
     )
 
@@ -105,11 +105,11 @@ def custom_openapi():
 
     protected_access_token_paths = [
         f"{app_config.API_STR}/users/me",
+        f"{app_config.API_STR}/auth/profile-setup",
     ]
 
     protected_refresh_token_paths = [
-        f"{app_config.API_STR}/auth/pin",
-        f"{app_config.API_STR}/auth/pin",
+        f"{app_config.API_STR}/auth/refresh",
     ]
 
     for path, methods in openapi_schema["paths"].items():

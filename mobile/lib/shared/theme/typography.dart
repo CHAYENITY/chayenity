@@ -32,10 +32,11 @@ class AppTypography {
     letterSpacing: 0,
   );
 
+  // Theme.of(context).textTheme.headlineSmall
   static const TextStyle headlineSmall = TextStyle(
     fontFamily: fontFamily,
     fontSize: 18,
-    fontWeight: FontWeight.w500, // Medium
+    fontWeight: FontWeight.w600,
     color: AppColors.foreground,
     letterSpacing: 0,
   );

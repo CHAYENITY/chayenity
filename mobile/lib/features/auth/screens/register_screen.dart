@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hourz/shared/constants/app_routes.dart';
 
 import 'package:hourz/shared/providers/index.dart';
 import 'package:hourz/shared/widgets/custom_status_bar.dart';
@@ -54,8 +55,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     PrimaryButton(
                       text: 'สร้างบัญชี Hourz',
                       onPressed: formState.isValid
-                          ? () =>
-                                ref.read(registerFormProvider.notifier).submit()
+                          ? () async {
+                              final success = await ref
+                                  .read(registerFormProvider.notifier)
+                                  .submit();
+                              if (success && context.mounted) {
+                                context.go(AppRoutePath.login);
+                              }
+                            }
                           : null,
                       isLoading: isLoading,
                       isDisabled: !formState.isValid,

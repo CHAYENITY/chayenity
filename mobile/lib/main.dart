@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // * GLOBAL PROVIDERS
 import 'package:hourz/shared/providers/index.dart';
@@ -14,6 +15,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
+    // Load .env file
+    await dotenv.load(fileName: ".env");
     runApp(const ProviderScope(child: MainApp()));
   } catch (e) {
     runApp(ErrorScreen(error: e.toString()));

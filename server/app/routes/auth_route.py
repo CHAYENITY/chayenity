@@ -1,13 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
+# routes/auth_route.py
+import re
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional
-from jose import jwt, JWTError
-from datetime import datetime, timezone
-import uuid
 
 from app.models import User
-from app.schemas.user_schema import UserRegister, UserProfileSetup, UserOut
+from app.schemas.user_schema import UserCreate, UserOut, UserProfileSetup
 from app.crud import user_crud
 from app.database.session import get_db
 from app.security import (
@@ -15,27 +13,20 @@ from app.security import (
     verify_password,
     create_refresh_token,
     create_access_token,
-    create_refresh_token_with_jti,  # Enhanced version
-    create_access_token_with_jti,   # Enhanced version
     get_current_user_with_refresh_token,
     get_current_user_with_access_token,
-    check_refresh_rate_limit,       # Rate limiting
 )
-from app.configs.app_config import app_config
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
-async def register(user_register: UserRegister, db: AsyncSession = Depends(get_db)):
-    """
-    Step 1: Basic registration with email and password only.
-    User must complete profile setup in step 2.
-    """
-    existing_user_by_email = await user_crud.get_user_by_email(db, user_register.email)
+async def register(user_create: UserCreate, db: AsyncSession = Depends(get_db)):
+    existing_user_by_email = await user_crud.get_user_by_email(db, user_create.email)
     if existing_user_by_email:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
 
+<<<<<<< HEAD
     password_hash = get_password_hash(user_register.password)
     
     # Create user with minimal information (email + password only)
@@ -54,6 +45,53 @@ async def register(user_register: UserRegister, db: AsyncSession = Depends(get_d
         "email": user.email,
         "is_profile_complete": user.is_profile_complete,
         "created_at": user.created_at,
+=======
+    hashed_password = get_password_hash(user_create.password)
+    user = await user_crud.create_user(db, user_create, hashed_password)
+    # Override addresses to [] to avoid lazy loading error
+    return UserOut.model_validate({**user.__dict__, "addresses": []})
+
+
+@router.post("/login")
+async def login(
+    # * username = Email
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: AsyncSession = Depends(get_db),
+):
+    user: User | None = None
+    input_identifier = form_data.username.strip().lower()
+
+    # * Email
+    if re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", input_identifier):
+        user = await user_crud.get_user_by_email(db, input_identifier)
+
+    if not user or not verify_password(form_data.password, str(user.hashed_password)):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    refresh_token = create_refresh_token(data={"sub": str(user.id)})
+    access_token = create_access_token(data={"sub": str(user.id)})
+    return {
+        "refresh_token": refresh_token,
+        "access_token": access_token,
+        "token_type": "bearer",
+        "is_profile_setup": user.is_profile_setup
+    }
+
+
+@router.post("/refresh")
+async def refresh(
+    current_user: User = Depends(get_current_user_with_refresh_token),
+):
+
+    access_token = create_access_token(data={"sub": str(current_user.id)})
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+>>>>>>> 9fff0e8f0a89a3848658d096c2637bc1989b6fd8
     }
 
 
@@ -61,23 +99,19 @@ async def register(user_register: UserRegister, db: AsyncSession = Depends(get_d
 async def setup_profile(
     profile_setup: UserProfileSetup,
     current_user: User = Depends(get_current_user_with_access_token),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Step 2: Complete user profile setup after basic registration.
     This includes name, phone, bio, address, and profile image.
     """
-    if current_user.is_profile_complete:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Profile already completed"
-        )
-    
-    # Update user profile with complete information
-    updated_user = await user_crud.complete_user_profile(db, current_user.id, profile_setup)
-    
-    return updated_user
+    if current_user.is_profile_setup:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Profile already setup")
 
+    # Update user profile with complete information
+    await user_crud.create_user_profile(db, current_user.id, profile_setup)
+
+<<<<<<< HEAD
 
 @router.post("/login")
 async def login(
@@ -244,3 +278,6 @@ async def logout(
         "message": "Successfully logged out",
         "security_note": "All tokens for this session should be discarded"
     }
+=======
+    return UserOut.model_validate({**current_user.__dict__, "addresses": []})
+>>>>>>> 9fff0e8f0a89a3848658d096c2637bc1989b6fd8

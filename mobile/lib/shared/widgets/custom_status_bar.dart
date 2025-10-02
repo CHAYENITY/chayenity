@@ -13,9 +13,12 @@ class CustomStatusBar extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: statusBarColor ?? Colors.transparent,
-        statusBarIconBrightness: brightness == Brightness.dark
+        statusBarIconBrightness: brightness == Brightness.light
             ? Brightness.light
-            : Brightness.dark,
+            : Brightness.dark, // Android
+        statusBarBrightness: brightness == Brightness.light
+            ? Brightness.light
+            : Brightness.dark, // iOS
       ),
       child: child,
     );
