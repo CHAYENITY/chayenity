@@ -173,7 +173,7 @@ class _ProfileSetupStep3ScreenState
                         child: ElevatedButton(
                           onPressed: (isLoading || !_hasUploadedImage)
                               ? null
-                              : () => context.go(AppRoutePath.dashboard),
+                              : () => {context.go(AppRoutePath.dashboard)},
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                           ),

@@ -12,7 +12,6 @@ class AuthService {
   AuthService(this._apiService);
 
   Future<LoginResponse> login(LoginRequest request) async {
-    print('🔵 [AUTH_SERVICE] Logging in with: ${request.email}');
     return await _apiService.postForm(
       _loginEndpoint,
       request.toFormData(),
@@ -33,7 +32,6 @@ class AuthService {
   }
 
   Future<User> getCurrentUser() async {
-    print('🔵 [AUTH_SERVICE] Fetching current user from: $_meEndpoint');
     return await _apiService.get(_meEndpoint, User.fromJson);
   }
 
@@ -41,7 +39,6 @@ class AuthService {
     String refreshToken,
     String oldAccessToken,
   ) async {
-    print('🔵 [AUTH_SERVICE] Refreshing access token');
 
     // Set the refresh token as the Authorization header
     _apiService.setAuthToken(refreshToken);
@@ -52,10 +49,8 @@ class AuthService {
         {}, // Empty body as per API spec
         RefreshTokenResponse.fromJson,
       );
-      print('🟢 [AUTH_SERVICE] Token refresh successful');
       return response;
     } catch (e) {
-      print('🔴 [AUTH_SERVICE] Token refresh failed: $e');
       rethrow;
     }
   }

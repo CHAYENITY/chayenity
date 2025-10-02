@@ -3,15 +3,14 @@ import '../models/profile_setup_model.dart';
 
 class ProfileSetupService {
   final ApiService _apiService;
-  static const String _endpoint = '/auth/profile-setup';
+  static const String _endpoint = '/profile-setup';
 
   ProfileSetupService(this._apiService);
 
-  /// Submit profile setup using PUT method
   Future<ProfileSetupModel> submitProfile(ProfileSetupModel profile) async {
-    return await _apiService.updateProfile(
+    return await _apiService.create(
       _endpoint,
-      profile.toApiJson(),
+      profile.toCreateJson(),
       ProfileSetupModel.fromJson,
     );
   }

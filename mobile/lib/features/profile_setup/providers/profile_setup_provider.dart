@@ -20,16 +20,16 @@ class ProfileSetupNotifier extends StateNotifier<ProfileSetupModel> {
   void updateBasicInfo({
     String? firstName,
     String? lastName,
-    String? bio,
+    String? introduction,
     String? phoneNumber,
-    String? additionalContact,
+    String? socialContact,
   }) {
     state = state.copyWith(
       firstName: firstName ?? state.firstName,
       lastName: lastName ?? state.lastName,
-      bio: bio ?? state.bio,
+      introduction: introduction ?? state.introduction,
       phoneNumber: phoneNumber ?? state.phoneNumber,
-      additionalContact: additionalContact ?? state.additionalContact,
+      socialContact: socialContact ?? state.socialContact,
     );
   }
 
@@ -44,36 +44,24 @@ class ProfileSetupNotifier extends StateNotifier<ProfileSetupModel> {
   }
 
   // Step 2: Location
-  void updateAddress({
-    String? addressText,
+  void updateLocation({
     String? district,
     String? province,
-    String? postalCode,
-    String? country,
+    String? address,
     double? latitude,
     double? longitude,
   }) {
-    final currentAddress = state.address ?? const AddressModel();
-    final updatedAddress = currentAddress.copyWith(
-      addressText: addressText ?? currentAddress.addressText,
-      district: district ?? currentAddress.district,
-      province: province ?? currentAddress.province,
-      postalCode: postalCode ?? currentAddress.postalCode,
-      country: country ?? currentAddress.country,
-      latitude: latitude ?? currentAddress.latitude,
-      longitude: longitude ?? currentAddress.longitude,
+    state = state.copyWith(
+      district: district ?? state.district,
+      province: province ?? state.province,
+      address: address ?? state.address,
+      latitude: latitude ?? state.latitude,
+      longitude: longitude ?? state.longitude,
     );
-    state = state.copyWith(address: updatedAddress);
   }
 
   void confirmCurrentLocation(double latitude, double longitude) {
-    final currentAddress = state.address ?? const AddressModel();
-    state = state.copyWith(
-      address: currentAddress.copyWith(
-        latitude: latitude,
-        longitude: longitude,
-      ),
-    );
+    state = state.copyWith(latitude: latitude, longitude: longitude);
   }
 
   void completeStep2() {
