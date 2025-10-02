@@ -23,9 +23,7 @@ pipeline {
         /*
         stage('Checkout') {
             steps {
-                checkout([$class: 'GitSCM', 
-                          branches: [[name: '*/feat/CI-CD']], 
-                          userRemoteConfigs: [[url: 'https://github.com/CHAYENITY/hourz.git']]])
+                checkout scm
             }
         }
         */
@@ -38,7 +36,7 @@ pipeline {
                     python3 -m venv venv
                     . venv/bin/activate
                     pip install --upgrade pip
-                    pip install poetry
+                    pip install poetry pytest-cov
                     poetry config virtualenvs.create false
                     poetry install
 
@@ -161,9 +159,28 @@ except Exception as e:
     exit(1)
 " || exit 1
                     
-                    # Run tests
-                    #echo "=== Running Tests ==="
-                    #pytest app/tests/test_basic_models.py app/tests/test_buddy_endpoints.py app/tests/test_review_endpoints.py app/tests/test_security.py app/tests/test_transaction_endpoints.py app/tests/test_upload_system.py app/tests/test_websocket_integration.py --maxfail=1 --disable-warnings -q --cov=app --cov-report=xml
+                    # Run tests with coverage
+                    echo "=== Running Tests ==="
+                    pytest app/tests/test_basic_models.py \
+                           app/tests/test_buddy_endpoints.py \
+                           app/tests/test_review_endpoints.py \
+                           app/tests/test_security.py \
+                           app/tests/test_transaction_endpoints.py \
+                           app/tests/test_websocket_integration.py \
+                           --maxfail=1 \
+                           --disable-warnings \
+                           -v \
+                           --cov=app \
+                           --cov-report=xml:coverage.xml \
+                           --cov-report=term-missing
+                    
+                    # Verify coverage file was created
+                    if [ -f coverage.xml ]; then
+                        echo "✅ Coverage report generated successfully"
+                        ls -lh coverage.xml
+                    else
+                        echo "⚠️ Warning: coverage.xml not found"
+                    fi
                     '''
                 }
             }
@@ -175,9 +192,20 @@ except Exception as e:
                     withSonarQubeEnv('Sonarqube') {
                         sh '''
                         echo "===== Running SonarQube Analysis ====="
-                        java -version
-                        . venv/bin/activate
-                        sonar-scanner
+                        
+                        # Verify coverage file exists
+                        if [ ! -f coverage.xml ]; then
+                            echo "⚠️ Warning: coverage.xml not found, SonarQube will run without coverage data"
+                        else
+                            echo "✅ Found coverage.xml"
+                        fi
+                        
+                        # Run SonarQube scanner
+                        sonar-scanner \
+                            -Dsonar.projectKey=chayenity-server \
+                            -Dsonar.sources=app \
+                            -Dsonar.python.coverage.reportPaths=coverage.xml \
+                            -Dsonar.exclusions=**/*.pyc,**/.venv/**,**/venv/**,**/__pycache__/**,**/migrations/**,**/uploads/**,**/scripts/**
                         '''
                     }
                 }
@@ -278,7 +306,7 @@ except Exception as e:
             '''
             
             // Optional cleanup
-            // sh 'docker rmi fastapi-app:latest $DOCKER_USER/fastapi-app:latest || true'
+            // sh 'docker rmi chayenity-server:latest $DOCKER_USER/chayenity-server:latest || true'
         }
     }
 }
