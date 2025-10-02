@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hourz/features/auth/providers/auth_provider.dart';
 import 'package:hourz/shared/constants/assets.dart';
 import 'package:hourz/shared/constants/app_routes.dart';
 
@@ -35,7 +36,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
     );
 
-    // Start animation and navigate after delay
+    // Start animation and check authentication
     _startSplashSequence();
   }
 
@@ -43,12 +44,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     // Start animations
     _animationController.forward();
 
-    // Wait for splash duration
-    await Future.delayed(const Duration(seconds: 3));
+    // Wait for minimum splash duration (for branding)
+    await Future.delayed(const Duration(seconds: 2));
 
-    // Navigate to next screen
+    // Check authentication status
     if (mounted) {
-      context.go(AppRoutePath.dashboard); // Adjust route as needed
+      final route = await ref.read(authProvider.notifier).checkAuthStatus();
+
+      if (mounted) {
+        if (route == 'dashboard') {
+          context.go(AppRoutePath.dashboard);
+        } else if (route == 'profileSetup') {
+          context.go(AppRoutePath.profileSetup);
+        } else {
+          // No valid auth, go to login
+          context.go(AppRoutePath.login);
+        }
+      }
     }
   }
 

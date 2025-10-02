@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hourz/shared/constants/app_routes.dart';
 import 'package:hourz/shared/providers/index.dart';
 import 'package:hourz/shared/widgets/custom_status_bar.dart';
 import '../providers/auth_provider.dart';
@@ -52,7 +53,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     PrimaryButton(
                       text: 'เข้าสู่ระบบ',
                       onPressed: formState.isValid
-                          ? () => ref.read(loginFormProvider.notifier).submit()
+                          ? () async {
+                              print('🔵 [UI] Login button pressed');
+                              final isProfileSetup = await ref
+                                  .read(loginFormProvider.notifier)
+                                  .submit();
+                              print(
+                                '🔵 [UI] Login result - isProfileSetup: $isProfileSetup',
+                              );
+                              if (context.mounted) {
+                                if (isProfileSetup) {
+                                  print('🔵 [UI] Navigating to dashboard');
+                                  context.go(AppRoutePath.dashboard);
+                                } else {
+                                  print('🔵 [UI] Navigating to profile setup');
+                                  context.go(AppRoutePath.profileSetup);
+                                }
+                              }
+                            }
                           : null,
                       isLoading: isLoading,
                       isDisabled: !formState.isValid,

@@ -3,6 +3,7 @@
 
 // * Services
 export '../services/api_service.dart';
+export '../services/storage_service.dart';
 
 // * Providers
 export 'theme_provider.dart';

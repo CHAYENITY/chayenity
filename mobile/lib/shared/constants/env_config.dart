@@ -1,8 +1,13 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class EnvConfig {
-  static String get serverUrl =>
-      dotenv.env['SERVER_URL'] ?? _throwMissingEnvError(('SERVER_URL'));
+  static String get serverUrl {
+    final url = dotenv.env['SERVER_URL'];
+    if (url == null) {
+      return _throwMissingEnvError('SERVER_URL');
+    }
+    return url;
+  }
 
   static String _throwMissingEnvError(String key) {
     throw Exception(

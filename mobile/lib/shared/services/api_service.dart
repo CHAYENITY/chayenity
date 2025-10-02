@@ -10,39 +10,43 @@ class ApiService {
   final Logger _logger = Logger();
 
   ApiService() {
-    _dio = Dio(
-      BaseOptions(
-        baseUrl: ApiEndpoints.apiUrl,
-        connectTimeout: AppConfig.apiTimeout,
-        receiveTimeout: AppConfig.apiTimeout,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ),
-    );
+    try {
+      _dio = Dio(
+        BaseOptions(
+          baseUrl: ApiEndpoints.apiUrl,
+          connectTimeout: AppConfig.apiTimeout,
+          receiveTimeout: AppConfig.apiTimeout,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      );
 
-    // Add interceptor for logging
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) {
-          _logger.d('🔵 ${options.method} ${options.path}');
-          handler.next(options);
-        },
-        onResponse: (response, handler) {
-          _logger.d(
-            '🟢 ${response.statusCode} ${response.requestOptions.path}',
-          );
-          handler.next(response);
-        },
-        onError: (error, handler) {
-          _logger.e(
-            '🔴 ${error.response?.statusCode} ${error.requestOptions.path}',
-          );
-          handler.next(error);
-        },
-      ),
-    );
+      // Add interceptor for logging
+      _dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            _logger.d('🔵 ${options.method} ${options.baseUrl}${options.path}');
+            handler.next(options);
+          },
+          onResponse: (response, handler) {
+            _logger.d(
+              '🟢 ${response.statusCode} ${response.requestOptions.path}',
+            );
+            handler.next(response);
+          },
+          onError: (error, handler) {
+            _logger.e(
+              '🔴 ${error.response?.statusCode} ${error.requestOptions.path}: ${error.message}',
+            );
+            handler.next(error);
+          },
+        ),
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 
   /// Handle Dio errors and convert to ApiException
@@ -85,7 +89,22 @@ class ApiService {
     T Function(Map<String, dynamic>) fromJson,
   ) async {
     try {
-      final response = await _dio.get('$endpoint/$id');
+      final path = id.isEmpty ? endpoint : '$endpoint/$id';
+      final response = await _dio.get(path);
+      final Map<String, dynamic> data = response.data['data'] ?? response.data;
+      return fromJson(data);
+    } on DioException catch (error) {
+      throw _handleError(error);
+    }
+  }
+
+  /// GET - Single resource (no ID needed)
+  Future<T> get<T>(
+    String endpoint,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
+    try {
+      final response = await _dio.get(endpoint);
       final Map<String, dynamic> data = response.data['data'] ?? response.data;
       return fromJson(data);
     } on DioException catch (error) {
@@ -109,6 +128,26 @@ class ApiService {
     }
   }
 
+  /// POST - Form URL Encoded (for OAuth2)
+  Future<T> postForm<T>(
+    String endpoint,
+    Map<String, dynamic> data,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
+    try {
+      final response = await _dio.post(
+        endpoint,
+        data: data,
+        options: Options(contentType: Headers.formUrlEncodedContentType),
+      );
+      final Map<String, dynamic> responseData =
+          response.data['data'] ?? response.data;
+      return fromJson(responseData);
+    } on DioException catch (error) {
+      throw _handleError(error);
+    }
+  }
+
   /// PUT - Update
   Future<T> update<T>(
     String endpoint,
@@ -118,6 +157,22 @@ class ApiService {
   ) async {
     try {
       final response = await _dio.put('$endpoint/$id', data: data);
+      final Map<String, dynamic> responseData =
+          response.data['data'] ?? response.data;
+      return fromJson(responseData);
+    } on DioException catch (error) {
+      throw _handleError(error);
+    }
+  }
+
+  /// PUT - Update without ID (for endpoints that don't require ID in path)
+  Future<T> updateProfile<T>(
+    String endpoint,
+    Map<String, dynamic> data,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
+    try {
+      final response = await _dio.put(endpoint, data: data);
       final Map<String, dynamic> responseData =
           response.data['data'] ?? response.data;
       return fromJson(responseData);
