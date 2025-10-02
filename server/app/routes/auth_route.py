@@ -59,7 +59,6 @@ async def login(
         "access_token": access_token,
         "token_type": "bearer",
         "is_profile_setup": user.is_profile_setup
-        
     }
 
 
