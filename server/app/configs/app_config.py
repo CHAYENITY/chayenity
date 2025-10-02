@@ -10,7 +10,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class AppConfig(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
 
-    ENVIRONMENT: Literal["local", "staging", "production"] = "local"
+    ENVIRONMENT: Literal["local", "staging", "production", "test"] = "local"
     PROJECT_NAME: str = "HOURZ"
     API_STR: str = "/api"
 
