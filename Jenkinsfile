@@ -133,7 +133,7 @@ pipeline {
                         fi
 
                         sonar-scanner \
-                            -Dsonar.projectKey=chayenity-server \
+                            -Dsonar.projectKey=hours-server \
                             -Dsonar.sources=app \
                             -Dsonar.python.coverage.reportPaths=coverage.xml \
                             -Dsonar.exclusions=**/*.pyc,**/.venv/**,**/venv/**,**/__pycache__/**,**/migrations/**,**/uploads/**,**/scripts/**

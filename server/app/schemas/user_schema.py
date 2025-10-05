@@ -91,61 +91,6 @@ class AddressRead(AddressBase):
     user_id: UUID
 
 
-<<<<<<< HEAD
-# Base schema with common fields (excluding sensitive fields)
-class UserBase(SQLModel):
-    email: EmailStr
-    first_name: Optional[str] = None  # ชื่อ - Optional for two-step registration
-    last_name: Optional[str] = None   # นามสกุล - Optional for two-step registration
-    bio: Optional[str] = None  # แนะนำตัวเอง
-    phone_number: Optional[str] = None  # เบอร์โทรศัพท์ - Optional for two-step registration
-    additional_contact: Optional[str] = None  # ช่องทางติดต่อเพิ่มเติม (LINE ID, etc.)
-    is_profile_complete: bool = False  # Track if profile setup is complete
-
-
-# Schema for creating users (includes password and address)
-class UserCreate(UserBase):
-    password: str
-    address: Optional[AddressCreate] = None  # ตำแหน่งปัจจุบัน
-
-    @field_validator("email")
-    @classmethod
-    def validate_email(cls, v: Optional[str]) -> Optional[str]:
-        return v.strip().lower() if v else v
-
-    @field_validator("phone_number")
-    @classmethod
-    def validate_phone_number(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return None
-        # Allow Thai phone numbers and international format
-        if re.fullmatch(r"(\+66|0)[0-9]{8,9}", v) or re.fullmatch(r"\+[0-9]{10,15}", v):
-            return v.strip()
-        raise ValueError(
-            "Phone number must be a valid Thai number (+66xxxxxxxxx or 0xxxxxxxxx) or international format"
-        )
-
-    @field_validator("first_name")
-    @classmethod
-    def validate_first_name(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return None
-        if len(v.strip()) < 1:
-            raise ValueError("First name cannot be empty")
-        return v.strip()
-
-    @field_validator("last_name") 
-    @classmethod
-    def validate_last_name(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return None
-        if len(v.strip()) < 1:
-            raise ValueError("Last name cannot be empty")
-        return v.strip()
-
-
-=======
->>>>>>> 9fff0e8f0a89a3848658d096c2637bc1989b6fd8
 # Schema for returning user data (excludes sensitive fields)
 class UserOut(UserBase):
     id: UUID
