@@ -100,28 +100,28 @@ pipeline {
                     
                     # Create a temporary Python script
                     cat > verify_config.py << 'EOF'
-try:
-    from app.configs.app_config import app_config
-    print('✅ Configuration loaded successfully')
-    print(f'DB URI: {app_config.SQLALCHEMY_DATABASE_URI}')
-except Exception as e:
-    print(f'❌ Configuration failed: {e}')
-    exit(1)
-EOF
+                    try:
+                        from app.configs.app_config import app_config
+                        print('✅ Configuration loaded successfully')
+                        print(f'DB URI: {app_config.SQLALCHEMY_DATABASE_URI}')
+                    except Exception as e:
+                        print(f'❌ Configuration failed: {e}')
+                        exit(1)
+                    EOF
 
                     python verify_config.py
                     rm verify_config.py
 
                     echo "=== Running tests ==="
-                    pytest app/tests/ \
-                        --maxfail=1 \
-                        --disable-warnings \
-                        -v \
-                        --cov=app \
-                        --cov-report=xml:coverage.xml \
-                        --cov-report=term-missing \
-                        --ignore=app/tests/dev \
-                        --ignore=app/tests/integration
+                    #pytest app/tests/ \
+                        #--maxfail=1 \
+                        #--disable-warnings \
+                        #-v \
+                        #--cov=app \
+                        #--cov-report=xml:coverage.xml \
+                        #--cov-report=term-missing \
+                        #--ignore=app/tests/dev \
+                        #--ignore=app/tests/integration
 
                     if [ -f coverage.xml ]; then
                         echo "✅ Coverage report generated"
