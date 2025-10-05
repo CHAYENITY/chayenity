@@ -1,16 +1,12 @@
+// Jenkinsfile for CI/CD pipeline using Jenkins
 pipeline {
     agent any
 
     environment {
+        // SonarQube token (stored in Jenkins credentials)
         SONARQUBE = credentials('sonarqube_token')
-        // Database configuration for tests (matches app_config.py requirements)
-        POSTGRES_DB = 'chayenity_test'
-        POSTGRES_USER = 'postgres'
-        POSTGRES_PASSWORD = 'password'
-        POSTGRES_SERVER = 'localhost'  // Fixed: was POSTGRES_HOST, now POSTGRES_SERVER
-        POSTGRES_PORT = '5432'
         
-        // Additional required config variables
+        // Test secrets (safe for CI)
         REFRESH_SECRET_KEY = 'test_refresh_secret_key_for_ci'
         ACCESS_SECRET_KEY = 'test_access_secret_key_for_ci'
         FRONTEND_URL = 'http://localhost:3000'
@@ -18,17 +14,7 @@ pipeline {
     }
 
     stages {
-        // Checkout stage is automatic when using "Pipeline script from SCM"
-        // If using "Pipeline script" instead, uncomment the stage below:
-        /*
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-        */
-
-        stage('Setup Environment (Python)') {
+        stage('Setup Python Environment') {
             steps {
                 dir('server') {
                     sh '''
@@ -36,147 +22,73 @@ pipeline {
                     python3 -m venv venv
                     . venv/bin/activate
                     pip install --upgrade pip
-                    pip install poetry pytest-cov
+                    pip install poetry
                     poetry config virtualenvs.create false
                     poetry install
+                    pip install pytest-cov
 
-                    # Verify installations
-                    python -c "import sys; print(sys.version)"
-                    pip list
+                    echo "Python version: $(python --version)"
+                    pip list | grep -E "pytest|coverage"
                     '''
                 }
             }
         }
 
-        stage('Setup Test Database') {
+        stage('Configure Test Environment (SQLite)') {
             steps {
                 dir('server') {
                     sh '''
-                    echo "===== Setting up Test Database ====="
-                    
-                    # Option 1: Use SQLite for faster testing (recommended for CI)
-                    echo "Creating test configuration for SQLite..."
-                    cat > test.env << EOF
-ENVIRONMENT=test
-POSTGRES_SERVER=sqlite
-POSTGRES_DB=test.db
-POSTGRES_USER=test
-POSTGRES_PASSWORD=test
-POSTGRES_PORT=0
-REFRESH_SECRET_KEY=test_refresh_secret_key_for_ci
-ACCESS_SECRET_KEY=test_access_secret_key_for_ci
-FRONTEND_URL=http://localhost:3000
-BACKEND_URL=http://localhost:8000
-EOF
+                    echo "===== Configuring SQLite for tests ====="
+                    cat > .env << EOF
+                    ENVIRONMENT=test
+                    POSTGRES_SERVER=sqlite
+                    POSTGRES_DB=test.db
+                    POSTGRES_USER=test
+                    POSTGRES_PASSWORD=test
+                    POSTGRES_PORT=0
+                    REFRESH_SECRET_KEY=test_refresh_secret_key_for_ci
+                    ACCESS_SECRET_KEY=test_access_secret_key_for_ci
+                    FRONTEND_URL=http://localhost:3000
+                    BACKEND_URL=http://localhost:8000
+                    EOF
 
-                    # Option 2: Start PostgreSQL container (backup option)
-                    echo "Starting PostgreSQL container as backup..."
-                    docker run -d --name postgres-test \
-                        -e POSTGRES_USER=postgres \
-                        -e POSTGRES_PASSWORD=password \
-                        -e POSTGRES_DB=chayenity_test \
-                        -p 5433:5432 \
-                        postgres:13 || echo "PostgreSQL container start failed, will use SQLite"
-                    
-                    # Wait a bit for PostgreSQL
-                    sleep 5
-                    
-                    # Test PostgreSQL connectivity
-                    if docker exec postgres-test pg_isready -U postgres 2>/dev/null; then
-                        echo "PostgreSQL is ready! Using PostgreSQL for tests."
-                        cat > .env << EOF
-ENVIRONMENT=test
-POSTGRES_SERVER=localhost
-POSTGRES_DB=chayenity_test
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=password
-POSTGRES_PORT=5433
-REFRESH_SECRET_KEY=test_refresh_secret_key_for_ci
-ACCESS_SECRET_KEY=test_access_secret_key_for_ci
-FRONTEND_URL=http://localhost:3000
-BACKEND_URL=http://localhost:8000
-EOF
-                    else
-                        echo "PostgreSQL not available, using SQLite for tests."
-                        cp test.env .env
-                    fi
-                    
-                    echo "Final .env configuration:"
+                    echo "Final .env:"
                     cat .env
                     '''
                 }
             }
         }
 
-        stage('Run Tests & Coverage') {
-            environment {
-                // Set environment variables at stage level for better isolation
-                POSTGRES_SERVER = 'localhost'
-                POSTGRES_DB = 'chayenity_test'
-                POSTGRES_USER = 'postgres'
-                POSTGRES_PASSWORD = 'password'
-                POSTGRES_PORT = '5432'
-                REFRESH_SECRET_KEY = 'test_refresh_secret_key_for_ci'
-                ACCESS_SECRET_KEY = 'test_access_secret_key_for_ci'
-                FRONTEND_URL = 'http://localhost:3000'
-                BACKEND_URL = 'http://localhost:8000'
-                ENVIRONMENT = 'test'  // Now supported in app_config.py
-            }
+        stage('Run Tests & Generate Coverage') {
             steps {
                 dir('server') {
                     sh '''
-                    echo "===== Running Tests ====="
                     . venv/bin/activate
-                    
-                    # Simple approach: Create minimal .env file
-                    cat > .env << 'EOF'
-ENVIRONMENT=test
-POSTGRES_SERVER=localhost
-POSTGRES_DB=chayenity_test
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=password
-POSTGRES_PORT=5432
-REFRESH_SECRET_KEY=test_refresh_secret_key_for_ci
-ACCESS_SECRET_KEY=test_access_secret_key_for_ci
-FRONTEND_URL=http://localhost:3000
-BACKEND_URL=http://localhost:8000
-EOF
-                    
-                    echo "=== Environment Check ==="
-                    echo "POSTGRES_SERVER: $POSTGRES_SERVER"
-                    echo "POSTGRES_DB: $POSTGRES_DB"
-                    cat .env
-                    
-                    # Quick app_config test
-                    echo "=== Testing Configuration Loading ==="
+
+                    echo "=== Verifying configuration ==="
                     python -c "
-try:
-    from app.configs.app_config import app_config
-    print('✅ Configuration loaded successfully')
-    print(f'DB URI: {app_config.SQLALCHEMY_DATABASE_URI}')
-except Exception as e:
-    print(f'❌ Configuration failed: {e}')
-    exit(1)
-" || exit 1
-                    
-                    # Run tests with coverage
-                    echo "=== Running Tests ==="
-                    pytest app/tests/test_basic_models.py \
-                           app/tests/test_buddy_endpoints.py \
-                           app/tests/test_review_endpoints.py \
-                           app/tests/test_security.py \
-                           app/tests/test_transaction_endpoints.py \
-                           app/tests/test_websocket_integration.py \
-                           --maxfail=1 \
-                           --disable-warnings \
-                           -v \
-                           --cov=app \
-                           --cov-report=xml:coverage.xml \
-                           --cov-report=term-missing
-                    
-                    # Verify coverage file was created
+                    try:
+                        from app.configs.app_config import app_config
+                        print('✅ Configuration loaded successfully')
+                        print(f'DB URI: {app_config.SQLALCHEMY_DATABASE_URI}')
+                    except Exception as e:
+                        print(f'❌ Configuration failed: {e}')
+                        exit(1)
+                    "
+
+                    echo "=== Running tests ==="
+                    pytest app/tests/ \
+                        --maxfail=1 \
+                        --disable-warnings \
+                        -v \
+                        --cov=app \
+                        --cov-report=xml:coverage.xml \
+                        --cov-report=term-missing \
+                        --ignore=app/tests/dev \
+                        --ignore=app/tests/integration
+
                     if [ -f coverage.xml ]; then
-                        echo "✅ Coverage report generated successfully"
+                        echo "✅ Coverage report generated"
                         ls -lh coverage.xml
                     else
                         echo "⚠️ Warning: coverage.xml not found"
@@ -191,16 +103,10 @@ except Exception as e:
                 dir('server') {
                     withSonarQubeEnv('Sonarqube') {
                         sh '''
-                        echo "===== Running SonarQube Analysis ====="
-                        
-                        # Verify coverage file exists
                         if [ ! -f coverage.xml ]; then
-                            echo "⚠️ Warning: coverage.xml not found, SonarQube will run without coverage data"
-                        else
-                            echo "✅ Found coverage.xml"
+                            echo "⚠️ No coverage.xml — SonarQube will run without coverage"
                         fi
-                        
-                        # Run SonarQube scanner
+
                         sonar-scanner \
                             -Dsonar.projectKey=chayenity-server \
                             -Dsonar.sources=app \
@@ -212,10 +118,11 @@ except Exception as e:
             }
         }
 
-        // ===== DEPLOYMENT STAGES =====
-        // Uncomment or enable these stages when you want to run automated deployment
-
+        // ===== DEPLOYMENT STAGES (only on main branch) =====
         stage('Build Docker Image') {
+            when {
+                branch 'main'
+            }
             steps {
                 dir('server') {
                     sh '''
@@ -226,29 +133,10 @@ except Exception as e:
             }
         }
 
-        stage('Deploy Container') {
-            steps {
-                dir('server') {
-                    sh '''
-                    echo "===== Deploying Container ====="
-                    docker stop chayenity-server-container || true
-                    docker rm chayenity-server-container || true
-                    docker run -d --name chayenity-server-container -p 8000:8000 \
-                        -e POSTGRES_SERVER=host.docker.internal \
-                        -e POSTGRES_DB=chayenity \
-                        -e POSTGRES_USER=postgres \
-                        -e POSTGRES_PASSWORD=password \
-                        -e REFRESH_SECRET_KEY=production_refresh_secret \
-                        -e ACCESS_SECRET_KEY=production_access_secret \
-                        -e FRONTEND_URL=http://localhost:3000 \
-                        -e BACKEND_URL=http://localhost:8000 \
-                        chayenity-server:latest
-                    '''
-                }
+        stage('Push to Docker Registry') {
+            when {
+                branch 'main'
             }
-        }
-
-        stage('Push to Registry') {
             steps {
                 dir('server') {
                     withCredentials([string(
@@ -256,33 +144,24 @@ except Exception as e:
                         variable: 'DOCKER_TOKEN'
                     )]) {
                         sh '''
-                        echo "===== Pushing to Docker Registry ====="
-                        
-                        # Set your Docker Hub username here
-                        DOCKER_USER="psu6510110357"
-                        
-                        # Login using personal access token
+                        DOCKER_USER="${DOCKER_HUB_USER:-psu6510110357}"
+
                         echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin
-                        
-                        # Create immutable tags (BUILD_NUMBER + git commit SHA)
+
                         IMAGE_TAG=${BUILD_NUMBER:-latest}
                         GIT_SHA=$(git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
-                        
-                        # Tag with build number
+
                         docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${IMAGE_TAG}
                         docker push $DOCKER_USER/chayenity-server:${IMAGE_TAG}
-                        
-                        # Tag with git commit SHA
+
                         docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${GIT_SHA}
                         docker push $DOCKER_USER/chayenity-server:${GIT_SHA}
-                        
-                        # Also push latest tag
+
                         docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:latest
                         docker push $DOCKER_USER/chayenity-server:latest
-                        
-                        # Logout for security
+
                         docker logout
-                        
+
                         echo "✅ Pushed images:"
                         echo "  - $DOCKER_USER/chayenity-server:${IMAGE_TAG}"
                         echo "  - $DOCKER_USER/chayenity-server:${GIT_SHA}"
@@ -292,21 +171,39 @@ except Exception as e:
                 }
             }
         }
+
+        // Optional: Uncomment if you want to deploy to a test server on main
+        /*
+        stage('Deploy Container') {
+            when {
+                branch 'main'
+            }
+            steps {
+                sh '''
+                docker stop chayenity-server-container || true
+                docker rm chayenity-server-container || true
+                docker run -d --name chayenity-server-container -p 8000:8000 \
+                    -e POSTGRES_SERVER=host.docker.internal \
+                    -e POSTGRES_DB=chayenity \
+                    -e POSTGRES_USER=postgres \
+                    -e POSTGRES_PASSWORD=password \
+                    -e REFRESH_SECRET_KEY=production_refresh_secret \
+                    -e ACCESS_SECRET_KEY=production_access_secret \
+                    -e FRONTEND_URL=http://localhost:3000 \
+                    -e BACKEND_URL=http://localhost:8000 \
+                    chayenity-server:latest
+                '''
+            }
+        }
+        */
     }
 
     post {
         always {
-            echo "Pipeline execution finished."
-            
-            // Cleanup test database
-            sh '''
-            echo "===== Cleaning up test database ====="
-            docker stop postgres-test || true
-            docker rm postgres-test || true
-            '''
-            
-            // Optional cleanup
-            // sh 'docker rmi chayenity-server:latest $DOCKER_USER/chayenity-server:latest || true'
+            echo "Pipeline finished. Cleaning up..."
+            // Clean up any leftover test containers (if you ever re-enable them)
+            sh 'docker stop postgres-test 2>/dev/null || true'
+            sh 'docker rm postgres-test 2>/dev/null || true'
         }
     }
 }
