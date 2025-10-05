@@ -118,7 +118,7 @@ EOF
                     python verify_config.py
                     rm verify_config.py
 
-                    echo "=== Running tests ==="
+                    #echo "=== Running tests ==="
                     #pytest app/tests/ \
                         #--maxfail=1 \
                         #--disable-warnings \
