@@ -173,8 +173,12 @@ EOF
                     TEMP_DIR="/tmp/chayenity-build-$(date +%s)"
                     mkdir -p "$TEMP_DIR"
                     
-                    # Copy files using cp with exclude patterns
-                    find . -mindepth 1 -maxdepth 1 -not -name '.' -not -name 'chayenity-server-source-*.tar.gz' -exec cp -r {} "$TEMP_DIR/" \;
+                    # Copy all files to temp directory (excluding the archive itself)
+                    for item in *; do
+                        if [ "$item" != "chayenity-server-source-*.tar.gz" ]; then
+                            cp -r "$item" "$TEMP_DIR/"
+                        fi
+                    done
                     
                     # Remove excluded directories/files from temp directory
                     find "$TEMP_DIR" -name "*.pyc" -delete
