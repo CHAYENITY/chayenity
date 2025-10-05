@@ -1,4 +1,3 @@
-// Jenkinsfile for CI/CD pipeline using Jenkins
 pipeline {
     agent any
 
@@ -27,7 +26,7 @@ pipeline {
             }
         }
 
-    stage('Setup Python Environment') {
+        stage('Setup Python Environment') {
             steps {
                 dir('server') {
                     sh '''
@@ -43,7 +42,6 @@ pipeline {
                     echo "===== Checking and updating poetry.lock ====="
                     if [ -f poetry.lock ]; then
                         echo "poetry.lock exists, checking if it needs update..."
-                        # Try to install first, if it fails due to lock file issues, regenerate
                         if poetry install; then
                             echo "✅ Dependencies installed successfully"
                         else
@@ -95,43 +93,43 @@ pipeline {
         stage('Run Tests & Generate Coverage') {
             steps {
                 dir('server') {
-            sh '''
-            . venv/bin/activate
+                    sh '''
+                    . venv/bin/activate
 
-            echo "=== Verifying configuration ==="
-            
-            # Create a temporary Python script
-            cat > verify_config.py << 'EOF'
-            try:
-                from app.configs.app_config import app_config
-                print('✅ Configuration loaded successfully')
-                print(f'DB URI: {app_config.SQLALCHEMY_DATABASE_URI}')
-            except Exception as e:
-                print(f'❌ Configuration failed: {e}')
-                exit(1)
-            EOF
+                    echo "=== Verifying configuration ==="
+                    
+                    # Create a temporary Python script
+                    cat > verify_config.py << 'EOF'
+try:
+    from app.configs.app_config import app_config
+    print('✅ Configuration loaded successfully')
+    print(f'DB URI: {app_config.SQLALCHEMY_DATABASE_URI}')
+except Exception as e:
+    print(f'❌ Configuration failed: {e}')
+    exit(1)
+EOF
 
-            python verify_config.py
-            rm verify_config.py
+                    python verify_config.py
+                    rm verify_config.py
 
-            echo "=== Running tests ==="
-            pytest app/tests/ \
-                --maxfail=1 \
-                --disable-warnings \
-                -v \
-                --cov=app \
-                --cov-report=xml:coverage.xml \
-                --cov-report=term-missing \
-                --ignore=app/tests/dev \
-                --ignore=app/tests/integration
+                    echo "=== Running tests ==="
+                    pytest app/tests/ \
+                        --maxfail=1 \
+                        --disable-warnings \
+                        -v \
+                        --cov=app \
+                        --cov-report=xml:coverage.xml \
+                        --cov-report=term-missing \
+                        --ignore=app/tests/dev \
+                        --ignore=app/tests/integration
 
-            if [ -f coverage.xml ]; then
-                echo "✅ Coverage report generated"
-                ls -lh coverage.xml
-            else
-                echo "⚠️ Warning: coverage.xml not found"
-            fi
-            '''
+                    if [ -f coverage.xml ]; then
+                        echo "✅ Coverage report generated"
+                        ls -lh coverage.xml
+                    else
+                        echo "⚠️ Warning: coverage.xml not found"
+                    fi
+                    '''
                 }
             }
         }
@@ -159,81 +157,71 @@ pipeline {
         // ===== DEPLOYMENT STAGES (only on main branch) =====
         stage('Build Docker Image') {
             when {
-                branch 'feat/CI-CD'
+                anyOf {
+                    branch 'main'
+                    branch 'feat/CI-CD'
+                    branch 'feature/*'
+                }
             }
             steps {
                 dir('server') {
-                    sh '''
-                    echo "===== Building Docker Image ====="
-                    docker.build('chayenity-server:latest', '.')
-                    '''
+                    script {
+                        // Build Docker image using Jenkins Docker plugin
+                        def serverImage = docker.build('chayenity-server:latest', '.')
+                        // Store image in Jenkins environment for later use
+                        env.BUILT_IMAGE_ID = serverImage.id
+                    }
                 }
             }
         }
 
         stage('Push to Docker Registry') {
             when {
-                branch 'feat/CI-CD'
+                anyOf {
+                    branch 'main'
+                    branch 'feat/CI-CD'
+                    branch 'feature/*'
+                }
             }
             steps {
                 dir('server') {
-                    withCredentials([string(
-                        credentialsId: 'dockerhub-token',
-                        variable: 'DOCKER_TOKEN'
-                    )]) {
-                        sh '''
-                        DOCKER_USER="${DOCKER_HUB_USER:-psu6510110357}"
-
-                        echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin
-
-                        IMAGE_TAG=${BUILD_NUMBER:-latest}
-                        GIT_SHA=$(git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
-
-                        docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${IMAGE_TAG}
-                        docker push $DOCKER_USER/chayenity-server:${IMAGE_TAG}
-
-                        docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${GIT_SHA}
-                        docker push $DOCKER_USER/chayenity-server:${GIT_SHA}
-
-                        docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:latest
-                        docker push $DOCKER_USER/chayenity-server:latest
-
-                        docker logout
-
-                        echo "✅ Pushed images:"
-                        echo "  - $DOCKER_USER/chayenity-server:${IMAGE_TAG}"
-                        echo "  - $DOCKER_USER/chayenity-server:${GIT_SHA}"
-                        echo "  - $DOCKER_USER/chayenity-server:latest"
-                        '''
+                    script {
+                        // Load the built image
+                        def serverImage = docker.image('chayenity-server:latest')
+                        
+                        withCredentials([string(
+                            credentialsId: 'dockerhub-token',
+                            variable: 'DOCKER_TOKEN'
+                        )]) {
+                            // Login to Docker Hub
+                            sh """
+                            echo "$DOCKER_TOKEN" | docker login -u '${env.DOCKER_HUB_USER ?: "psu6510110357"}' --password-stdin
+                            """
+                            
+                            // Get build info
+                            def imageTag = env.BUILD_NUMBER ?: 'latest'
+                            def gitSha = sh(
+                                script: 'git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown"',
+                                returnStdout: true
+                            ).trim()
+                            
+                            // Tag and push images
+                            serverImage.push(imageTag)
+                            serverImage.push(gitSha)
+                            serverImage.push('latest')
+                            
+                            // Logout
+                            sh 'docker logout'
+                            
+                            echo "✅ Pushed images:"
+                            echo "  - ${env.DOCKER_HUB_USER ?: "psu6510110357"}/chayenity-server:${imageTag}"
+                            echo "  - ${env.DOCKER_HUB_USER ?: "psu6510110357"}/chayenity-server:${gitSha}"
+                            echo "  - ${env.DOCKER_HUB_USER ?: "psu6510110357"}/chayenity-server:latest"
+                        }
                     }
                 }
             }
         }
-
-        // Optional: Uncomment if you want to deploy to a test server on main
-        /*
-        stage('Deploy Container') {
-            when {
-                branch 'main'
-            }
-            steps {
-                sh '''
-                docker stop chayenity-server-container || true
-                docker rm chayenity-server-container || true
-                docker run -d --name chayenity-server-container -p 8000:8000 \
-                    -e POSTGRES_SERVER=host.docker.internal \
-                    -e POSTGRES_DB=chayenity \
-                    -e POSTGRES_USER=postgres \
-                    -e POSTGRES_PASSWORD=password \
-                    -e REFRESH_SECRET_KEY=production_refresh_secret \
-                    -e ACCESS_SECRET_KEY=production_access_secret \
-                    -e FRONTEND_URL=http://localhost:3000 \
-                    -e BACKEND_URL=http://localhost:8000 \
-                    chayenity-server:latest
-                '''
-            }
-        }
-        */
     }
 
     post {
