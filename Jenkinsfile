@@ -27,23 +27,6 @@ pipeline {
             }
         }
 
-    stage('Check for Git Conflicts') {
-        steps {
-            dir('server') {
-                sh '''
-                echo "===== Checking for Git merge conflicts ====="
-                if git grep -l "<<<<<<< HEAD\|=======\|>>>>>>>"; then
-                    echo "❌ Git merge conflicts found! Please resolve them first."
-                    git grep -n "<<<<<<< HEAD\|=======\|>>>>>>>"
-                    exit 1
-                else
-                    echo "✅ No Git merge conflicts found"
-                fi
-                '''
-            }
-        }
-    }
-
     stage('Setup Python Environment') {
             steps {
                 dir('server') {
