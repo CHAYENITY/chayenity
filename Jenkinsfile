@@ -78,7 +78,7 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Run Tests & Generate Coverage') {
             steps {
                 dir('server') {
