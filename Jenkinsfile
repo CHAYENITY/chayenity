@@ -146,7 +146,7 @@ pipeline {
         // ===== DEPLOYMENT STAGES (only on main branch) =====
         stage('Build Docker Image') {
             when {
-                branch 'main'
+                branch 'feat/CI-CD'
             }
             steps {
                 dir('server') {
@@ -160,7 +160,7 @@ pipeline {
 
         stage('Push to Docker Registry') {
             when {
-                branch 'main'
+                branch 'feat/CI-CD'
             }
             steps {
                 dir('server') {
