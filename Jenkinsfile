@@ -158,7 +158,9 @@ EOF
         stage('Build Artifacts') {
             when {
                 anyOf {
+                    branch 'main'
                     branch 'feat/CI-CD'
+                    branch 'feature/*'
                 }
             }
             steps {
@@ -167,8 +169,12 @@ EOF
                     echo "===== Creating deployment artifacts ====="
                     echo "Branch: $BRANCH_NAME"
                     
-                    # Create a zip/tar of the source code for deployment
-                    tar -czf chayenity-server-source-$(git rev-parse --short=8 HEAD).tar.gz \
+                    # Create a temp directory to avoid self-inclusion issues
+                    TEMP_DIR="/tmp/chayenity-build-$(date +%s)"
+                    mkdir -p "$TEMP_DIR"
+                    
+                    # Copy files to temp directory (excluding problematic ones)
+                    rsync -av \
                         --exclude='*.pyc' \
                         --exclude='.git' \
                         --exclude='.venv' \
@@ -178,7 +184,16 @@ EOF
                         --exclude='.pytest_cache' \
                         --exclude='htmlcov' \
                         --exclude='*.egg-info' \
-                        .
+                        --exclude='chayenity-server-source-*.tar.gz' \
+                        . "$TEMP_DIR/"
+                    
+                    # Create the archive from temp directory
+                    cd "$TEMP_DIR"
+                    tar -czf "../chayenity-server-source-$(git rev-parse --short=8 HEAD).tar.gz" .
+                    cd -
+                    
+                    # Clean up temp directory
+                    rm -rf "$TEMP_DIR"
                     
                     echo "✅ Created deployment archive"
                     ls -lh chayenity-server-source-*.tar.gz
@@ -190,7 +205,9 @@ EOF
         stage('Prepare for Docker Build (External)') {
             when {
                 anyOf {
+                    branch 'main'
                     branch 'feat/CI-CD'
+                    branch 'feature/*'
                 }
             }
             steps {
