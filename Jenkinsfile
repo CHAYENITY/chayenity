@@ -25,20 +25,25 @@ pipeline {
                     pip install poetry
                     poetry config virtualenvs.create false
                     
-                    echo "===== Syncing poetry.lock with pyproject.toml ====="
+                    echo "===== Poetry version: $(poetry --version) ====="
+                    
+                    echo "===== Checking and updating poetry.lock ====="
                     if [ -f poetry.lock ]; then
-                        echo "Checking if poetry.lock is in sync..."
-                        if ! poetry lock --check; then
-                            echo "poetry.lock is out of sync, regenerating..."
-                            poetry lock --no-update
+                        echo "poetry.lock exists, checking if it needs update..."
+                        # Try to install first, if it fails due to lock file issues, regenerate
+                        if poetry install; then
+                            echo "✅ Dependencies installed successfully"
+                        else
+                            echo "⚠️ Install failed, regenerating lock file..."
+                            poetry lock
+                            poetry install
                         fi
                     else
                         echo "poetry.lock not found, generating..."
                         poetry lock
+                        poetry install
                     fi
                     
-                    echo "===== Installing dependencies ====="
-                    poetry install
                     pip install pytest-cov
 
                     echo "Python version: $(python --version)"
