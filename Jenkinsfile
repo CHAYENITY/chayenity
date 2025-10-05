@@ -165,7 +165,7 @@ pipeline {
                 dir('server') {
                     sh '''
                     echo "===== Building Docker Image ====="
-                    docker build -t chayenity-server:latest .
+                    docker.build('chayenity-server:latest', '.')
                     '''
                 }
             }
