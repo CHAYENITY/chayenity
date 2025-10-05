@@ -24,11 +24,26 @@ pipeline {
                     pip install --upgrade pip
                     pip install poetry
                     poetry config virtualenvs.create false
+                    
+                    echo "===== Syncing poetry.lock with pyproject.toml ====="
+                    if [ -f poetry.lock ]; then
+                        echo "Checking if poetry.lock is in sync..."
+                        if ! poetry lock --check; then
+                            echo "poetry.lock is out of sync, regenerating..."
+                            poetry lock --no-update
+                        fi
+                    else
+                        echo "poetry.lock not found, generating..."
+                        poetry lock
+                    fi
+                    
+                    echo "===== Installing dependencies ====="
                     poetry install
                     pip install pytest-cov
 
                     echo "Python version: $(python --version)"
-                    pip list | grep -E "pytest|coverage"
+                    echo "Poetry version: $(poetry --version)"
+                    pip list | grep -E "pytest|coverage|poetry"
                     '''
                 }
             }
