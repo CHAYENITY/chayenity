@@ -100,14 +100,14 @@ pipeline {
                     
                     # Create a temporary Python script
                     cat > verify_config.py << 'EOF'
-                    try:
-                        from app.configs.app_config import app_config
-                        print('✅ Configuration loaded successfully')
-                        print(f'DB URI: {app_config.SQLALCHEMY_DATABASE_URI}')
-                    except Exception as e:
-                        print(f'❌ Configuration failed: {e}')
-                        exit(1)
-                    EOF
+try:
+    from app.configs.app_config import app_config
+    print('✅ Configuration loaded successfully')
+    print(f'DB URI: {app_config.SQLALCHEMY_DATABASE_URI}')
+except Exception as e:
+    print(f'❌ Configuration failed: {e}')
+    exit(1)
+EOF
 
                     python verify_config.py
                     rm verify_config.py
@@ -154,71 +154,78 @@ pipeline {
             }
         }
 
-        // ===== DEPLOYMENT STAGES (only on main branch) =====
-        stage('Build Docker Image') {
+        // ===== DEPLOYMENT PREPARATION STAGES (only on main branch) =====
+        stage('Build Artifacts') {
             when {
                 anyOf {
-                    branch 'main'
                     branch 'feat/CI-CD'
-                    branch 'feature/*'
                 }
             }
             steps {
                 dir('server') {
-                    script {
-                        // Build Docker image using Jenkins Docker plugin
-                        def serverImage = docker.build('chayenity-server:latest', '.')
-                        // Store image in Jenkins environment for later use
-                        env.BUILT_IMAGE_ID = serverImage.id
-                    }
+                    sh '''
+                    echo "===== Creating deployment artifacts ====="
+                    echo "Branch: $BRANCH_NAME"
+                    
+                    # Create a zip/tar of the source code for deployment
+                    tar -czf chayenity-server-source-$(git rev-parse --short=8 HEAD).tar.gz \
+                        --exclude='*.pyc' \
+                        --exclude='.git' \
+                        --exclude='.venv' \
+                        --exclude='__pycache__' \
+                        --exclude='*.log' \
+                        --exclude='node_modules' \
+                        --exclude='.pytest_cache' \
+                        --exclude='htmlcov' \
+                        --exclude='*.egg-info' \
+                        .
+                    
+                    echo "✅ Created deployment archive"
+                    ls -lh chayenity-server-source-*.tar.gz
+                    '''
                 }
             }
         }
 
-        stage('Push to Docker Registry') {
+        stage('Prepare for Docker Build (External)') {
             when {
                 anyOf {
-                    branch 'main'
                     branch 'feat/CI-CD'
-                    branch 'feature/*'
                 }
             }
             steps {
                 dir('server') {
-                    script {
-                        // Load the built image
-                        def serverImage = docker.image('chayenity-server:latest')
-                        
-                        withCredentials([string(
-                            credentialsId: 'dockerhub-token',
-                            variable: 'DOCKER_TOKEN'
-                        )]) {
-                            // Login to Docker Hub
-                            sh """
-                            echo "$DOCKER_TOKEN" | docker login -u '${env.DOCKER_HUB_USER ?: "psu6510110357"}' --password-stdin
-                            """
-                            
-                            // Get build info
-                            def imageTag = env.BUILD_NUMBER ?: 'latest'
-                            def gitSha = sh(
-                                script: 'git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown"',
-                                returnStdout: true
-                            ).trim()
-                            
-                            // Tag and push images
-                            serverImage.push(imageTag)
-                            serverImage.push(gitSha)
-                            serverImage.push('latest')
-                            
-                            // Logout
-                            sh 'docker logout'
-                            
-                            echo "✅ Pushed images:"
-                            echo "  - ${env.DOCKER_HUB_USER ?: "psu6510110357"}/chayenity-server:${imageTag}"
-                            echo "  - ${env.DOCKER_HUB_USER ?: "psu6510110357"}/chayenity-server:${gitSha}"
-                            echo "  - ${env.DOCKER_HUB_USER ?: "psu6510110357"}/chayenity-server:latest"
-                        }
-                    }
+                    sh '''
+                    echo "===== Preparing for Docker build ====="
+                    echo "Dockerfile exists: $(if [ -f Dockerfile ]; then echo 'YES'; else echo 'NO'; fi)"
+                    
+                    # Show Dockerfile content
+                    if [ -f Dockerfile ]; then
+                        echo "Dockerfile content:"
+                        cat Dockerfile
+                    else
+                        echo "❌ No Dockerfile found in server directory"
+                        exit 1
+                    fi
+                    
+                    echo "===== Build information ====="
+                    echo "Branch: $BRANCH_NAME"
+                    echo "Commit: $(git rev-parse HEAD)"
+                    echo "Date: $(date)"
+                    
+                    # Create build info file
+                    cat > build-info.txt << EOF
+Branch: $BRANCH_NAME
+Commit: $(git rev-parse HEAD)
+Date: $(date)
+Author: $(git log -1 --pretty=format:'%an')
+Message: $(git log -1 --pretty=format:'%s')
+Dockerfile exists: $(if [ -f Dockerfile ]; then echo 'YES'; else echo 'NO'; fi)
+EOF
+                    
+                    echo "✅ Build information created"
+                    cat build-info.txt
+                    '''
                 }
             }
         }
