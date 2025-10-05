@@ -14,7 +14,37 @@ pipeline {
     }
 
     stages {
-        stage('Setup Python Environment') {
+        stage('Debug Branch Info') {
+            steps {
+                sh '''
+                echo "========================================"
+                echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+                echo "Environment branch: $BRANCH_NAME"
+                echo "Git branch output:"
+                git branch -a
+                echo "========================================"
+                '''
+            }
+        }
+
+    stage('Check for Git Conflicts') {
+        steps {
+            dir('server') {
+                sh '''
+                echo "===== Checking for Git merge conflicts ====="
+                if git grep -l "<<<<<<< HEAD\|=======\|>>>>>>>"; then
+                    echo "❌ Git merge conflicts found! Please resolve them first."
+                    git grep -n "<<<<<<< HEAD\|=======\|>>>>>>>"
+                    exit 1
+                else
+                    echo "✅ No Git merge conflicts found"
+                fi
+                '''
+            }
+        }
+    }
+
+    stage('Setup Python Environment') {
             steps {
                 dir('server') {
                     sh '''
