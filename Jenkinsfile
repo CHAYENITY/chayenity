@@ -169,25 +169,25 @@ EOF
                     echo "===== Creating deployment artifacts ====="
                     echo "Branch: $BRANCH_NAME"
                     
-                    # Create a temp directory to avoid self-inclusion issues
+                    # Create a temporary directory for the build
                     TEMP_DIR="/tmp/chayenity-build-$(date +%s)"
                     mkdir -p "$TEMP_DIR"
                     
-                    # Copy files to temp directory (excluding problematic ones)
-                    rsync -av \
-                        --exclude='*.pyc' \
-                        --exclude='.git' \
-                        --exclude='.venv' \
-                        --exclude='__pycache__' \
-                        --exclude='*.log' \
-                        --exclude='node_modules' \
-                        --exclude='.pytest_cache' \
-                        --exclude='htmlcov' \
-                        --exclude='*.egg-info' \
-                        --exclude='chayenity-server-source-*.tar.gz' \
-                        . "$TEMP_DIR/"
+                    # Copy files using cp with exclude patterns
+                    find . -mindepth 1 -maxdepth 1 -not -name '.' -not -name 'chayenity-server-source-*.tar.gz' -exec cp -r {} "$TEMP_DIR/" \;
                     
-                    # Create the archive from temp directory
+                    # Remove excluded directories/files from temp directory
+                    find "$TEMP_DIR" -name "*.pyc" -delete
+                    find "$TEMP_DIR" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
+                    find "$TEMP_DIR" -name ".pytest_cache" -type d -exec rm -rf {} + 2>/dev/null || true
+                    find "$TEMP_DIR" -name "htmlcov" -type d -exec rm -rf {} + 2>/dev/null || true
+                    find "$TEMP_DIR" -name "*.egg-info" -type d -exec rm -rf {} + 2>/dev/null || true
+                    find "$TEMP_DIR" -name "*.log" -delete
+                    rm -rf "$TEMP_DIR/.git" 2>/dev/null || true
+                    rm -rf "$TEMP_DIR/.venv" 2>/dev/null || true
+                    rm -rf "$TEMP_DIR/node_modules" 2>/dev/null || true
+                    
+                    # Create the archive from the cleaned temp directory
                     cd "$TEMP_DIR"
                     tar -czf "../chayenity-server-source-$(git rev-parse --short=8 HEAD).tar.gz" .
                     cd -
