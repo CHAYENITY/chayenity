@@ -54,19 +54,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       text: 'เข้าสู่ระบบ',
                       onPressed: formState.isValid
                           ? () async {
-                              print('🔵 [UI] Login button pressed');
                               final isProfileSetup = await ref
                                   .read(loginFormProvider.notifier)
                                   .submit();
-                              print(
-                                '🔵 [UI] Login result - isProfileSetup: $isProfileSetup',
-                              );
                               if (context.mounted) {
                                 if (isProfileSetup) {
-                                  print('🔵 [UI] Navigating to dashboard');
                                   context.go(AppRoutePath.dashboard);
                                 } else {
-                                  print('🔵 [UI] Navigating to profile setup');
                                   context.go(AppRoutePath.profileSetup);
                                 }
                               }
