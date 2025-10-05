@@ -78,42 +78,47 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Run Tests & Generate Coverage') {
             steps {
                 dir('server') {
-                    sh '''
-                    . venv/bin/activate
+            sh '''
+            . venv/bin/activate
 
-                    echo "=== Verifying configuration ==="
-                    python -c "
-                    try:
-                        from app.configs.app_config import app_config
-                        print('✅ Configuration loaded successfully')
-                        print(f'DB URI: {app_config.SQLALCHEMY_DATABASE_URI}')
-                    except Exception as e:
-                        print(f'❌ Configuration failed: {e}')
-                        exit(1)
-                    "
+            echo "=== Verifying configuration ==="
+            
+            # Create a temporary Python script
+            cat > verify_config.py << 'EOF'
+            try:
+                from app.configs.app_config import app_config
+                print('✅ Configuration loaded successfully')
+                print(f'DB URI: {app_config.SQLALCHEMY_DATABASE_URI}')
+            except Exception as e:
+                print(f'❌ Configuration failed: {e}')
+                exit(1)
+            EOF
 
-                    echo "=== Running tests ==="
-                    pytest app/tests/ \
-                        --maxfail=1 \
-                        --disable-warnings \
-                        -v \
-                        --cov=app \
-                        --cov-report=xml:coverage.xml \
-                        --cov-report=term-missing \
-                        --ignore=app/tests/dev \
-                        --ignore=app/tests/integration
+            python verify_config.py
+            rm verify_config.py
 
-                    if [ -f coverage.xml ]; then
-                        echo "✅ Coverage report generated"
-                        ls -lh coverage.xml
-                    else
-                        echo "⚠️ Warning: coverage.xml not found"
-                    fi
-                    '''
+            echo "=== Running tests ==="
+            pytest app/tests/ \
+                --maxfail=1 \
+                --disable-warnings \
+                -v \
+                --cov=app \
+                --cov-report=xml:coverage.xml \
+                --cov-report=term-missing \
+                --ignore=app/tests/dev \
+                --ignore=app/tests/integration
+
+            if [ -f coverage.xml ]; then
+                echo "✅ Coverage report generated"
+                ls -lh coverage.xml
+            else
+                echo "⚠️ Warning: coverage.xml not found"
+            fi
+            '''
                 }
             }
         }
