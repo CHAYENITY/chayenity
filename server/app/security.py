@@ -2,13 +2,13 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 
 from app.database.session import get_db
 from app.models import User
+from app.crud.user_crud import get_user_by_id
 from app.configs.app_config import app_config
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -65,8 +65,7 @@ async def get_current_user_with_refresh_token(
     except (JWTError, ValueError):
         raise credentials_exception
 
-    result = await db.execute(select(User).filter(User.id == user_id))
-    user = result.scalars().first()
+    user = await get_user_by_id(db, user_id)
 
     if user is None:
         raise credentials_exception
@@ -92,8 +91,8 @@ async def get_current_user_with_access_token(
     except (JWTError, ValueError):
         raise credentials_exception
 
-    result = await db.execute(select(User).filter(User.id == user_id))
-    user = result.scalars().first()
+    user = await get_user_by_id(db, user_id)
+
     if user is None:
         raise credentials_exception
     return user

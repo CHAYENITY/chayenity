@@ -5,7 +5,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User
-from app.schemas.user_schema import UserCreate, UserOut, UserProfileSetup
+from app.schemas.api_schema import CreateOut
+from app.schemas.user_schema import UserCreate
 from app.crud import user_crud
 from app.database.session import get_db
 from app.security import (
@@ -14,22 +15,20 @@ from app.security import (
     create_refresh_token,
     create_access_token,
     get_current_user_with_refresh_token,
-    get_current_user_with_access_token,
 )
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
+router = APIRouter(prefix="/auth", tags=["Authorization"])
 
 
-@router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=CreateOut, status_code=status.HTTP_201_CREATED)
 async def register(user_create: UserCreate, db: AsyncSession = Depends(get_db)):
     existing_user_by_email = await user_crud.get_user_by_email(db, user_create.email)
     if existing_user_by_email:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
 
     hashed_password = get_password_hash(user_create.password)
-    user = await user_crud.create_user(db, user_create, hashed_password)
-    # Override addresses to [] to avoid lazy loading error
-    return UserOut.model_validate({**user.__dict__, "addresses": []})
+    await user_crud.create_user(db, user_create, hashed_password)
+    return {"success": True}
 
 
 @router.post("/login")
@@ -58,7 +57,6 @@ async def login(
         "refresh_token": refresh_token,
         "access_token": access_token,
         "token_type": "bearer",
-        "is_profile_setup": user.is_profile_setup
     }
 
 
@@ -72,22 +70,3 @@ async def refresh(
         "access_token": access_token,
         "token_type": "bearer",
     }
-
-
-@router.put("/profile-setup", response_model=UserOut)
-async def setup_profile(
-    profile_setup: UserProfileSetup,
-    current_user: User = Depends(get_current_user_with_access_token),
-    db: AsyncSession = Depends(get_db),
-):
-    """
-    Step 2: Complete user profile setup after basic registration.
-    This includes name, phone, bio, address, and profile image.
-    """
-    if current_user.is_profile_setup:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Profile already setup")
-
-    # Update user profile with complete information
-    await user_crud.create_user_profile(db, current_user.id, profile_setup)
-
-    return UserOut.model_validate({**current_user.__dict__, "addresses": []})

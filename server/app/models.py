@@ -1,15 +1,16 @@
 import enum
-from typing import Optional, List, Any
 from datetime import datetime
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from sqlalchemy import Column
-from sqlalchemy import JSON
 from geoalchemy2 import Geometry
-from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import String, Integer, Float, Boolean, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+
+from app.database.base import Base
 
 
-# === Enum Definitions ===
+# * === Enum Definitions ===
 
 
 class GigStatus(str, enum.Enum):
@@ -33,342 +34,218 @@ class MessageType(str, enum.Enum):
     SYSTEM = "system"
 
 
-# === Core Entities ===
+# * === Core Entities ===
 
 
-class Address(SQLModel, table=True):
-    """Address information for users"""
-
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    address_text: str  # Full address string
-    district: str  # อำเภอ/เขต
-    province: str  # จังหวัด
-    postal_code: Optional[str] = None
-    country: str = Field(default="Thailand")
-
-    # Location coordinates (GPS)
-    location: Optional[Any] = Field(default=None, sa_column=Column(Geometry("POINT", srid=4326)))
-
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-
-    # Foreign Keys
-    user_id: UUID = Field(foreign_key="user.id", index=True)
-
-    # Relationships
-    user: "User" = Relationship(back_populates="addresses")
-
-
-class User(SQLModel, table=True):
+class User(Base):
     """User accounts for Hourz app - can be both Helper and Seeker"""
 
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    email: str = Field(unique=True, index=True)
-    hashed_password: str = Field(nullable=False)
-
-    # Profile fields (optional initially, completed in second step)
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    bio: Optional[str] = None  # แนะนำตัวเอง
-
-    # Contact information (optional initially)
-    phone_number: Optional[str] = None  # เบอร์โทรศัพท์
-    additional_contact: Optional[str] = None  # ช่องทางติดต่อเพิ่มเติม (LINE ID, etc.)
-
-    # Profile image
-    profile_image_url: Optional[str] = None  # รูปประจำตัว
-
-    # Profile completion status
-    is_profile_setup: bool = Field(default=False)  # Track if user completed step 2
-
-    # Helper availability
-    is_available: bool = Field(default=False)  # Helper availability toggle
-
-    # Profile and reputation
-    is_verified: bool = Field(default=False)
-    reputation_score: float = Field(default=5.0)
-    total_reviews: int = Field(default=0)
-
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-
-    # Utility properties
-    @property
-    def full_name(self) -> str:
-        """Backward compatibility - combines first_name and last_name"""
-        if not self.first_name and not self.last_name:
-            return "Incomplete Profile"
-        first = self.first_name or ""
-        last = self.last_name or ""
-        return f"{first} {last}".strip() or "Incomplete Profile"
-
-    @property
-    def current_address(self) -> Optional["Address"]:
-        """Get the most recent address"""
-        if self.addresses:
-            return max(self.addresses, key=lambda addr: addr.updated_at)
-        return None
-
-    # Relationships
-    addresses: List["Address"] = Relationship(back_populates="user")
-    gigs_created: List["Gig"] = Relationship(
-        back_populates="seeker", sa_relationship_kwargs={"foreign_keys": "Gig.seeker_id"}
-    )
-    gigs_accepted: List["Gig"] = Relationship(
-        back_populates="helper", sa_relationship_kwargs={"foreign_keys": "Gig.helper_id"}
-    )
-    reviews_written: List["Review"] = Relationship(
-        back_populates="reviewer", sa_relationship_kwargs={"foreign_keys": "Review.reviewer_id"}
-    )
-    reviews_received: List["Review"] = Relationship(
-        back_populates="reviewee", sa_relationship_kwargs={"foreign_keys": "Review.reviewee_id"}
-    )
-    buddies: List["BuddyList"] = Relationship(
-        back_populates="user", sa_relationship_kwargs={"foreign_keys": "BuddyList.user_id"}
-    )
-    buddy_of: List["BuddyList"] = Relationship(
-        back_populates="buddy", sa_relationship_kwargs={"foreign_keys": "BuddyList.buddy_id"}
-    )
-    chat_participants: List["ChatParticipant"] = Relationship(back_populates="user")
-    messages_sent: List["Message"] = Relationship(back_populates="sender")
-    transactions_as_payer: List["Transaction"] = Relationship(
-        back_populates="payer", sa_relationship_kwargs={"foreign_keys": "Transaction.payer_id"}
-    )
-    transactions_as_payee: List["Transaction"] = Relationship(
-        back_populates="payee", sa_relationship_kwargs={"foreign_keys": "Transaction.payee_id"}
-    )
-    uploaded_files: List["UploadedFile"] = Relationship(back_populates="uploader")
-
-
-class Gig(SQLModel, table=True):
-    """Gigs/Requests posted by Seekers"""
-
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    title: str = Field(index=True)
-    description: str
-    duration_hours: int  # Expected duration in hours
-    budget: float = Field(index=True)  # Budget in local currency
-
-    # Location where gig needs to be done (GPS pinned by Seeker)
-    location: Any = Field(sa_column=Column(Geometry("POINT", srid=4326)))
-    address_text: str
-
-    status: GigStatus = Field(default=GigStatus.PENDING, index=True)
-
-    # Images for the gig
-    image_urls: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
-
-    created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    starts_at: Optional[datetime] = None  # When gig should start
-    completed_at: Optional[datetime] = None
-
-    # Foreign Keys
-    seeker_id: UUID = Field(foreign_key="user.id", index=True)  # User who posted the gig
-    helper_id: Optional[UUID] = Field(
-        default=None, foreign_key="user.id", index=True
-    )  # User who accepted
-
-    # Relationships
-    seeker: User = Relationship(
-        back_populates="gigs_created",
-        sa_relationship_kwargs={"foreign_keys": "Gig.seeker_id"},
-    )
-    helper: Optional[User] = Relationship(
-        back_populates="gigs_accepted",
-        sa_relationship_kwargs={"foreign_keys": "Gig.helper_id"},
-    )
-    chat_room: Optional["ChatRoom"] = Relationship(back_populates="gig")
-    reviews: List["Review"] = Relationship(back_populates="gig")
-    transaction: Optional["Transaction"] = Relationship(back_populates="gig")
-
-
-class ChatRoom(SQLModel, table=True):
-    """Chat rooms created when gigs are accepted"""
-
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    is_active: bool = Field(default=True)
-
-    # Foreign Keys
-    gig_id: UUID = Field(foreign_key="gig.id", unique=True, index=True)
-
-    # Relationships
-    gig: Gig = Relationship(back_populates="chat_room")
-    participants: List["ChatParticipant"] = Relationship(back_populates="chat_room")
-    messages: List["Message"] = Relationship(back_populates="chat_room")
-
-
-class ChatParticipant(SQLModel, table=True):
-    """Users participating in a chat room"""
-
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    joined_at: datetime = Field(default_factory=datetime.utcnow)
-    last_read_at: Optional[datetime] = None
-
-    # Foreign Keys
-    chat_room_id: UUID = Field(foreign_key="chatroom.id", index=True)
-    user_id: UUID = Field(foreign_key="user.id", index=True)
-
-    # Relationships
-    chat_room: ChatRoom = Relationship(back_populates="participants")
-    user: User = Relationship(back_populates="chat_participants")
-
-
-class Message(SQLModel, table=True):
-    """Messages within chat rooms"""
-
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    content: str
-    message_type: MessageType = Field(default=MessageType.TEXT)
-    image_url: Optional[str] = None
-    is_read: bool = Field(default=False, index=True)
-    timestamp: datetime = Field(default_factory=datetime.utcnow, index=True)
-
-    # Foreign Keys
-    chat_room_id: UUID = Field(foreign_key="chatroom.id", index=True)
-    sender_id: UUID = Field(foreign_key="user.id", index=True)
-
-    # Relationships
-    chat_room: ChatRoom = Relationship(back_populates="messages")
-    sender: User = Relationship(back_populates="messages_sent")
-
-
-class BuddyList(SQLModel, table=True):
-    """Favorite helpers/seekers (buddy system)"""
-
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    notes: Optional[str] = None  # Optional notes about the buddy
-
-    # Foreign Keys
-    user_id: UUID = Field(foreign_key="user.id", index=True)
-    buddy_id: UUID = Field(foreign_key="user.id", index=True)
-
-    # Relationships
-    user: User = Relationship(
-        back_populates="buddies",
-        sa_relationship_kwargs={"foreign_keys": "BuddyList.user_id"},
-    )
-    buddy: User = Relationship(
-        back_populates="buddy_of",
-        sa_relationship_kwargs={"foreign_keys": "BuddyList.buddy_id"},
-    )
-
-
-class Review(SQLModel, table=True):
-    """Reviews and ratings after gig completion"""
-
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    rating: int = Field(ge=1, le=5)
-    comment: Optional[str] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
-    # Foreign Keys
-    gig_id: UUID = Field(foreign_key="gig.id", index=True)
-    reviewer_id: UUID = Field(foreign_key="user.id")  # Who wrote the review
-    reviewee_id: UUID = Field(foreign_key="user.id")  # Who is being reviewed
-
-    # Relationships
-    gig: Gig = Relationship(back_populates="reviews")
-    reviewer: User = Relationship(
-        back_populates="reviews_written",
-        sa_relationship_kwargs={"foreign_keys": "Review.reviewer_id"},
-    )
-    reviewee: User = Relationship(
-        back_populates="reviews_received",
-        sa_relationship_kwargs={"foreign_keys": "Review.reviewee_id"},
-    )
-
-
-class Transaction(SQLModel, table=True):
-    """Mock payment transactions for gigs"""
-
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    amount: float  # Total amount
-    service_fee: float  # Platform service fee
-    net_amount: float  # Amount after service fee
-    currency: str = Field(default="THB")
-    status: TransactionStatus = Field(default=TransactionStatus.PENDING, index=True)
-
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    completed_at: Optional[datetime] = None
-
-    # Mock payment details
-    payment_method: Optional[str] = None
-    transaction_ref: Optional[str] = None
-
-    # Foreign Keys
-    gig_id: UUID = Field(foreign_key="gig.id", unique=True, index=True)
-    payer_id: UUID = Field(foreign_key="user.id", index=True)  # Seeker
-    payee_id: UUID = Field(foreign_key="user.id", index=True)  # Helper
-
-    # Relationships
-    gig: Gig = Relationship(back_populates="transaction")
-    payer: User = Relationship(
-        back_populates="transactions_as_payer",
-        sa_relationship_kwargs={"foreign_keys": "Transaction.payer_id"},
-    )
-    payee: User = Relationship(
-        back_populates="transactions_as_payee",
-        sa_relationship_kwargs={"foreign_keys": "Transaction.payee_id"},
-    )
-
-
-class UploadedFile(SQLModel, table=True):
-    """File upload tracking and metadata"""
-
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    filename: str = Field(index=True)  # Generated filename
-    original_filename: str  # User's original filename
-    file_path: str  # Server file path
-    file_size: int  # File size in bytes
-    content_type: str  # MIME type
-    upload_category: str = Field(index=True)  # 'profile', 'gig', etc.
-    uploaded_at: datetime = Field(default_factory=datetime.utcnow, index=True)
-    is_active: bool = Field(default=True, index=True)
-
-    # Foreign Keys
-    uploaded_by: UUID = Field(foreign_key="user.id", index=True)
-
-    # Relationships
-    uploader: User = Relationship(back_populates="uploaded_files")
-
-
-# === Enhanced Security Models ===
-
-
-class UserSession(SQLModel, table=True):
-    """
-    🔐 Track active user sessions for enhanced security.
-    Enables token rotation and session management.
-    """
-
-    id: str = Field(default_factory=lambda: str(uuid4()), primary_key=True)
-    user_id: str = Field(index=True)  # References User.id
-    refresh_token_jti: str = Field(unique=True)  # JWT ID for refresh token
-    device_info: Optional[str] = None  # User agent, device type
-    ip_address: Optional[str] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    last_used: datetime = Field(default_factory=datetime.utcnow)
-    expires_at: datetime  # Required - when session expires
-    is_active: bool = Field(default=True)
-
-    # Optional security features
-    login_location: Optional[str] = None  # City/Country
-    is_suspicious: bool = Field(default=False)
-
-
-class BlacklistedToken(SQLModel, table=True):
-    """
-    🚫 Store blacklisted/revoked tokens for immediate invalidation.
-    Critical for logout and security breaches.
-    """
-
-    jti: str = Field(primary_key=True)  # JWT ID
-    token_type: str  # 'access' or 'refresh'
-    user_id: str = Field(index=True)  # References User.id
-    blacklisted_at: datetime = Field(default_factory=datetime.utcnow)
-    reason: Optional[str] = None  # 'logout', 'security_breach', 'expired'
-    expires_at: datetime  # When to clean up this record
+    __tablename__ = "user"
+    id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+
+    first_name = Column(String, nullable=True)
+    last_name = Column(String, nullable=True)
+    phone_number = Column(String, nullable=True)
+    bio = Column(String, nullable=True)
+    additional_contact = Column(String, nullable=True)
+    profile_image_url = Column(String, nullable=True)
+
+    is_profile_setup = Column(Boolean, default=False)
+    is_available = Column(Boolean, default=False)
+    is_verified = Column(Boolean, default=False)
+    reputation_score = Column(Float, default=5.0)
+    total_reviews = Column(Integer, default=0)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)
+
+    address_id = Column(String, ForeignKey("address.id"), unique=True)
+
+    address = relationship("Address", back_populates="user", uselist=False)
+    # gigs_created = relationship("Gig", back_populates="seeker", foreign_keys="Gig.seeker_id")
+    # gigs_accepted = relationship("Gig", back_populates="helper", foreign_keys="Gig.helper_id")
+    # reviews_written = relationship(
+    #     "Review", back_populates="reviewer", foreign_keys="Review.reviewer_id"
+    # )
+    # reviews_received = relationship(
+    #     "Review", back_populates="reviewee", foreign_keys="Review.reviewee_id"
+    # )
+    # buddies = relationship("BuddyList", back_populates="user", foreign_keys="BuddyList.user_id")
+    # buddy_of = relationship("BuddyList", back_populates="buddy", foreign_keys="BuddyList.buddy_id")
+    # chat_participants = relationship("ChatParticipant", back_populates="user")
+    # messages_sent = relationship("Message", back_populates="sender")
+    # transactions_as_payer = relationship(
+    #     "Transaction", back_populates="payer", foreign_keys="Transaction.payer_id"
+    # )
+    # transactions_as_payee = relationship(
+    #     "Transaction", back_populates="payee", foreign_keys="Transaction.payee_id"
+    # )
+    # uploaded_files = relationship("UploadedFile", back_populates="uploader")
+
+    # @property
+    # def full_name(self) -> str:
+    #     first = getattr(self, "first_name", None)
+    #     last = getattr(self, "last_name", None)
+    #     if not first and not last:
+    #         return "Incomplete Profile"
+    #     return f"{first or ''} {last or ''}".strip() or "Incomplete Profile"
+
+    # @property
+    # def current_address(self):
+    #     return self.address
+
+
+class Address(Base):
+    """Address information for users"""
+
+    __tablename__ = "address"
+    id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+    address_line = Column(String, nullable=False)
+    district = Column(String, nullable=False)
+    province = Column(String, nullable=False)
+    postal_code = Column(String, nullable=True)
+    country = Column(String, default="Thailand")
+    location = Column(Geometry("POINT", srid=4326), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="address", uselist=False)
+
+
+# class Gig(Base):
+#     """Gigs/Requests posted by Seekers"""
+
+#     __tablename__ = "gig"
+#     id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+#     title = Column(String, index=True, nullable=False)
+#     description = Column(String, nullable=False)
+#     duration_hours = Column(Integer, nullable=False)
+#     budget = Column(Float, index=True, nullable=False)
+#     location = Column(Geometry("POINT", srid=4326), nullable=False)
+#     address_text = Column(String, nullable=False)
+#     status = Column(String, default=GigStatus.PENDING.value, index=True)
+#     image_urls = Column(JSON, nullable=True)
+#     created_at = Column(DateTime, default=datetime.utcnow, index=True)
+#     updated_at = Column(DateTime, default=datetime.utcnow)
+#     starts_at = Column(DateTime, nullable=True)
+#     completed_at = Column(DateTime, nullable=True)
+#     seeker_id = Column(String, ForeignKey("user.id"), index=True, nullable=False)
+#     helper_id = Column(String, ForeignKey("user.id"), index=True, nullable=True)
+#     seeker = relationship("User", back_populates="gigs_created", foreign_keys=[seeker_id])
+#     helper = relationship("User", back_populates="gigs_accepted", foreign_keys=[helper_id])
+#     chat_room = relationship("ChatRoom", back_populates="gig", uselist=False)
+#     reviews = relationship("Review", back_populates="gig")
+#     transaction = relationship("Transaction", back_populates="gig", uselist=False)
+
+
+# class ChatRoom(Base):
+#     """Chat rooms created when gigs are accepted"""
+
+#     __tablename__ = "chatroom"
+#     id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+#     created_at = Column(DateTime, default=datetime.utcnow)
+#     updated_at = Column(DateTime, default=datetime.utcnow)
+#     is_active = Column(Boolean, default=True)
+#     gig_id = Column(String, ForeignKey("gig.id"), unique=True, index=True)
+#     gig = relationship("Gig", back_populates="chat_room")
+#     participants = relationship("ChatParticipant", back_populates="chat_room")
+#     messages = relationship("Message", back_populates="chat_room")
+
+
+# class ChatParticipant(Base):
+#     """Users participating in a chat room"""
+
+#     __tablename__ = "chatparticipant"
+#     id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+#     joined_at = Column(DateTime, default=datetime.utcnow)
+#     last_read_at = Column(DateTime, nullable=True)
+#     chat_room_id = Column(String, ForeignKey("chatroom.id"), index=True)
+#     user_id = Column(String, ForeignKey("user.id"), index=True)
+#     chat_room = relationship("ChatRoom", back_populates="participants")
+#     user = relationship("User", back_populates="chat_participants")
+
+
+# class Message(Base):
+#     """Messages within chat rooms"""
+
+#     __tablename__ = "message"
+#     id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+#     content = Column(String, nullable=False)
+#     message_type = Column(String, default=MessageType.TEXT.value)
+#     image_url = Column(String, nullable=True)
+#     is_read = Column(Boolean, default=False, index=True)
+#     timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+#     chat_room_id = Column(String, ForeignKey("chatroom.id"), index=True)
+#     sender_id = Column(String, ForeignKey("user.id"), index=True)
+#     chat_room = relationship("ChatRoom", back_populates="messages")
+#     sender = relationship("User", back_populates="messages_sent")
+
+
+# class BuddyList(Base):
+#     """Favorite helpers/seekers (buddy system)"""
+
+#     __tablename__ = "buddylist"
+#     id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+#     created_at = Column(DateTime, default=datetime.utcnow)
+#     notes = Column(String, nullable=True)
+#     user_id = Column(String, ForeignKey("user.id"), index=True)
+#     buddy_id = Column(String, ForeignKey("user.id"), index=True)
+#     user = relationship("User", back_populates="buddies", foreign_keys=[user_id])
+#     buddy = relationship("User", back_populates="buddy_of", foreign_keys=[buddy_id])
+
+
+# class Review(Base):
+#     """Reviews and ratings after gig completion"""
+
+#     __tablename__ = "review"
+#     id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+#     rating = Column(Integer, nullable=False)
+#     comment = Column(String, nullable=True)
+#     created_at = Column(DateTime, default=datetime.utcnow)
+#     gig_id = Column(String, ForeignKey("gig.id"), index=True)
+#     reviewer_id = Column(String, ForeignKey("user.id"))
+#     reviewee_id = Column(String, ForeignKey("user.id"))
+#     gig = relationship("Gig", back_populates="reviews")
+#     reviewer = relationship("User", back_populates="reviews_written", foreign_keys=[reviewer_id])
+#     reviewee = relationship("User", back_populates="reviews_received", foreign_keys=[reviewee_id])
+
+
+# class Transaction(Base):
+#     """Mock payment transactions for gigs"""
+
+#     __tablename__ = "transaction"
+#     id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+#     amount = Column(Float, nullable=False)
+#     service_fee = Column(Float, nullable=False)
+#     net_amount = Column(Float, nullable=False)
+#     currency = Column(String, default="THB")
+#     status = Column(String, default=TransactionStatus.PENDING.value, index=True)
+#     created_at = Column(DateTime, default=datetime.utcnow)
+#     completed_at = Column(DateTime, nullable=True)
+#     payment_method = Column(String, nullable=True)
+#     transaction_ref = Column(String, nullable=True)
+#     gig_id = Column(String, ForeignKey("gig.id"), unique=True, index=True)
+#     payer_id = Column(String, ForeignKey("user.id"), index=True)
+#     payee_id = Column(String, ForeignKey("user.id"), index=True)
+#     gig = relationship("Gig", back_populates="transaction")
+#     payer = relationship("User", back_populates="transactions_as_payer", foreign_keys=[payer_id])
+#     payee = relationship("User", back_populates="transactions_as_payee", foreign_keys=[payee_id])
+
+
+# class UploadedFile(Base):
+#     """File upload tracking and metadata"""
+
+#     __tablename__ = "uploadedfile"
+#     id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+#     filename = Column(String, index=True, nullable=False)
+#     original_filename = Column(String, nullable=False)
+#     file_path = Column(String, nullable=False)
+#     file_size = Column(Integer, nullable=False)
+#     content_type = Column(String, nullable=False)
+#     upload_category = Column(String, index=True, nullable=False)
+#     uploaded_at = Column(DateTime, default=datetime.utcnow, index=True)
+#     is_active = Column(Boolean, default=True, index=True)
+#     uploaded_by = Column(String, ForeignKey("user.id"), index=True)
+#     uploader = relationship("User", back_populates="uploaded_files")

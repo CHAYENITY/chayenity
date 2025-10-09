@@ -10,17 +10,17 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class AppConfig(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
 
-    ENVIRONMENT: Literal["local", "staging", "production","test"] = "local"
-    PROJECT_NAME: str = "HOURZ"
-    API_STR: str = "/api"
+    ENVIRONMENT: Literal["local", "staging", "production", "test"] = "local"
+    PROJECT_NAME: str
+    API_STR: str
 
-    REFRESH_SECRET_KEY: str = "refresh_secret_key"
-    REFRESH_TOKEN_EXPIRE: int = 10080
-    ACCESS_SECRET_KEY: str = "access_secret_key"
-    ACCESS_TOKEN_EXPIRE: int = 10080
-    ALGORITHM: str = "HS256"
+    REFRESH_SECRET_KEY: str
+    REFRESH_TOKEN_EXPIRE: int
+    ACCESS_SECRET_KEY: str
+    ACCESS_TOKEN_EXPIRE: int
+    ALGORITHM: str
 
-    FRONTEND_URL: str = ""
+    FRONTEND_URL: str
     BACKEND_URL: list[AnyUrl] | str = []
 
     POSTGRES_SERVER: str

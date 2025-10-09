@@ -13,7 +13,7 @@ from app.database.session import engine
 
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -105,7 +105,7 @@ def custom_openapi():
 
     protected_access_token_paths = [
         f"{app_config.API_STR}/users/me",
-        f"{app_config.API_STR}/auth/profile-setup",
+        f"{app_config.API_STR}/users/profile",
     ]
 
     protected_refresh_token_paths = [

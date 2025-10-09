@@ -1,12 +1,13 @@
+# init_db.py
 import logging
 import asyncio
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
-from sqlmodel import SQLModel
 
 from app.database.session import engine
+from app.database.base import Base
 from app.models import *  # type: ignore # noqa: F403
 
 logging.basicConfig(level=logging.INFO)
@@ -26,17 +27,9 @@ async def init(db_engine: AsyncEngine) -> None:
     try:
         async with db_engine.begin() as conn:
             logger.info("🧨 Dropping all tables...")
-
-            # For PostgreSQL, we need to drop with CASCADE to handle enum dependencies
-            await conn.execute(text("DROP SCHEMA public CASCADE"))
-            await conn.execute(text("CREATE SCHEMA public"))
-            await conn.execute(text("GRANT ALL ON SCHEMA public TO public"))
-
-            # Enable PostGIS extension for geometry type
-            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
-
+            await conn.run_sync(Base.metadata.drop_all)
             logger.info("🛠 Creating all tables...")
-            await conn.run_sync(SQLModel.metadata.create_all)
+            await conn.run_sync(Base.metadata.create_all)
 
         # Optional test query
         async_session = async_sessionmaker(bind=db_engine, class_=AsyncSession)

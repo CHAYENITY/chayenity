@@ -1,219 +1,75 @@
 # schemas/user_schema.py
-import re
-from sqlmodel import SQLModel
-from pydantic import EmailStr, field_validator
-from typing import Optional, List
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from typing import Optional
 from datetime import datetime
 from uuid import UUID
+from app.schemas.address_schema import AddressBase
+from app.validations.user_validation import (
+    validate_email as user_validate_email,
+    validate_password as user_validate_password,
+    validate_phone_number as user_validate_phone_number,
+    validate_first_name as user_validate_first_name,
+    validate_last_name as user_validate_last_name,
+)
+
+# TODO: UPLOAD PROFILE IMAGE
 
 
-class UserBase(SQLModel):
-    email: EmailStr
-    first_name: Optional[str] = None  # ชื่อ - Optional for two-step registration
-    last_name: Optional[str] = None  # นามสกุล - Optional for two-step registration
-    bio: Optional[str] = None  # แนะนำตัวเอง
-    phone_number: Optional[str] = None  # เบอร์โทรศัพท์ - Optional for two-step registration
-    additional_contact: Optional[str] = None  # ช่องทางติดต่อเพิ่มเติม (LINE ID, etc.)
-    is_profile_setup: bool = False  # Track if profile setup is complete
+class UserBase(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    bio: Optional[str] = None
+    additional_contact: Optional[str] = None
+    address: Optional[AddressBase] = None
 
 
-class UserCreate(SQLModel):
+class UserCreate(BaseModel):
     email: EmailStr
     password: str
 
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
-        return v.strip().lower()
+        return user_validate_email(v)
 
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        if len(v) < 6:
-            raise ValueError("Password must be at least 6 characters long")
-        return v
+        return user_validate_password(v)
 
 
-class UserProfileSetup(SQLModel):
-    first_name: str
-    last_name: str
-    bio: Optional[str] = None
-    phone_number: str
-    additional_contact: Optional[str] = None
-    profile_image_url: Optional[str] = None
-    address: Optional["AddressCreate"] = None
-
-    @field_validator("first_name")
-    @classmethod
-    def validate_first_name(cls, v: str) -> str:
-        if not v or len(v.strip()) < 1:
-            raise ValueError("First name is required")
-        return v.strip()
-
-    @field_validator("last_name")
-    @classmethod
-    def validate_last_name(cls, v: str) -> str:
-        if not v or len(v.strip()) < 1:
-            raise ValueError("Last name is required")
-        return v.strip()
+class UserProfileUpsert(UserBase):
+    pass
 
     @field_validator("phone_number")
     @classmethod
     def validate_phone_number(cls, v: str) -> str:
-        if not v:
-            raise ValueError("Phone number is required")
-        # Allow Thai phone numbers and international format
-        if re.fullmatch(r"(\+66|0)[0-9]{8,9}", v) or re.fullmatch(r"\+[0-9]{10,15}", v):
-            return v.strip()
-        raise ValueError(
-            "Phone number must be a valid Thai number (+66xxxxxxxxx or 0xxxxxxxxx) or international format"
-        )
-
-
-# === ADDRESS SCHEMAS ===
-class AddressBase(SQLModel):
-    address_text: str
-    district: str  # อำเภอ/เขต
-    province: str  # จังหวัด
-    postal_code: Optional[str] = None
-    country: str = "Thailand"
-
-
-class AddressCreate(AddressBase):
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-
-
-class AddressRead(AddressBase):
-    id: UUID
-    created_at: datetime
-    updated_at: datetime
-    user_id: UUID
-
-
-# Schema for returning user data (excludes sensitive fields)
-class UserOut(UserBase):
-    id: UUID
-    profile_image_url: Optional[str] = None
-    is_verified: bool
-    reputation_score: float
-    created_at: datetime
-    addresses: List[AddressRead] = []
-
-    # Computed properties
-    @property
-    def full_name(self) -> str:
-        if self.first_name and self.last_name:
-            return f"{self.first_name} {self.last_name}".strip()
-        elif self.first_name:
-            return self.first_name.strip()
-        elif self.last_name:
-            return self.last_name.strip()
-        else:
-            return ""
-
-    @property
-    def current_address(self) -> Optional[AddressRead]:
-        if self.addresses:
-            return max(self.addresses, key=lambda addr: addr.updated_at)
-        return None
-
-
-# Schema for updating user profile
-class UserUpdate(SQLModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    bio: Optional[str] = None
-    phone_number: Optional[str] = None
-    additional_contact: Optional[str] = None
-    profile_image_url: Optional[str] = None
-    address: Optional[AddressCreate] = None
-
-    @field_validator("phone_number")
-    @classmethod
-    def validate_phone_number(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return None
-        if re.fullmatch(r"(\+66|0)[0-9]{8,9}", v) or re.fullmatch(r"\+[0-9]{10,15}", v):
-            return v.strip()
-        raise ValueError(
-            "Phone number must be a valid Thai number (+66xxxxxxxxx or 0xxxxxxxxx) or international format"
-        )
+        return user_validate_phone_number(v)
 
     @field_validator("first_name")
     @classmethod
     def validate_first_name(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None and len(v.strip()) < 1:
-            raise ValueError("First name must be at least 1 character long")
-        return v.strip() if v else v
+        return user_validate_first_name(v)
 
     @field_validator("last_name")
     @classmethod
     def validate_last_name(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None and len(v.strip()) < 1:
-            raise ValueError("Last name must be at least 1 character long")
-        return v.strip() if v else v
+        return user_validate_last_name(v)
 
 
-# Schema for updating user location (now creates a new address)
-class LocationUpdate(SQLModel):
-    address_text: str
-    district: str
-    province: str
-    postal_code: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-
-    @field_validator("latitude")
-    @classmethod
-    def validate_latitude(cls, v: Optional[float]) -> Optional[float]:
-        if v is not None and not -90 <= v <= 90:
-            raise ValueError("Latitude must be between -90 and 90")
-        return v
-
-    @field_validator("longitude")
-    @classmethod
-    def validate_longitude(cls, v: Optional[float]) -> Optional[float]:
-        if v is not None and not -180 <= v <= 180:
-            raise ValueError("Longitude must be between -180 and 180")
-        return v
-
-
-# Schema for updating availability status
-class AvailabilityUpdate(SQLModel):
-    is_available: bool
-
-
-# Schema for nearby users search
-class NearbyUsersRequest(SQLModel):
-    latitude: float
-    longitude: float
-    radius: float = 5.0  # Default 5km radius
-    only_available: bool = True  # Only show available helpers
-
-    @field_validator("radius")
-    @classmethod
-    def validate_radius(cls, v: float) -> float:
-        if not 0.1 <= v <= 50.0:
-            raise ValueError("Radius must be between 0.1 and 50 kilometers")
-        return v
-
-
-# Schema for nearby user response
-class NearbyUserOut(SQLModel):
-    id: UUID
-    full_name: str
+class UserOut(UserBase):
+    email: EmailStr
     profile_image_url: Optional[str] = None
+
+    is_profile_setup: bool
+    is_available: bool
+    is_verified: bool
     reputation_score: float
     total_reviews: int
-    is_available: bool
-    distance_km: float  # Distance from search point
-    address_text: Optional[str] = None
 
+    created_at: datetime
+    updated_at: datetime
+    id: UUID
 
-# Enhanced profile schema with location and availability
-class UserProfileOut(UserOut):
-    is_available: bool
-    total_reviews: int
-    address_text: Optional[str] = None
-    has_location: bool = False  # Indicates if user has set a fixed location
+    model_config = ConfigDict(from_attributes=True)
