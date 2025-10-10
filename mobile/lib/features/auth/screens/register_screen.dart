@@ -19,17 +19,13 @@ class RegisterScreen extends ConsumerStatefulWidget {
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
-    final formState = ref.watch(registerFormProvider);
-    final isLoading = ref.watch(isLoadingProvider('auth-register'));
-    final isGoogleLoading = ref.watch(isLoadingProvider('auth-google'));
-
-    return CustomStatusBar(
+    return const CustomStatusBar(
       child: Scaffold(
         backgroundColor: AppColors.background,
         resizeToAvoidBottomInset: true,
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+            padding: EdgeInsets.symmetric(horizontal: 32),
             child: Center(
               child: SingleChildScrollView(
                 child: Column(
@@ -37,56 +33,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Header
-                    const Center(
+                    Center(
                       child: AuthHeader(title: 'เพื่อนที่พร้อมช่วย รอคุณอยู่!'),
                     ),
 
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32),
 
                     // Register Form
-                    _RegisterForm(
-                      formState: formState,
-                      isDisabled: isLoading || isGoogleLoading,
-                    ),
+                    _RegisterFormFields(),
 
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
 
                     // Register Button
-                    PrimaryButton(
-                      text: 'สร้างบัญชี Hourz',
-                      onPressed: formState.isValid
-                          ? () async {
-                              final success = await ref
-                                  .read(registerFormProvider.notifier)
-                                  .submit();
-                              if (success && context.mounted) {
-                                context.go(AppRoutePath.login);
-                              }
-                            }
-                          : null,
-                      isLoading: isLoading,
-                      isDisabled: !formState.isValid,
-                    ),
+                    _RegisterButton(),
 
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
 
                     // Google Sign In Button
-                    GoogleSignInButton(
-                      text: 'ลงทะเบียนด้วย Google',
-                      onPressed: () =>
-                          ref.read(authProvider.notifier).loginWithGoogle(),
-                      isLoading: isGoogleLoading,
-                      isDisabled: isLoading,
-                    ),
+                    _GoogleRegisterButton(),
 
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32),
 
                     // Navigation to Login
-                    AuthNavigationLink(
-                      question: 'มีบัญชีแล้ว?',
-                      linkText: 'เข้าสู่ระบบเลย',
-                      onTap: () => context.goNamed('login'),
-                    ),
+                    _NavigationToLogin(),
                   ],
                 ),
               ),
@@ -98,15 +67,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 }
 
-// Private Register Form Widget
-class _RegisterForm extends ConsumerWidget {
-  final RegisterFormState formState;
-  final bool isDisabled;
-
-  const _RegisterForm({required this.formState, this.isDisabled = false});
+// Register Form Fields Widget (rebuilds only when form state changes)
+class _RegisterFormFields extends ConsumerWidget {
+  const _RegisterFormFields();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final formState = ref.watch(registerFormProvider);
+    final isLoading = ref.watch(isLoadingProvider('auth-register'));
+    final isGoogleLoading = ref.watch(isLoadingProvider('auth-google'));
+    final isDisabled = isLoading || isGoogleLoading;
+
     return Column(
       children: [
         // Email Field
@@ -123,54 +94,12 @@ class _RegisterForm extends ConsumerWidget {
         const SizedBox(height: 24),
 
         // Password Field
-        AuthTextField(
-          label: 'รหัสผ่าน',
-          hintText: '••••••••••••••',
-          obscureText: formState.obscurePassword,
-          value: formState.password,
-          onChanged: (value) =>
-              ref.read(registerFormProvider.notifier).setPassword(value),
-          isDisabled: isDisabled,
-          suffixIcon: IconButton(
-            icon: Icon(
-              formState.obscurePassword
-                  ? Icons.visibility_off
-                  : Icons.visibility,
-              color: AppColors.primary,
-            ),
-            onPressed: isDisabled
-                ? null
-                : () => ref
-                      .read(registerFormProvider.notifier)
-                      .togglePasswordVisibility(),
-          ),
-        ),
+        _PasswordField(isDisabled: isDisabled),
 
         const SizedBox(height: 24),
 
         // Confirm Password Field
-        AuthTextField(
-          label: 'ยืนยันรหัสผ่าน',
-          hintText: '••••••••••••••',
-          obscureText: formState.obscureConfirmPassword,
-          value: formState.confirmPassword,
-          onChanged: (value) =>
-              ref.read(registerFormProvider.notifier).setConfirmPassword(value),
-          isDisabled: isDisabled,
-          suffixIcon: IconButton(
-            icon: Icon(
-              formState.obscureConfirmPassword
-                  ? Icons.visibility_off
-                  : Icons.visibility,
-              color: AppColors.primary,
-            ),
-            onPressed: isDisabled
-                ? null
-                : () => ref
-                      .read(registerFormProvider.notifier)
-                      .toggleConfirmPasswordVisibility(),
-          ),
-        ),
+        _ConfirmPasswordField(isDisabled: isDisabled),
 
         const SizedBox(height: 24),
 
@@ -190,6 +119,143 @@ class _RegisterForm extends ConsumerWidget {
           isDisabled: isDisabled,
         ),
       ],
+    );
+  }
+}
+
+// Password Field Widget (rebuilds only when password or obscure state changes)
+class _PasswordField extends ConsumerWidget {
+  final bool isDisabled;
+
+  const _PasswordField({required this.isDisabled});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final password = ref.watch(
+      registerFormProvider.select((state) => state.password),
+    );
+    final obscurePassword = ref.watch(
+      registerFormProvider.select((state) => state.obscurePassword),
+    );
+
+    return AuthTextField(
+      label: 'รหัสผ่าน',
+      hintText: '••••••••••••••',
+      obscureText: obscurePassword,
+      value: password,
+      onChanged: (value) =>
+          ref.read(registerFormProvider.notifier).setPassword(value),
+      isDisabled: isDisabled,
+      suffixIcon: IconButton(
+        icon: Icon(
+          obscurePassword ? Icons.visibility_off : Icons.visibility,
+          color: AppColors.primary,
+        ),
+        onPressed: isDisabled
+            ? null
+            : () => ref
+                  .read(registerFormProvider.notifier)
+                  .togglePasswordVisibility(),
+      ),
+    );
+  }
+}
+
+// Confirm Password Field Widget (rebuilds only when confirm password or obscure state changes)
+class _ConfirmPasswordField extends ConsumerWidget {
+  final bool isDisabled;
+
+  const _ConfirmPasswordField({required this.isDisabled});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final confirmPassword = ref.watch(
+      registerFormProvider.select((state) => state.confirmPassword),
+    );
+    final obscureConfirmPassword = ref.watch(
+      registerFormProvider.select((state) => state.obscureConfirmPassword),
+    );
+
+    return AuthTextField(
+      label: 'ยืนยันรหัสผ่าน',
+      hintText: '••••••••••••••',
+      obscureText: obscureConfirmPassword,
+      value: confirmPassword,
+      onChanged: (value) =>
+          ref.read(registerFormProvider.notifier).setConfirmPassword(value),
+      isDisabled: isDisabled,
+      suffixIcon: IconButton(
+        icon: Icon(
+          obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+          color: AppColors.primary,
+        ),
+        onPressed: isDisabled
+            ? null
+            : () => ref
+                  .read(registerFormProvider.notifier)
+                  .toggleConfirmPasswordVisibility(),
+      ),
+    );
+  }
+}
+
+// Register Button Widget (rebuilds only when isValid or isLoading changes)
+class _RegisterButton extends ConsumerWidget {
+  const _RegisterButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isValid = ref.watch(
+      registerFormProvider.select((state) => state.isValid),
+    );
+    final isLoading = ref.watch(isLoadingProvider('auth-register'));
+
+    return PrimaryButton(
+      text: 'สร้างบัญชี Hourz',
+      onPressed: isValid
+          ? () async {
+              final success = await ref
+                  .read(registerFormProvider.notifier)
+                  .submit();
+              if (success && context.mounted) {
+                context.go(AppRoutePath.login);
+              }
+            }
+          : null,
+      isLoading: isLoading,
+      isDisabled: !isValid,
+    );
+  }
+}
+
+// Google Register Button Widget (rebuilds only when loading states change)
+class _GoogleRegisterButton extends ConsumerWidget {
+  const _GoogleRegisterButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isGoogleLoading = ref.watch(isLoadingProvider('auth-google'));
+    final isRegisterLoading = ref.watch(isLoadingProvider('auth-register'));
+
+    return GoogleSignInButton(
+      text: 'ลงทะเบียนด้วย Google',
+      onPressed: () => ref.read(authProvider.notifier).loginWithGoogle(),
+      isLoading: isGoogleLoading,
+      isDisabled: isRegisterLoading,
+    );
+  }
+}
+
+// Navigation to Login Widget (static, never rebuilds)
+class _NavigationToLogin extends StatelessWidget {
+  const _NavigationToLogin();
+
+  @override
+  Widget build(BuildContext context) {
+    return AuthNavigationLink(
+      question: 'มีบัญชีแล้ว?',
+      linkText: 'เข้าสู่ระบบเลย',
+      onTap: () => context.goNamed('login'),
     );
   }
 }

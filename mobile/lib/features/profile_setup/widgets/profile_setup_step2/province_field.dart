@@ -26,7 +26,7 @@ class _ProvinceFieldState extends ConsumerState<ProvinceField> {
         const SizedBox(height: 8),
         provincesAsync.when(
           data: (provinces) => DropdownButtonFormField<String>(
-            value: _selectedProvinceId,
+            initialValue: _selectedProvinceId,
             decoration: const InputDecoration(hintText: 'เลือกจังหวัด'),
             items: provinces
                 .map(

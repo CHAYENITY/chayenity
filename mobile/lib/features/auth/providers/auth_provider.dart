@@ -1,251 +1,23 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hourz/features/auth/models/auth.dart';
+import 'package:hourz/features/auth/services/auth_service.dart';
 import 'package:hourz/shared/providers/index.dart';
+import 'package:logger/logger.dart';
 
-import '../models/auth.dart';
-import '../services/auth_service.dart';
-
+// ============================================================================
 // Auth Service Provider
+// ============================================================================
+
 final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService(ref.read(apiProvider));
 });
 
-// Auth State Provider
-final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier(ref);
-});
-
-// Login Form Provider
-final loginFormProvider =
-    StateNotifierProvider<LoginFormNotifier, LoginFormState>((ref) {
-      return LoginFormNotifier(ref);
-    });
-
-// Register Form Provider
-final registerFormProvider =
-    StateNotifierProvider<RegisterFormNotifier, RegisterFormState>((ref) {
-      return RegisterFormNotifier(ref);
-    });
-
-// Auth State
-enum AuthStatus { initial, authenticated, unauthenticated, loading }
-
-class AuthState {
-  final AuthStatus status;
-  final String? error;
-
-  const AuthState({this.status = AuthStatus.initial, this.error});
-
-  AuthState copyWith({AuthStatus? status, String? error}) {
-    return AuthState(status: status ?? this.status, error: error ?? this.error);
-  }
-}
-
-// Auth Notifier
-class AuthNotifier extends StateNotifier<AuthState> {
-  final Ref _ref;
-
-  AuthNotifier(this._ref) : super(const AuthState());
-
-  Future<bool> login(String email, String password) async {
-    try {
-      state = state.copyWith(status: AuthStatus.loading);
-      _ref.read(loadingProvider.notifier).startLoading('auth-login');
-
-      final request = LoginRequest(email: email, password: password);
-      final service = _ref.read(authServiceProvider);
-      final loginResponse = await service.login(request);
-
-      // Store tokens in secure storage
-      final storageService = _ref.read(storageServiceProvider);
-      await storageService.saveAccessToken(loginResponse.accessToken);
-      await storageService.saveRefreshToken(loginResponse.refreshToken);
-
-      // Set access token for API calls
-      final apiService = _ref.read(apiProvider);
-      apiService.setAuthToken(loginResponse.accessToken);
-
-      final user = await service.getCurrentUser();
-
-      state = state.copyWith(status: AuthStatus.authenticated);
-
-      return loginResponse.isProfileSetup;
-    } catch (e) {
-      state = state.copyWith(
-        status: AuthStatus.unauthenticated,
-        error: e.toString(),
-      );
-      _ref
-          .read(errorProvider.notifier)
-          .handleError('Login failed: $e', context: 'auth-login');
-      return false;
-    } finally {
-      _ref.read(loadingProvider.notifier).stopLoading('auth-login');
-    }
-  }
-
-  Future<bool> register(
-    String email,
-    String password,
-    String confirmPassword,
-  ) async {
-    try {
-      state = state.copyWith(status: AuthStatus.loading);
-      _ref.read(loadingProvider.notifier).startLoading('auth-register');
-
-      final request = RegisterRequest(
-        email: email,
-        password: password,
-        confirmPassword: confirmPassword,
-      );
-      if (!request.isPasswordMatch) {
-        throw Exception('รหัสผ่านไม่ตรงกัน');
-      }
-
-      final service = _ref.read(authServiceProvider);
-      final user = await service.register(request);
-
-      _ref.read(currentUserProvider.notifier).state = user;
-      state = state.copyWith(status: AuthStatus.authenticated, user: user);
-      return true;
-    } catch (e) {
-      state = state.copyWith(
-        status: AuthStatus.unauthenticated,
-        error: e.toString(),
-      );
-      _ref
-          .read(errorProvider.notifier)
-          .handleError('Register failed: $e', context: 'auth-register');
-      return false;
-    } finally {
-      _ref.read(loadingProvider.notifier).stopLoading('auth-register');
-    }
-  }
-
-  Future<void> logout() async {
-    try {
-      _ref.read(loadingProvider.notifier).startLoading('auth-logout');
-      final service = _ref.read(authServiceProvider);
-      await service.logout();
-
-      // Clear stored tokens
-      final storageService = _ref.read(storageServiceProvider);
-      await storageService.clearAllTokens();
-
-      // Clear API auth token
-      final apiService = _ref.read(apiProvider);
-      apiService.clearAuthToken();
-
-      _ref.read(currentUserProvider.notifier).state = null;
-      state = state.copyWith(status: AuthStatus.unauthenticated, user: null);
-    } catch (e) {
-      _ref
-          .read(errorProvider.notifier)
-          .handleError('Logout failed: $e', context: 'auth-logout');
-    } finally {
-      _ref.read(loadingProvider.notifier).stopLoading('auth-logout');
-    }
-  }
-
-  /// Check authentication status on app startup
-  /// Returns the route to navigate to based on auth status
-  Future<String?> checkAuthStatus() async {
-    try {
-      state = state.copyWith(status: AuthStatus.loading);
-
-      final storageService = _ref.read(storageServiceProvider);
-      final apiService = _ref.read(apiProvider);
-      final service = _ref.read(authServiceProvider);
-
-      // Check if refresh token exists
-      final refreshToken = await storageService.getRefreshToken();
-      if (refreshToken == null) {
-        state = state.copyWith(status: AuthStatus.unauthenticated);
-        return null; // Will navigate to login
-      }
-
-      // Try to get access token and fetch user profile
-      final accessToken = await storageService.getAccessToken();
-      if (accessToken != null) {
-        apiService.setAuthToken(accessToken);
-
-        try {
-          final user = await service.getCurrentUser();
-          _ref.read(currentUserProvider.notifier).state = user;
-          state = state.copyWith(status: AuthStatus.authenticated, user: user);
-
-          // Check profile setup status
-          if (user.isProfileSetup) {
-            return 'dashboard';
-          } else {
-            return 'profileSetup';
-          }
-        } catch (e) {}
-      }
-
-      // If we get here, either no access token or it failed
-      // Try to refresh the access token
-      try {
-        final oldAccessToken = accessToken ?? '';
-        final refreshResponse = await service.refreshToken(
-          refreshToken,
-          oldAccessToken,
-        );
-
-        // Save new access token
-        await storageService.saveAccessToken(refreshResponse.accessToken);
-        apiService.setAuthToken(refreshResponse.accessToken);
-
-        // Fetch user profile with new token
-        final user = await service.getCurrentUser();
-        _ref.read(currentUserProvider.notifier).state = user;
-        state = state.copyWith(status: AuthStatus.authenticated, user: user);
-
-        // Check profile setup status
-        if (user.isProfileSetup) {
-          return 'dashboard';
-        } else {
-          return 'profileSetup';
-        }
-      } catch (e) {
-        // Clear invalid tokens
-        await storageService.clearAllTokens();
-        apiService.clearAuthToken();
-        state = state.copyWith(status: AuthStatus.unauthenticated);
-        return null; // Will navigate to login
-      }
-    } catch (e) {
-      state = state.copyWith(
-        status: AuthStatus.unauthenticated,
-        error: e.toString(),
-      );
-      return null; // Will navigate to login
-    }
-  }
-
-  Future<void> loginWithGoogle() async {
-    try {
-      state = state.copyWith(status: AuthStatus.loading);
-      _ref.read(loadingProvider.notifier).startLoading('auth-google');
-
-      final service = _ref.read(authServiceProvider);
-      await service.loginWithGoogle();
-
-      // TODO: Handle Google login response
-    } catch (e) {
-      state = state.copyWith(
-        status: AuthStatus.unauthenticated,
-        error: e.toString(),
-      );
-      _ref
-          .read(errorProvider.notifier)
-          .handleError('Google login failed: $e', context: 'auth-google');
-    } finally {
-      _ref.read(loadingProvider.notifier).stopLoading('auth-google');
-    }
-  }
-}
-
+// ============================================================================
 // Login Form State
+// ============================================================================
+
+@immutable
 class LoginFormState {
   final String email;
   final String password;
@@ -269,17 +41,30 @@ class LoginFormState {
     );
   }
 
-  bool get isValid => email.isNotEmpty && password.isNotEmpty;
+  bool get isValid =>
+      email.isNotEmpty &&
+      email.contains('@') &&
+      password.isNotEmpty &&
+      password.length >= 8;
 }
 
-// Login Form Notifier
+// ============================================================================
+// Login Form Provider
+// ============================================================================
+
+final loginFormProvider =
+    StateNotifierProvider<LoginFormNotifier, LoginFormState>((ref) {
+      return LoginFormNotifier(ref);
+    });
+
 class LoginFormNotifier extends StateNotifier<LoginFormState> {
   final Ref _ref;
+  final Logger _logger = Logger();
 
   LoginFormNotifier(this._ref) : super(const LoginFormState());
 
   void setEmail(String email) {
-    state = state.copyWith(email: email);
+    state = state.copyWith(email: email.trim().toLowerCase());
   }
 
   void setPassword(String password) {
@@ -290,15 +75,57 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     state = state.copyWith(obscurePassword: !state.obscurePassword);
   }
 
+  /// Submit login form
+  /// Returns true if user profile is already setup
   Future<bool> submit() async {
-    if (!state.isValid) return false;
-    return await _ref
-        .read(authProvider.notifier)
-        .login(state.email, state.password);
+    if (!state.isValid) {
+      _logger.w('⚠️ Login form is invalid');
+      return false;
+    }
+
+    try {
+      _ref.read(loadingProvider.notifier).startLoading('auth-login');
+
+      final request = LoginRequest(
+        email: state.email,
+        password: state.password,
+      );
+
+      final authService = _ref.read(authServiceProvider);
+      final token = await authService.login(request);
+
+      // Save token to secure storage
+      await _ref.read(tokenProvider.notifier).saveToken(token);
+
+      _logger.d('✅ Login successful');
+
+      // TODO: Check if user profile is setup (implement later)
+      // For now, assume profile is setup
+      return true;
+    } catch (e) {
+      _logger.e('❌ Login failed: $e');
+      _ref
+          .read(errorProvider.notifier)
+          .handleError(
+            'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบอีเมลและรหัสผ่าน',
+            context: 'login',
+          );
+      rethrow;
+    } finally {
+      _ref.read(loadingProvider.notifier).stopLoading('auth-login');
+    }
+  }
+
+  void reset() {
+    state = const LoginFormState();
   }
 }
 
+// ============================================================================
 // Register Form State
+// ============================================================================
+
+@immutable
 class RegisterFormState {
   final String email;
   final String password;
@@ -335,23 +162,37 @@ class RegisterFormState {
     );
   }
 
-  bool get isValid =>
-      email.isNotEmpty &&
+  bool get isPasswordMatch =>
       password.isNotEmpty &&
       confirmPassword.isNotEmpty &&
-      password == confirmPassword &&
+      password == confirmPassword;
+
+  bool get isValid =>
+      email.isNotEmpty &&
+      email.contains('@') &&
+      password.isNotEmpty &&
+      password.length >= 8 &&
+      isPasswordMatch &&
       agreeToTerms;
-  bool get isPasswordMatch => password == confirmPassword;
 }
 
-// Register Form Notifier
+// ============================================================================
+// Register Form Provider
+// ============================================================================
+
+final registerFormProvider =
+    StateNotifierProvider<RegisterFormNotifier, RegisterFormState>((ref) {
+      return RegisterFormNotifier(ref);
+    });
+
 class RegisterFormNotifier extends StateNotifier<RegisterFormState> {
   final Ref _ref;
+  final Logger _logger = Logger();
 
   RegisterFormNotifier(this._ref) : super(const RegisterFormState());
 
   void setEmail(String email) {
-    state = state.copyWith(email: email);
+    state = state.copyWith(email: email.trim().toLowerCase());
   }
 
   void setPassword(String password) {
@@ -376,10 +217,125 @@ class RegisterFormNotifier extends StateNotifier<RegisterFormState> {
     state = state.copyWith(agreeToTerms: agree);
   }
 
+  /// Submit registration form
+  /// Returns true if registration successful
   Future<bool> submit() async {
-    if (!state.isValid) return false;
-    return await _ref
-        .read(authProvider.notifier)
-        .register(state.email, state.password, state.confirmPassword);
+    if (!state.isValid) {
+      _logger.w('⚠️ Register form is invalid');
+      return false;
+    }
+
+    try {
+      _ref.read(loadingProvider.notifier).startLoading('auth-register');
+
+      final request = RegisterRequest(
+        email: state.email,
+        password: state.password,
+        confirmPassword: state.confirmPassword,
+      );
+
+      final authService = _ref.read(authServiceProvider);
+      await authService.register(request);
+
+      _logger.d('✅ Registration successful');
+      return true;
+    } catch (e) {
+      _logger.e('❌ Registration failed: $e');
+      _ref
+          .read(errorProvider.notifier)
+          .handleError(
+            'ลงทะเบียนไม่สำเร็จ อีเมลนี้อาจถูกใช้งานแล้ว',
+            context: 'register',
+          );
+      rethrow;
+    } finally {
+      _ref.read(loadingProvider.notifier).stopLoading('auth-register');
+    }
+  }
+
+  void reset() {
+    state = const RegisterFormState();
+  }
+}
+
+// ============================================================================
+// Auth State Provider (For Google Sign In & General Auth)
+// ============================================================================
+
+final authProvider = StateNotifierProvider<AuthNotifier, AsyncValue<void>>(
+  (ref) => AuthNotifier(ref),
+);
+
+class AuthNotifier extends StateNotifier<AsyncValue<void>> {
+  final Ref _ref;
+  final Logger _logger = Logger();
+
+  AuthNotifier(this._ref) : super(const AsyncValue.data(null));
+
+  /// Login with Google (Placeholder - implement when Google Sign In is ready)
+  Future<void> loginWithGoogle() async {
+    try {
+      _ref.read(loadingProvider.notifier).startLoading('auth-google');
+      state = const AsyncValue.loading();
+
+      // TODO: Implement Google Sign In
+      _logger.w('⚠️ Google Sign In not implemented yet');
+
+      await Future.delayed(const Duration(seconds: 1)); // Simulate API call
+
+      _ref
+          .read(errorProvider.notifier)
+          .handleError(
+            'Google Sign In ยังไม่พร้อมใช้งาน',
+            context: 'google-signin',
+          );
+
+      state = const AsyncValue.data(null);
+    } catch (e) {
+      _logger.e('❌ Google Sign In failed: $e');
+      state = AsyncValue.error(e, StackTrace.current);
+      rethrow;
+    } finally {
+      _ref.read(loadingProvider.notifier).stopLoading('auth-google');
+    }
+  }
+
+  /// Logout user
+  Future<void> logout() async {
+    try {
+      final authService = _ref.read(authServiceProvider);
+      await authService.logout();
+    } catch (e) {
+      _logger.e('❌ Logout API failed: $e');
+      // Continue logout even if API fails
+    } finally {
+      // Always clear local token
+      await _ref.read(tokenProvider.notifier).clearToken();
+      _logger.d('✅ User logged out');
+    }
+  }
+
+  /// Check authentication status on app start
+  /// Returns route to navigate to
+  Future<String> checkAuthStatus() async {
+    try {
+      // Load token from secure storage
+      await _ref.read(tokenProvider.notifier).loadToken();
+
+      final isAuthenticated = _ref.read(isAuthenticatedProvider);
+
+      if (isAuthenticated) {
+        _logger.d('✅ User is authenticated');
+        // TODO: Check if profile setup is complete
+        // For now, go to dashboard
+        return '/dashboard';
+      } else {
+        _logger.d('❌ User is not authenticated');
+        return '/login';
+      }
+    } catch (e) {
+      _logger.e('❌ Check auth status failed: $e');
+      return '/login';
+    }
   }
 }

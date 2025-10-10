@@ -57,7 +57,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         } else if (route == 'profileSetup') {
           context.go(AppRoutePath.profileSetup);
         } else {
-          // No valid auth, go to login
           context.go(AppRoutePath.login);
         }
       }

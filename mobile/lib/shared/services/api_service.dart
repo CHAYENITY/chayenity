@@ -1,15 +1,17 @@
 import 'package:dio/dio.dart';
+import 'package:logger/logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:hourz/shared/models/api.dart';
 import 'package:hourz/shared/providers/index.dart';
-import 'package:logger/logger.dart';
 
 /// Simple API Service for basic CRUD operations
 class ApiService {
   late final Dio _dio;
   final Logger _logger = Logger();
+  final Ref? _ref; // For auth interceptor
 
-  ApiService() {
+  ApiService({Ref? ref}) : _ref = ref {
     try {
       _dio = Dio(
         BaseOptions(
@@ -23,7 +25,7 @@ class ApiService {
         ),
       );
 
-      // Add interceptor for logging
+      // Add logging interceptor
       _dio.interceptors.add(
         InterceptorsWrapper(
           onRequest: (options, handler) {
@@ -44,6 +46,12 @@ class ApiService {
           },
         ),
       );
+
+      // Add auth interceptor (if ref is provided)
+      if (_ref != null) {
+        _dio.interceptors.add(AuthInterceptor(ref: _ref, dio: _dio));
+        _logger.d('✅ Auth interceptor added');
+      }
     } catch (e) {
       rethrow;
     }
@@ -189,17 +197,7 @@ class ApiService {
       throw _handleError(error);
     }
   }
-
-  /// Set Authorization Token
-  void setAuthToken(String token) {
-    _dio.options.headers['Authorization'] = 'Bearer $token';
-  }
-
-  /// Clear Authorization Token
-  void clearAuthToken() {
-    _dio.options.headers.remove('Authorization');
-  }
 }
 
 /// Provider for SimpleApiService
-final apiProvider = Provider<ApiService>((ref) => ApiService());
+final apiProvider = Provider<ApiService>((ref) => ApiService(ref: ref));

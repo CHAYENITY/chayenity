@@ -14,6 +14,4 @@ class ApiEndpoints {
 
   // 👤 User endpoints
   static const String currentUser = '/users/me';
-  static const String updateProfile = '/users/me';
-  static const String users = '/users';
 }
