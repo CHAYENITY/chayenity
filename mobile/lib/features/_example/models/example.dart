@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'example.freezed.dart';
 part 'example.g.dart';
 
-/// Task Model - ตัวอย่าง data model สำหรับ CRUD operations
+// * Task Model - CRUD operations
 @freezed
 class Task with _$Task {
   const factory Task({
@@ -17,10 +17,10 @@ class Task with _$Task {
 
   const Task._();
 
-  /// Create Task from JSON (API Response)
+  // * Create Task from JSON (API Response)
   factory Task.fromJson(Map<String, dynamic> json) => _$TaskFromJson(json);
 
-  /// Create Task for API requests (without id and timestamps)
+  // * Create Task for API requests (without id and timestamps)
   Map<String, dynamic> toCreateJson() {
     return {
       'title': title,
@@ -29,7 +29,7 @@ class Task with _$Task {
     };
   }
 
-  /// Create Task for update requests
+  // * Create Task for update requests
   Map<String, dynamic> toUpdateJson() {
     return {
       'title': title,
@@ -38,12 +38,12 @@ class Task with _$Task {
     };
   }
 
-  /// Mark task as completed
+  // * Mark task as completed
   Task markCompleted() {
     return copyWith(isCompleted: true, completedAt: DateTime.now());
   }
 
-  /// Mark task as uncompleted
+  // * Mark task as uncompleted
   Task markUncompleted() {
     return copyWith(isCompleted: false, completedAt: null);
   }

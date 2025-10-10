@@ -1,52 +1,55 @@
 import 'package:hourz/shared/providers/index.dart';
+
 import '../models/example.dart';
 
-/// Task Service - จัดการ API calls เฉพาะ Task feature
 class TaskService {
   final ApiService _apiService;
-  static const String _endpoint = '/tasks';
 
   TaskService(this._apiService);
 
-  /// GET - ดึงรายการ tasks ทั้งหมด
+  // * CRUD API
+
+  // * GET - ดึงรายการ tasks ทั้งหมด
   Future<List<Task>> getTasks() async {
-    return await _apiService.getList(_endpoint, Task.fromJson);
+    return await _apiService.getList(ApiEndpoints.tasks, Task.fromJson);
   }
 
-  /// GET - ดึง task ตาม ID
+  // * GET - ดึง task ตาม ID
   Future<Task> getTaskById(String id) async {
-    return await _apiService.getById(_endpoint, id, Task.fromJson);
+    return await _apiService.getById(ApiEndpoints.tasks, id, Task.fromJson);
   }
 
-  /// POST - สร้าง task ใหม่
+  // * POST - สร้าง task ใหม่
   Future<Task> createTask(Task task) async {
     return await _apiService.create(
-      _endpoint,
+      ApiEndpoints.tasks,
       task.toCreateJson(),
       Task.fromJson,
     );
   }
 
-  /// PUT - อัปเดต task
+  // * PUT - อัปเดต task
   Future<Task> updateTask(Task task) async {
     return await _apiService.update(
-      _endpoint,
+      ApiEndpoints.tasks,
       task.id,
       task.toUpdateJson(),
       Task.fromJson,
     );
   }
 
-  /// DELETE - ลบ task
+  // * DELETE - ลบ task
   Future<void> deleteTask(String id) async {
-    await _apiService.delete(_endpoint, id);
+    await _apiService.delete(ApiEndpoints.tasks, id);
   }
 
-  /// PATCH - Toggle task completion (custom endpoint)
+  // * CUSTOM API
+
+  // * PATCH - Toggle task completion (custom endpoint)
   Future<Task> toggleTaskCompletion(String id) async {
     // สำหรับ custom API endpoint
     final response = await _apiService.update(
-      '$_endpoint/$id/toggle',
+      '${ApiEndpoints.tasks}/$id/toggle',
       id,
       {}, // Empty body for toggle action
       Task.fromJson,
@@ -54,18 +57,18 @@ class TaskService {
     return response;
   }
 
-  /// GET - ดึง completed tasks เฉพาะ
+  // * GET - ดึง completed tasks เฉพาะ
   Future<List<Task>> getCompletedTasks() async {
     return await _apiService.getList(
-      '$_endpoint?completed=true',
+      '${ApiEndpoints.tasks}?completed=true',
       Task.fromJson,
     );
   }
 
-  /// GET - ดึง pending tasks เฉพาะ
+  // * GET - ดึง pending tasks เฉพาะ
   Future<List<Task>> getPendingTasks() async {
     return await _apiService.getList(
-      '$_endpoint?completed=false',
+      '${ApiEndpoints.tasks}?completed=false',
       Task.fromJson,
     );
   }

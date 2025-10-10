@@ -1,15 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hourz/shared/providers/index.dart';
-import '../models/user.dart';
+
+import '../models/auth.dart';
 import '../services/auth_service.dart';
 
 // Auth Service Provider
 final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService(ref.read(apiProvider));
 });
-
-// Current User Provider
-final currentUserProvider = StateProvider<User?>((ref) => null);
 
 // Auth State Provider
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
@@ -33,17 +31,12 @@ enum AuthStatus { initial, authenticated, unauthenticated, loading }
 
 class AuthState {
   final AuthStatus status;
-  final User? user;
   final String? error;
 
-  const AuthState({this.status = AuthStatus.initial, this.user, this.error});
+  const AuthState({this.status = AuthStatus.initial, this.error});
 
-  AuthState copyWith({AuthStatus? status, User? user, String? error}) {
-    return AuthState(
-      status: status ?? this.status,
-      user: user ?? this.user,
-      error: error ?? this.error,
-    );
+  AuthState copyWith({AuthStatus? status, String? error}) {
+    return AuthState(status: status ?? this.status, error: error ?? this.error);
   }
 }
 
@@ -55,14 +48,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<bool> login(String email, String password) async {
     try {
-      print('🟡 [LOGIN] Starting login for: $email');
       state = state.copyWith(status: AuthStatus.loading);
       _ref.read(loadingProvider.notifier).startLoading('auth-login');
 
       final request = LoginRequest(email: email, password: password);
       final service = _ref.read(authServiceProvider);
       final loginResponse = await service.login(request);
-
 
       // Store tokens in secure storage
       final storageService = _ref.read(storageServiceProvider);
@@ -75,12 +66,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       final user = await service.getCurrentUser();
 
-      _ref.read(currentUserProvider.notifier).state = user;
-      state = state.copyWith(status: AuthStatus.authenticated, user: user);
+      state = state.copyWith(status: AuthStatus.authenticated);
 
       return loginResponse.isProfileSetup;
     } catch (e) {
-      print('🔴 [LOGIN] Error: $e');
       state = state.copyWith(
         status: AuthStatus.unauthenticated,
         error: e.toString(),
@@ -91,7 +80,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return false;
     } finally {
       _ref.read(loadingProvider.notifier).stopLoading('auth-login');
-      print('🟡 [LOGIN] Finished');
     }
   }
 
@@ -175,7 +163,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return null; // Will navigate to login
       }
 
-
       // Try to get access token and fetch user profile
       final accessToken = await storageService.getAccessToken();
       if (accessToken != null) {
@@ -192,8 +179,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           } else {
             return 'profileSetup';
           }
-        } catch (e) {
-        }
+        } catch (e) {}
       }
 
       // If we get here, either no access token or it failed
@@ -204,7 +190,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
           refreshToken,
           oldAccessToken,
         );
-
 
         // Save new access token
         await storageService.saveAccessToken(refreshResponse.accessToken);

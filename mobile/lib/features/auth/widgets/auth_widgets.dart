@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/gestures.dart';
+
 import 'package:hourz/shared/constants/assets.dart';
 import 'package:hourz/shared/providers/index.dart';
+
 import 'terms_dialog.dart';
 
 // Auth Header Widget

@@ -10,39 +10,17 @@ flutter pub get
 
 After installing dependencies, generate the required Freezed and JSON serialization files:
 
+- `One-time generation`
+
 ```bash
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-**Windows:**
+- `Watch mode (auto-regenerate on file changes)`
 
 ```bash
-generate-code.bat
-```
-
-**Linux/macOS:**
-
-```bash
-chmod +x generate-code.sh
-./generate-code.sh
-```
-
-**Manual:**
-
-```bash
-# One-time generation
-dart run build_runner build --delete-conflicting-outputs
-
-# Watch mode (auto-regenerate on file changes)
 dart run build_runner watch --delete-conflicting-outputs
 ```
-
-> **⚠️ Important:** You must run code generation whenever you:
->
-> - Add new `@freezed` models
-> - Modify existing Freezed models
-> - Change JSON annotations (`@JsonKey`)
-> - First time setting up the project
 
 ---
 

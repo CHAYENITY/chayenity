@@ -3,13 +3,13 @@ import 'package:hourz/shared/providers/index.dart';
 import '../models/example.dart';
 import '../services/example_service.dart';
 
-/// Task Service Provider
+// * Task Service Provider
 final taskServiceProvider = Provider<TaskService>((ref) {
   final apiService = ref.read(apiProvider);
   return TaskService(apiService);
 });
 
-/// Task List State Notifier
+// * Task List State Notifier
 class TaskListNotifier extends StateNotifier<List<Task>> {
   TaskListNotifier(this._ref) : super([]);
   final Ref _ref;
@@ -37,7 +37,7 @@ class TaskListNotifier extends StateNotifier<List<Task>> {
       _ref.read(loadingProvider.notifier).startLoading('create-task');
       final taskService = _ref.read(taskServiceProvider);
 
-      // Create a new task instance
+      // * Create a new task instance
       final newTask = Task(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         title: title,
@@ -112,6 +112,7 @@ final taskListProvider = StateNotifierProvider<TaskListNotifier, List<Task>>((
   return TaskListNotifier(ref);
 });
 
+// ⚡ Use .select() for computed values - no rebuild unless value changes
 final taskStatsProvider = Provider<Map<String, int>>((ref) {
   final tasks = ref.watch(taskListProvider);
   final completed = tasks.where((task) => task.isCompleted).length;
@@ -119,6 +120,7 @@ final taskStatsProvider = Provider<Map<String, int>>((ref) {
   return {'total': tasks.length, 'completed': completed, 'pending': pending};
 });
 
+// ⚡ Specific loading state providers
 final isTasksLoadingProvider = Provider<bool>((ref) {
   return ref.watch(isLoadingProvider('load-tasks'));
 });

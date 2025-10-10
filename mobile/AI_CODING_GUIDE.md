@@ -82,23 +82,35 @@ class ModelListNotifier extends StateNotifier<List<ModelName>> {
     }
   }
 }
+
+// ⚡ Use .select() for computed values (no rebuild unless value changes)
+final activeCountProvider = Provider<int>((ref) {
+  return ref.watch(modelListProvider.select((models) =>
+    models.where((m) => m.isActive).length
+  ));
+});
+
+final totalCountProvider = Provider<int>((ref) {
+  return ref.watch(modelListProvider.select((models) => models.length));
+});
 ```
 
 ### 3. Service Pattern
 
 ```dart
+import 'package:hourz/shared/constants/api_endpoints.dart'; // Always import
+
 class ModelService {
   final ApiService _apiService;
-  static const String _endpoint = '/models';
 
   ModelService(this._apiService);
 
   Future<List<ModelName>> getItems() async {
-    return await _apiService.getList(_endpoint, ModelName.fromJson);
+    return await _apiService.getList(ApiEndpoints.models, ModelName.fromJson);
   }
 
   Future<ModelName> createItem(ModelName item) async {
-    return await _apiService.create(_endpoint, item.toCreateJson(), ModelName.fromJson);
+    return await _apiService.create(ApiEndpoints.models, item.toCreateJson(), ModelName.fromJson);
   }
 }
 ```
@@ -107,6 +119,8 @@ class ModelService {
 
 ```dart
 class ModelListScreen extends ConsumerStatefulWidget {
+  const ModelListScreen({super.key});
+
   @override
   ConsumerState<ModelListScreen> createState() => _ModelListScreenState();
 }
@@ -115,78 +129,77 @@ class _ModelListScreenState extends ConsumerState<ModelListScreen> {
   @override
   void initState() {
     super.initState();
+    // Load data on first build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(modelListProvider.notifier).loadData();
     });
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final data = ref.watch(modelListProvider);
+  Widget build(BuildContext context) {
+    // ⚡ Use derived providers - no rebuild unless count changes
+    final totalCount = ref.watch(totalCountProvider);
+    final activeCount = ref.watch(activeCountProvider);
     final isLoading = ref.watch(isLoadingProvider('load-data'));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Models')),
       body: Column(
         children: [
-          // Stats card with private widget
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                _StatItem(label: 'Total', value: data.length.toString()),
-                _StatItem(label: 'Active', value: '${data.where((m) => m.isActive).length}'),
-              ],
-            ),
-          ),
+          // Stats - rebuilds only when counts change
+          _StatsCard(totalCount: totalCount, activeCount: activeCount),
 
-          // List with feature widget
-          Expanded(
-            child: ListView.builder(
-              itemCount: data.length,
-              itemBuilder: (context, index) => ModelCard(
-                model: data[index],
-                isDisabled: isLoading,
-              ),
-            ),
-          ),
+          // List - rebuilds only when list or loading changes
+          Expanded(child: _ModelListView(isLoading: isLoading)),
         ],
       ),
     );
   }
 }
-```
 
-### 5. Widget Pattern
+// Separate widget for stats (rebuilds only when counts change)
+class _StatsCard extends StatelessWidget {
+  final int totalCount;
+  final int activeCount;
 
-```dart
-// Main feature widget (in widgets/ folder)
-class ModelCard extends ConsumerWidget {
-  final ModelName model;
-  final bool isDisabled;
-
-  const ModelCard({super.key, required this.model, this.isDisabled = false});
+  const _StatsCard({required this.totalCount, required this.activeCount});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Card(
-      child: ListTile(
-        leading: Checkbox(
-          value: model.isActive,
-          onChanged: isDisabled ? null : (_) => _handleToggle(ref),
-        ),
-        title: Text(model.title),
-        trailing: PopupMenuButton(/* menu items */),
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          _StatItem(label: 'Total', value: totalCount.toString()),
+          _StatItem(label: 'Active', value: activeCount.toString()),
+        ],
       ),
     );
   }
+}
 
-  void _handleToggle(WidgetRef ref) {
-    ref.read(modelListProvider.notifier).toggleItem(model.id);
+// List view widget (rebuilds when list changes)
+class _ModelListView extends ConsumerWidget {
+  final bool isLoading;
+
+  const _ModelListView({required this.isLoading});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch only the list items
+    final models = ref.watch(modelListProvider);
+
+    return ListView.builder(
+      itemCount: models.length,
+      itemBuilder: (context, index) => ModelCard(
+        model: models[index],
+        isDisabled: isLoading,
+      ),
+    );
   }
 }
 
-// Private helper widgets (in same screen file)
+// Helper widget (no state, never rebuilds unless parent passes new data)
 class _StatItem extends StatelessWidget {
   final String label;
   final String value;
@@ -203,16 +216,100 @@ class _StatItem extends StatelessWidget {
 }
 ```
 
+### 5. Widget Pattern
+
+```dart
+// Main feature widget (in widgets/ folder)
+class ModelCard extends StatelessWidget {
+  final ModelName model;
+  final bool isDisabled;
+
+  const ModelCard({super.key, required this.model, this.isDisabled = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: _ModelCheckbox(model: model, isDisabled: isDisabled),
+        title: Text(model.title),
+        trailing: _ModelMenu(model: model, isDisabled: isDisabled),
+      ),
+    );
+  }
+}
+
+// Separate checkbox widget (rebuilds only when checkbox state changes)
+class _ModelCheckbox extends ConsumerWidget {
+  final ModelName model;
+  final bool isDisabled;
+
+  const _ModelCheckbox({required this.model, required this.isDisabled});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch only isActive for this specific model
+    final isActive = ref.watch(
+      modelListProvider.select((models) {
+        final found = models.firstWhereOrNull((m) => m.id == model.id);
+        return found?.isActive ?? model.isActive; // Fallback to passed value
+      })
+    );
+
+    return Checkbox(
+      value: isActive,
+      onChanged: isDisabled ? null : (_) =>
+        ref.read(modelListProvider.notifier).toggleItem(model.id),
+    );
+  }
+}
+
+// Menu widget (static, no state)
+class _ModelMenu extends ConsumerWidget {
+  final ModelName model;
+  final bool isDisabled;
+
+  const _ModelMenu({required this.model, required this.isDisabled});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PopupMenuButton(
+      enabled: !isDisabled,
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          child: const Text('Edit'),
+          onTap: () => _handleEdit(ref),
+        ),
+        PopupMenuItem(
+          child: const Text('Delete'),
+          onTap: () => _handleDelete(ref),
+        ),
+      ],
+    );
+  }
+
+  void _handleEdit(WidgetRef ref) {
+    ref.read(modelListProvider.notifier).editItem(model.id);
+  }
+
+  void _handleDelete(WidgetRef ref) {
+    ref.read(modelListProvider.notifier).deleteItem(model.id);
+  }
+}
+```
+
 ### 6. Routes Pattern
 
 ```dart
+import 'package:hourz/shared/constants/app_routes.dart'; // Always import
+
 final featureRoutes = [
   GoRoute(
-    path: '/models',
+    path: AppRoutePath.models,
+    name: AppRouteName.models,
     builder: (context, state) => const ModelListScreen(),
   ),
   GoRoute(
-    path: '/models/:id',
+    path: AppRoutePath.modelDetail,
     builder: (context, state) => DetailScreen(id: state.pathParameters['id']!),
   ),
 ];
@@ -222,32 +319,71 @@ final featureRoutes = [
 
 ## 🚨 Essential Rules
 
-**✅ Always:** Use `@freezed`, import `shared/providers/index.dart`, handle loading/error  
-**❌ Never:** Use `Navigator` (use GoRouter), mutate Freezed objects, skip error handling
+### ✅ Always Do
 
-**Widget Guidelines:**
+- Use `@freezed` for all models
+- Import `shared/providers/index.dart` in providers
+- Handle loading/error with `loadingProvider` & `errorProvider`
+- Use `.select()` when watching specific values
+- Use `ref.read()` for actions (onClick, onSubmit)
+- Use GoRouter: `context.go()`, `context.push()`, `context.pop()`
 
-- Complex/reusable components → `widgets/` folder (e.g., `ModelCard`)
-- Simple helper widgets → private `_Widget` in same screen file (e.g., `_StatItem`)
-- Use `ConsumerWidget` for widgets that need state
+### ❌ Never Do
 
-**Navigation:** `context.go('/path')`, `context.push('/path')`, `context.pop()`  
-**Code Gen:** `generate-code.bat` (Windows) or `./generate-code.sh` (Linux)
+- Use `Navigator.push()` (use GoRouter)
+- Mutate Freezed objects directly
+- Use `ref.watch()` inside callbacks
+- Skip error/loading handling
+- Watch entire providers when you need only one field
 
 ---
 
+## ⚡ Performance Rules
+
+### 1. Use `.select()` for Partial State
+
+```dart
+// ❌ Rebuilds on ANY change
+final user = ref.watch(userProvider);
+
+// ✅ Rebuilds only when name changes
+final name = ref.watch(userProvider.select((u) => u.name));
+```
+
+### 2. Separate Widgets by State
+
+```dart
+// ❌ Entire Column rebuilds
+Column([
+  Text(ref.watch(dataProvider)),
+  if (ref.watch(loadingProvider)) CircularProgressIndicator(),
+])
+
+// ✅ Only indicator rebuilds
+Column([
+  const _DataText(),
+  const _LoadingIndicator(),
+])
+```
+
+### 3. Cache Computed Values
+
+```dart
+// Create derived provider
+final activeCountProvider = Provider<int>((ref) =>
+  ref.watch(itemsProvider.select((items) =>
+    items.where((i) => i.isActive).length
+  ))
+);
+```
+
+### 4. Widget Organization
+
+- **Reusable/Complex** → `widgets/` folder (e.g., `ModelCard`)
+- **Simple/Private** → `_Widget` in screen (e.g., `_StatItem`)
+- **Use `const`** wherever possible
+- **Separate** `ConsumerWidget` for frequently changing parts
+
 ---
 
-## ⚡️ Performance Optimization (Flutter UI)
-
-**Tips for efficient UI and AI code generation:**
-
-- ใช้ `const` widget ให้มากที่สุด เพื่อลดการ rebuild
-- แยก `ConsumerWidget` เฉพาะจุดที่ state เปลี่ยนบ่อย (เช่น field ในฟอร์ม)
-- หลีกเลี่ยงการ rebuild ทั้งหน้าจอหรือ column ใหญ่ ๆ
-- ใช้ provider/selector เฉพาะ field ถ้า state management รองรับ
-- Optimize ภาพ: resize ก่อนแสดง, ใช้ cache ถ้าจำเป็น
-
-ใช้แนวทางนี้เมื่อสร้างหรือปรับ UI เพื่อให้โค้ดมีประสิทธิภาพสูงสุด
-
-หากต้องการดูรายละเอียดเพิ่มเติม ให้ดูที่โฟลเดอร์ `_example`
+> 💡 **Pro Tip:** ดูตัวอย่างเพิ่มเติมที่โฟลเดอร์ `_example`

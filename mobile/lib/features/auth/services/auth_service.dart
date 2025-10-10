@@ -1,5 +1,8 @@
+import 'package:hourz/shared/models/api.dart';
 import 'package:hourz/shared/providers/index.dart';
-import '../models/user.dart';
+
+import 'package:hourz/shared/services/api_service.dart';
+import '../models/auth.dart';
 
 class AuthService {
   final ApiService _apiService;
@@ -7,7 +10,6 @@ class AuthService {
   static const String _registerEndpoint = '/auth/register';
   static const String _logoutEndpoint = '/auth/logout';
   static const String _refreshEndpoint = '/auth/refresh';
-  static const String _meEndpoint = '/users/me';
 
   AuthService(this._apiService);
 
@@ -19,27 +21,18 @@ class AuthService {
     );
   }
 
-  Future<User> register(RegisterRequest request) async {
-    return await _apiService.create(
-      _registerEndpoint,
-      request.toJson(),
-      User.fromJson,
-    );
+  Future<CreateResponse> register(RegisterRequest request) async {
+    return await _apiService.create(_registerEndpoint, request.toJson());
   }
 
   Future<void> logout() async {
     await _apiService.delete(_logoutEndpoint, '');
   }
 
-  Future<User> getCurrentUser() async {
-    return await _apiService.get(_meEndpoint, User.fromJson);
-  }
-
   Future<RefreshTokenResponse> refreshToken(
     String refreshToken,
     String oldAccessToken,
   ) async {
-
     // Set the refresh token as the Authorization header
     _apiService.setAuthToken(refreshToken);
 
