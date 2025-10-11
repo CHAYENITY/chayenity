@@ -1,20 +1,20 @@
 Manifest-Version: 1.0
-Created-By: Maven Archiver 3.6.0
-Build-Jdk-Spec: 17
+Created-By: Maven Archiver 3.6.4
+Build-Jdk-Spec: 21
 Specification-Title: Pipeline SCM API for Blue Ocean
 Specification-Version: 1.27
 Implementation-Title: Pipeline SCM API for Blue Ocean
-Implementation-Version: 1.27.21
+Implementation-Version: 1.27.22
 Group-Id: io.jenkins.blueocean
 Artifact-Id: blueocean-pipeline-scm-api
 Short-Name: blueocean-pipeline-scm-api
 Long-Name: Pipeline SCM API for Blue Ocean
 Url: https://github.com/jenkinsci/blueocean-plugin/blob/master/blueocean
  /doc/BlueOcean.adoc
-Plugin-Version: 1.27.21
+Plugin-Version: 1.27.22
 Hudson-Version: 2.479.3
 Jenkins-Version: 2.479.3
-Plugin-Dependencies: blueocean-rest:1.27.21,workflow-multibranch:806.vb_
+Plugin-Dependencies: blueocean-rest:1.27.22,workflow-multibranch:806.vb_
  b_688f609ee9,branch-api:2.1217.v43d8b_b_d8b_2c7,credentials:1415.v83109
  6eb_5534,pubsub-light:1.19
 Plugin-Developers: Thorsten Iberian Sumurai:scherler:,Cliff Meyers:cliff
@@ -27,7 +27,7 @@ Plugin-License-Name: MIT License
 Plugin-License-Url: https://opensource.org/licenses/MIT
 Plugin-ScmConnection: scm:git:https://github.com/jenkinsci/blueocean-plu
  gin.git
-Plugin-ScmTag: blueocean-parent-1.27.21
+Plugin-ScmTag: blueocean-parent-1.27.22
 Plugin-ScmUrl: https://github.com/jenkinsci/blueocean-plugin
-Implementation-Build: 116d5464e9af650cff8e83065bd67d2f91efd2fc
+Implementation-Build: f12d9bef7c2e0fdc07e68a159d45d24670d46579
 

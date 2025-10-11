@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jenkins-ci.plugins</groupId>
   <artifactId>docker-workflow</artifactId>
-  <version>621.va_73f881d9232</version>
+  <version>632.vb_4b_d9336b_5ef</version>
   <packaging>hpi</packaging>
   <name>Docker Pipeline</name>
   <description>Build and use Docker containers from pipelines</description>
@@ -19,7 +19,7 @@
   <scm>
     <connection>scm:git:https://github.com/jenkinsci/docker-workflow-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/docker-workflow-plugin.git</developerConnection>
-    <tag>a73f881d9232e98f0e1f04cac45358ece361616f</tag>
+    <tag>b4bd9336b5efb8e44d4c5e0841939f941f4318cd</tag>
     <url>https://github.com/jenkinsci/docker-workflow-plugin</url>
   </scm>
   <distributionManagement>
@@ -42,13 +42,13 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-cps</artifactId>
-      <version>4046.v90b_1b_9edec67</version>
+      <version>4150.ve20ca_b_a_a_2815</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-durable-task-step</artifactId>
-      <version>1405.v1fcd4a_d00096</version>
+      <version>1434.v1b_595c29ddd7</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -66,13 +66,13 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>cloudbees-folder</artifactId>
-      <version>6.985.va_f1635030cc5</version>
+      <version>6.1026.ve06dfa_cf31c3</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkinsci.plugins</groupId>
       <artifactId>pipeline-model-definition</artifactId>
-      <version>2.2247.va_423189a_7dff</version>
+      <version>2.2255.v56a_15e805f12</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -99,7 +99,7 @@
       <plugin>
         <groupId>org.jenkins-ci.tools</groupId>
         <artifactId>maven-hpi-plugin</artifactId>
-        <version>3.64</version>
+        <version>3.66</version>
         <extensions>true</extensions>
       </plugin>
     </plugins>

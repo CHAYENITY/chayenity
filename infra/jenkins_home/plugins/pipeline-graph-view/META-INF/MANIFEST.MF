@@ -4,13 +4,13 @@ Build-Jdk-Spec: 17
 Specification-Title: Pipeline Graph View Plugin
 Specification-Version: 0.0
 Implementation-Title: Pipeline Graph View Plugin
-Implementation-Version: 660.vfb_46a_0e6fa_d9
+Implementation-Version: 661.v6003f4542123
 Group-Id: io.jenkins.plugins
 Artifact-Id: pipeline-graph-view
 Short-Name: pipeline-graph-view
 Long-Name: Pipeline Graph View Plugin
 Url: https://github.com/jenkinsci/pipeline-graph-view-plugin
-Plugin-Version: 660.vfb_46a_0e6fa_d9
+Plugin-Version: 661.v6003f4542123
 Hudson-Version: 2.504.3
 Jenkins-Version: 2.504.3
 Plugin-Dependencies: ionicons-api:94.vcc3065403257,workflow-cps:4183.v94
@@ -25,7 +25,7 @@ Plugin-License-Name: MIT License
 Plugin-License-Url: https://opensource.org/licenses/MIT
 Plugin-ScmConnection: scm:git:https://github.com/jenkinsci/pipeline-grap
  h-view-plugin.git
-Plugin-ScmTag: fb46a0e6fad919c178d67320e0fcec5c902bc901
+Plugin-ScmTag: 6003f4542123449b885447ced002d73d11990bb1
 Plugin-ScmUrl: https://github.com/jenkinsci/pipeline-graph-view-plugin
-Implementation-Build: fb46a0e6fad919c178d67320e0fcec5c902bc901
+Implementation-Build: 6003f4542123449b885447ced002d73d11990bb1
 

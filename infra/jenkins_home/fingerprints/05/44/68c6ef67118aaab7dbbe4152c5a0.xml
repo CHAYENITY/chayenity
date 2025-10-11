@@ -1,0 +1,13 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<fingerprint>
+  <timestamp>2025-10-11 14:54:15.353 UTC</timestamp>
+  <md5sum>054468c6ef67118aaab7dbbe4152c5a0</md5sum>
+  <fileName>Credential id=sonarqube_token name=sonarqube_token</fileName>
+  <usages>
+    <entry>
+      <string>hourz</string>
+      <ranges>1</ranges>
+    </entry>
+  </usages>
+  <facets/>
+</fingerprint>

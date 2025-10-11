@@ -1,20 +1,20 @@
 Manifest-Version: 1.0
-Created-By: Maven Archiver 3.6.0
-Build-Jdk-Spec: 17
+Created-By: Maven Archiver 3.6.4
+Build-Jdk-Spec: 21
 Specification-Title: REST API for Blue Ocean
 Specification-Version: 1.27
 Implementation-Title: REST API for Blue Ocean
-Implementation-Version: 1.27.21
+Implementation-Version: 1.27.22
 Group-Id: io.jenkins.blueocean
 Artifact-Id: blueocean-rest
 Short-Name: blueocean-rest
 Long-Name: REST API for Blue Ocean
 Url: https://github.com/jenkinsci/blueocean-plugin/blob/master/blueocean
  /doc/BlueOcean.adoc
-Plugin-Version: 1.27.21
+Plugin-Version: 1.27.22
 Hudson-Version: 2.479.3
 Jenkins-Version: 2.479.3
-Plugin-Dependencies: blueocean-commons:1.27.21
+Plugin-Dependencies: blueocean-commons:1.27.22
 Plugin-Developers: Thorsten Iberian Sumurai:scherler:,Cliff Meyers:cliff
  meyers:,Tom Fennelly:tfennelly:,Vivek Pandey:vivek:,Kohsuke:kohsuke:,Jo
  sh McDonald:sophistifunk:,Ivan Meredith:imeredith:,Michael Neale:michae
@@ -25,7 +25,7 @@ Plugin-License-Name: MIT License
 Plugin-License-Url: https://opensource.org/licenses/MIT
 Plugin-ScmConnection: scm:git:https://github.com/jenkinsci/blueocean-plu
  gin.git
-Plugin-ScmTag: blueocean-parent-1.27.21
+Plugin-ScmTag: blueocean-parent-1.27.22
 Plugin-ScmUrl: https://github.com/jenkinsci/blueocean-plugin
-Implementation-Build: 116d5464e9af650cff8e83065bd67d2f91efd2fc
+Implementation-Build: f12d9bef7c2e0fdc07e68a159d45d24670d46579
 

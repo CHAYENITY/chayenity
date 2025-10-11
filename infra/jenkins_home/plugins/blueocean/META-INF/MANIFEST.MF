@@ -1,27 +1,27 @@
 Manifest-Version: 1.0
-Created-By: Maven Archiver 3.6.0
-Build-Jdk-Spec: 17
+Created-By: Maven Archiver 3.6.4
+Build-Jdk-Spec: 21
 Specification-Title: Blue Ocean
 Specification-Version: 1.27
 Implementation-Title: Blue Ocean
-Implementation-Version: 1.27.21
+Implementation-Version: 1.27.22
 Group-Id: io.jenkins.blueocean
 Artifact-Id: blueocean
 Short-Name: blueocean
 Long-Name: Blue Ocean
 Url: https://github.com/jenkinsci/blueocean-plugin/blob/master/blueocean
  /doc/BlueOcean.adoc
-Plugin-Version: 1.27.21
+Plugin-Version: 1.27.22
 Hudson-Version: 2.479.3
 Jenkins-Version: 2.479.3
-Plugin-Dependencies: blueocean-bitbucket-pipeline:1.27.21,blueocean-comm
- ons:1.27.21,blueocean-config:1.27.21,blueocean-core-js:1.27.21,blueocea
- n-dashboard:1.27.21,blueocean-events:1.27.21,blueocean-executor-info:1.
- 27.21;resolution:=optional,blueocean-git-pipeline:1.27.21,blueocean-git
- hub-pipeline:1.27.21,blueocean-i18n:1.27.21,blueocean-jwt:1.27.21,blueo
- cean-personalization:1.27.21,blueocean-pipeline-api-impl:1.27.21,blueoc
- ean-pipeline-editor:1.27.21,blueocean-rest-impl:1.27.21,blueocean-rest:
- 1.27.21,blueocean-web:1.27.21,jenkins-design-language:1.27.21,blueocean
+Plugin-Dependencies: blueocean-bitbucket-pipeline:1.27.22,blueocean-comm
+ ons:1.27.22,blueocean-config:1.27.22,blueocean-core-js:1.27.22,blueocea
+ n-dashboard:1.27.22,blueocean-events:1.27.22,blueocean-executor-info:1.
+ 27.22;resolution:=optional,blueocean-git-pipeline:1.27.22,blueocean-git
+ hub-pipeline:1.27.22,blueocean-i18n:1.27.22,blueocean-jwt:1.27.22,blueo
+ cean-personalization:1.27.22,blueocean-pipeline-api-impl:1.27.22,blueoc
+ ean-pipeline-editor:1.27.22,blueocean-rest-impl:1.27.22,blueocean-rest:
+ 1.27.22,blueocean-web:1.27.22,jenkins-design-language:1.27.22,blueocean
  -display-url:2.4.4,pipeline-build-step:567.vea_ce550ece97,pipeline-mile
  stone-step:134.vdf60d179845f
 Plugin-Developers: Thorsten Iberian Sumurai:scherler:,Cliff Meyers:cliff
@@ -34,7 +34,7 @@ Plugin-License-Name: MIT License
 Plugin-License-Url: https://opensource.org/licenses/MIT
 Plugin-ScmConnection: scm:git:https://github.com/jenkinsci/blueocean-plu
  gin.git
-Plugin-ScmTag: blueocean-parent-1.27.21
+Plugin-ScmTag: blueocean-parent-1.27.22
 Plugin-ScmUrl: https://github.com/jenkinsci/blueocean-plugin
-Implementation-Build: 116d5464e9af650cff8e83065bd67d2f91efd2fc
+Implementation-Build: f12d9bef7c2e0fdc07e68a159d45d24670d46579
 
