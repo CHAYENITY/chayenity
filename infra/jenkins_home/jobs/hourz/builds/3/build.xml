@@ -1,0 +1,1051 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-build plugin="workflow-job@1551.v7320b_88b_d5e6">
+  <actions>
+    <hudson.model.CauseAction>
+      <causeBag class="linked-hash-map">
+        <entry>
+          <hudson.model.Cause_-UserIdCause>
+            <userId>admin</userId>
+          </hudson.model.Cause_-UserIdCause>
+          <int>1</int>
+        </entry>
+      </causeBag>
+    </hudson.model.CauseAction>
+    <jenkins.metrics.impl.TimeInQueueAction plugin="metrics@4.2.37-487.v7d6048d8733c">
+      <queuingDurationMillis>15</queuingDurationMillis>
+      <blockedDurationMillis>0</blockedDurationMillis>
+      <buildableDurationMillis>0</buildableDurationMillis>
+      <waitingDurationMillis>8</waitingDurationMillis>
+    </jenkins.metrics.impl.TimeInQueueAction>
+    <org.jenkinsci.plugins.workflow.libs.LibrariesAction plugin="pipeline-groovy-lib@766.v2b_e08c2e6ff2">
+      <libraries/>
+    </org.jenkinsci.plugins.workflow.libs.LibrariesAction>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.ExecutionModelAction plugin="pipeline-model-definition@2.2273.v643f36ed9e94">
+      <stagesUUID>c2d01961-c955-416b-b335-7a16fa6ddc07</stagesUUID>
+      <pipelineDefs>
+        <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTPipelineDef plugin="pipeline-model-api@2.2273.v643f36ed9e94">
+          <stages>
+            <stages>
+              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+                <name>Checkout</name>
+                <branches>
+                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                    <name>default</name>
+                    <steps>
+                      <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                        <name>checkout</name>
+                        <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTNamedArgumentList">
+                          <arguments class="linked-hash-map">
+                            <entry>
+                              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                                <key>scm</key>
+                              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-GStringValue>
+                                <value class="string">${scm}</value>
+                              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-GStringValue>
+                            </entry>
+                          </arguments>
+                        </args>
+                      </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                    </steps>
+                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                </branches>
+              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+                <name>Debug Branch Info</name>
+                <branches>
+                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                    <name>default</name>
+                    <steps>
+                      <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                        <name>sh</name>
+                        <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTNamedArgumentList">
+                          <arguments class="linked-hash-map">
+                            <entry>
+                              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                                <key>script</key>
+                              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                                <value class="string">
+                echo &quot;========================================&quot;
+                echo &quot;Current branch: $(git rev-parse --abbrev-ref HEAD)&quot;
+                echo &quot;Environment branch: $BRANCH_NAME&quot;
+                echo &quot;Git branch output:&quot;
+                git branch -a
+                echo &quot;========================================&quot;
+                </value>
+                              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                            </entry>
+                          </arguments>
+                        </args>
+                      </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                    </steps>
+                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                </branches>
+              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+                <name>Setup Python Environment</name>
+                <branches>
+                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                    <name>default</name>
+                    <steps>
+                      <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTreeStep>
+                        <name>dir</name>
+                        <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument">
+                          <value class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue$ConstantValue">
+                            <value class="string">server</value>
+                          </value>
+                        </args>
+                        <children>
+                          <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                            <name>sh</name>
+                            <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTNamedArgumentList">
+                              <arguments class="linked-hash-map">
+                                <entry>
+                                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                                    <key>script</key>
+                                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                                    <value class="string">
+                    echo &quot;===== Setting up Python Virtual Environment =====&quot;
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install poetry
+                    poetry config virtualenvs.create false
+                    
+                    echo &quot;===== Poetry version: $(poetry --version) =====&quot;
+                    
+                    echo &quot;===== Checking and updating poetry.lock =====&quot;
+                    if [ -f poetry.lock ]; then
+                        echo &quot;poetry.lock exists, checking if it needs update...&quot;
+                        if poetry install; then
+                            echo &quot;✅ Dependencies installed successfully&quot;
+                        else
+                            echo &quot;⚠️ Install failed, regenerating lock file...&quot;
+                            poetry lock
+                            poetry install
+                        fi
+                    else
+                        echo &quot;poetry.lock not found, generating...&quot;
+                        poetry lock
+                        poetry install
+                    fi
+                    
+
+                    echo &quot;Python version: $(python --version)&quot;
+                    echo &quot;Poetry version: $(poetry --version)&quot;
+                    pip list | grep -E &quot;pytest|coverage|poetry&quot;
+                    </value>
+                                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                                </entry>
+                              </arguments>
+                            </args>
+                          </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                        </children>
+                      </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTreeStep>
+                    </steps>
+                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                </branches>
+              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+                <name>Configure Test Environment (SQLite)</name>
+                <branches>
+                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                    <name>default</name>
+                    <steps>
+                      <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTreeStep>
+                        <name>dir</name>
+                        <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument">
+                          <value class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue$ConstantValue">
+                            <value class="string">server</value>
+                          </value>
+                        </args>
+                        <children>
+                          <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                            <name>sh</name>
+                            <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTNamedArgumentList">
+                              <arguments class="linked-hash-map">
+                                <entry>
+                                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                                    <key>script</key>
+                                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                                    <value class="string">
+                    echo &quot;===== Configuring SQLite for tests =====&quot;
+                    cat &gt; .env &lt;&lt; EOF
+                    ENVIRONMENT=test
+                    POSTGRES_SERVER=sqlite
+                    POSTGRES_DB=test.db
+                    POSTGRES_USER=test
+                    POSTGRES_PASSWORD=test
+                    POSTGRES_PORT=0
+                    REFRESH_SECRET_KEY=test_refresh_secret_key_for_ci
+                    ACCESS_SECRET_KEY=test_access_secret_key_for_ci
+                    FRONTEND_URL=http://localhost:3000
+                    BACKEND_URL=http://localhost:8000
+                    EOF
+
+                    echo &quot;Final .env:&quot;
+                    cat .env
+                    </value>
+                                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                                </entry>
+                              </arguments>
+                            </args>
+                          </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                        </children>
+                      </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTreeStep>
+                    </steps>
+                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                </branches>
+              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+                <name>SonarQube Analysis</name>
+                <branches>
+                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                    <name>default</name>
+                    <steps>
+                      <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTreeStep>
+                        <name>dir</name>
+                        <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument">
+                          <value class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue$ConstantValue">
+                            <value class="string">server</value>
+                          </value>
+                        </args>
+                        <children>
+                          <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTreeStep>
+                            <name>withSonarQubeEnv</name>
+                            <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument">
+                              <value class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue$ConstantValue">
+                                <value class="string">Sonarqube</value>
+                              </value>
+                            </args>
+                            <children>
+                              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                                <name>sh</name>
+                                <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTNamedArgumentList">
+                                  <arguments class="linked-hash-map">
+                                    <entry>
+                                      <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                                        <key>script</key>
+                                      </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                                      <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                                        <value class="string">
+                        if [ ! -f coverage.xml ]; then
+                            echo &quot;⚠️ No coverage.xml — SonarQube will run without coverage&quot;
+                        fi
+
+                        sonar-scanner                             -Dsonar.projectKey=hours-server                             -Dsonar.sources=app                             -Dsonar.python.coverage.reportPaths=coverage.xml                             -Dsonar.exclusions=**/*.pyc,**/.venv/**,**/venv/**,**/__pycache__/**,**/migrations/**,**/uploads/**,**/scripts/**
+                        </value>
+                                      </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                                    </entry>
+                                  </arguments>
+                                </args>
+                              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                            </children>
+                          </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTreeStep>
+                        </children>
+                      </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTreeStep>
+                    </steps>
+                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                </branches>
+              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+                <when>
+                  <conditions>
+                    <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                      <name>anyOf</name>
+                      <children>
+                        <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                          <name>branch</name>
+                          <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument">
+                            <value class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue$ConstantValue">
+                              <value class="string">main</value>
+                            </value>
+                          </args>
+                          <children/>
+                        </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                        <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                          <name>branch</name>
+                          <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument">
+                            <value class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue$ConstantValue">
+                              <value class="string">feat/CI-CD</value>
+                            </value>
+                          </args>
+                          <children/>
+                        </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                        <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                          <name>branch</name>
+                          <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument">
+                            <value class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue$ConstantValue">
+                              <value class="string">feature/*</value>
+                            </value>
+                          </args>
+                          <children/>
+                        </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                      </children>
+                    </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                  </conditions>
+                </when>
+                <name>Build Docker Image</name>
+                <branches>
+                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                    <name>default</name>
+                    <steps>
+                      <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTreeStep>
+                        <name>dir</name>
+                        <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument">
+                          <value class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue$ConstantValue">
+                            <value class="string">server</value>
+                          </value>
+                        </args>
+                        <children>
+                          <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                            <name>sh</name>
+                            <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTNamedArgumentList">
+                              <arguments class="linked-hash-map">
+                                <entry>
+                                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                                    <key>script</key>
+                                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                                    <value class="string">
+                    echo &quot;===== Building Docker Image =====&quot;
+                    docker build -t chayenity-server:latest .
+                    echo &quot;✅ Docker image built successfully&quot;
+                    docker images chayenity-server:latest
+                    </value>
+                                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                                </entry>
+                              </arguments>
+                            </args>
+                          </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                        </children>
+                      </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTreeStep>
+                    </steps>
+                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                </branches>
+              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+                <when>
+                  <conditions>
+                    <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                      <name>anyOf</name>
+                      <children>
+                        <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                          <name>branch</name>
+                          <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument">
+                            <value class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue$ConstantValue">
+                              <value class="string">main</value>
+                            </value>
+                          </args>
+                          <children/>
+                        </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                        <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                          <name>branch</name>
+                          <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument">
+                            <value class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue$ConstantValue">
+                              <value class="string">feat/CI-CD</value>
+                            </value>
+                          </args>
+                          <children/>
+                        </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                        <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                          <name>branch</name>
+                          <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument">
+                            <value class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue$ConstantValue">
+                              <value class="string">feature/*</value>
+                            </value>
+                          </args>
+                          <children/>
+                        </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                      </children>
+                    </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                  </conditions>
+                </when>
+                <name>Deploy Container</name>
+                <branches>
+                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                    <name>default</name>
+                    <steps>
+                      <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                        <name>sh</name>
+                        <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTNamedArgumentList">
+                          <arguments class="linked-hash-map">
+                            <entry>
+                              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                                <key>script</key>
+                              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                                <value class="string">
+                echo &quot;===== Deploying Container =====&quot;
+                # Stop and remove previous container if it exists
+                docker stop chayenity-server-container || true
+                docker rm chayenity-server-container || true
+                # Run the new container (adjust ports and environment as needed)
+                docker run -d                     --name chayenity-server-container                     -p 8000:8000                     -e POSTGRES_SERVER=sqlite                     -e POSTGRES_DB=test.db                     -e REFRESH_SECRET_KEY=test_refresh_secret_key_for_ci                     -e ACCESS_SECRET_KEY=test_access_secret_key_for_ci                     -e FRONTEND_URL=http://localhost:3000                     -e BACKEND_URL=http://localhost:8000                     chayenity-server:latest
+                echo &quot;✅ Container deployed successfully&quot;
+                docker ps
+                </value>
+                              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                            </entry>
+                          </arguments>
+                        </args>
+                      </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                    </steps>
+                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                </branches>
+              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+                <when>
+                  <conditions>
+                    <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                      <name>anyOf</name>
+                      <children>
+                        <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                          <name>branch</name>
+                          <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument">
+                            <value class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue$ConstantValue">
+                              <value class="string">main</value>
+                            </value>
+                          </args>
+                          <children/>
+                        </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                        <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                          <name>branch</name>
+                          <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument">
+                            <value class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue$ConstantValue">
+                              <value class="string">feat/CI-CD</value>
+                            </value>
+                          </args>
+                          <children/>
+                        </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                        <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                          <name>branch</name>
+                          <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument">
+                            <value class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue$ConstantValue">
+                              <value class="string">feature/*</value>
+                            </value>
+                          </args>
+                          <children/>
+                        </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                      </children>
+                    </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTWhenCondition>
+                  </conditions>
+                </when>
+                <name>Push to Docker Registry</name>
+                <branches>
+                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                    <name>default</name>
+                    <steps>
+                      <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTreeStep>
+                        <name>withCredentials</name>
+                        <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument">
+                          <value class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue$GStringValue">
+                            <value class="string">${[usernamePassword(
+                    credentialsId: &apos;dockerhub-cred&apos;, // Make sure this matches your Jenkins credential ID
+                    usernameVariable: &apos;DOCKER_USER&apos;,
+                    passwordVariable: &apos;DOCKER_PASS&apos;
+                )]}</value>
+                          </value>
+                        </args>
+                        <children>
+                          <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                            <name>sh</name>
+                            <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTNamedArgumentList">
+                              <arguments class="linked-hash-map">
+                                <entry>
+                                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                                    <key>script</key>
+                                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                                  <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                                    <value class="string">
+                    echo &quot;===== Pushing to Docker Registry =====&quot;
+                    echo &quot;$DOCKER_PASS&quot; | docker login -u &quot;$DOCKER_USER&quot; --password-stdin
+
+                    IMAGE_TAG=${BUILD_NUMBER:-latest}
+                    GIT_SHA=$(git rev-parse --short=8 HEAD 2&gt;/dev/null || echo &quot;unknown&quot;)
+
+                    # Tag and push different versions
+                    docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${IMAGE_TAG}
+                    docker push $DOCKER_USER/chayenity-server:${IMAGE_TAG}
+
+                    docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${GIT_SHA}
+                    docker push $DOCKER_USER/chayenity-server:${GIT_SHA}
+
+                    docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:latest
+                    docker push $DOCKER_USER/chayenity-server:latest
+
+                    docker logout
+
+                    echo &quot;✅ Pushed images:&quot;
+                    echo &quot;  - $DOCKER_USER/chayenity-server:${IMAGE_TAG}&quot;
+                    echo &quot;  - $DOCKER_USER/chayenity-server:${GIT_SHA}&quot;
+                    echo &quot;  - $DOCKER_USER/chayenity-server:latest&quot;
+                    </value>
+                                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                                </entry>
+                              </arguments>
+                            </args>
+                          </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                        </children>
+                      </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTreeStep>
+                    </steps>
+                  </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBranch>
+                </branches>
+              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage>
+            </stages>
+            <uuid>c2d01961-c955-416b-b335-7a16fa6ddc07</uuid>
+          </stages>
+          <postBuild>
+            <conditions>
+              <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBuildCondition>
+                <condition>always</condition>
+                <branch>
+                  <name>default</name>
+                  <steps>
+                    <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                      <name>echo</name>
+                      <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTNamedArgumentList">
+                        <arguments class="linked-hash-map">
+                          <entry>
+                            <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                              <key>message</key>
+                            </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                            <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                              <value class="string">Pipeline finished. Cleaning up...</value>
+                            </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                          </entry>
+                        </arguments>
+                      </args>
+                    </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                    <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                      <name>sh</name>
+                      <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTNamedArgumentList">
+                        <arguments class="linked-hash-map">
+                          <entry>
+                            <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                              <key>script</key>
+                            </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                            <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                              <value class="string">docker stop postgres-test 2&gt;/dev/null || true</value>
+                            </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                          </entry>
+                        </arguments>
+                      </args>
+                    </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                    <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                      <name>sh</name>
+                      <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTNamedArgumentList">
+                        <arguments class="linked-hash-map">
+                          <entry>
+                            <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                              <key>script</key>
+                            </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                            <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                              <value class="string">docker rm postgres-test 2&gt;/dev/null || true</value>
+                            </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                          </entry>
+                        </arguments>
+                      </args>
+                    </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                    <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                      <name>sh</name>
+                      <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTNamedArgumentList">
+                        <arguments class="linked-hash-map">
+                          <entry>
+                            <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                              <key>script</key>
+                            </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                            <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                              <value class="string">docker stop chayenity-server-container 2&gt;/dev/null || true</value>
+                            </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                          </entry>
+                        </arguments>
+                      </args>
+                    </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                    <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                      <name>sh</name>
+                      <args class="org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTNamedArgumentList">
+                        <arguments class="linked-hash-map">
+                          <entry>
+                            <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                              <key>script</key>
+                            </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                            <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                              <value class="string">docker rm chayenity-server-container 2&gt;/dev/null || true</value>
+                            </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                          </entry>
+                        </arguments>
+                      </args>
+                    </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep>
+                  </steps>
+                </branch>
+              </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTBuildCondition>
+            </conditions>
+          </postBuild>
+          <environment>
+            <variables class="linked-hash-map">
+              <entry>
+                <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                  <key>SONARQUBE</key>
+                </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTInternalFunctionCall>
+                  <name>credentials</name>
+                  <args>
+                    <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                      <value class="string">sonarqube_token</value>
+                    </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                  </args>
+                </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTInternalFunctionCall>
+              </entry>
+              <entry>
+                <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                  <key>REFRESH_SECRET_KEY</key>
+                </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                  <value class="string">test_refresh_secret_key_for_ci</value>
+                </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+              </entry>
+              <entry>
+                <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                  <key>ACCESS_SECRET_KEY</key>
+                </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                  <value class="string">test_access_secret_key_for_ci</value>
+                </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+              </entry>
+              <entry>
+                <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                  <key>FRONTEND_URL</key>
+                </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                  <value class="string">http://localhost:3000</value>
+                </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+              </entry>
+              <entry>
+                <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                  <key>BACKEND_URL</key>
+                </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTKey>
+                <org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+                  <value class="string">http://localhost:8000</value>
+                </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTValue_-ConstantValue>
+              </entry>
+            </variables>
+          </environment>
+          <agent>
+            <agentType>
+              <key>any</key>
+            </agentType>
+          </agent>
+        </org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTPipelineDef>
+      </pipelineDefs>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.ExecutionModelAction>
+    <hudson.plugins.git.util.BuildData plugin="git@5.8.0">
+      <buildsByBranchName>
+        <entry>
+          <string>refs/remotes/origin/feat/CI-CD</string>
+          <hudson.plugins.git.util.Build>
+            <marked plugin="git-client@6.4.0">
+              <sha1>e6643c4e9bb988c7470ac7f99228f6240452f793</sha1>
+              <branches class="list">
+                <hudson.plugins.git.Branch>
+                  <sha1 reference="../../../sha1"/>
+                  <name>refs/remotes/origin/feat/CI-CD</name>
+                </hudson.plugins.git.Branch>
+              </branches>
+            </marked>
+            <revision reference="../marked"/>
+            <hudsonBuildNumber>3</hudsonBuildNumber>
+          </hudson.plugins.git.util.Build>
+        </entry>
+      </buildsByBranchName>
+      <lastBuild reference="../buildsByBranchName/entry/hudson.plugins.git.util.Build"/>
+      <remoteUrls>
+        <string>https://github.com/CHAYENITY/hourz.git</string>
+      </remoteUrls>
+    </hudson.plugins.git.util.BuildData>
+    <org.jenkinsci.plugins.workflow.steps.scm.MultiSCMRevisionState plugin="workflow-scm-step@452.vdf1ca_c8d3a_87">
+      <revisionStates>
+        <entry>
+          <string>git https://github.com/CHAYENITY/hourz.git</string>
+          <hudson.scm.SCMRevisionState_-None/>
+        </entry>
+      </revisionStates>
+    </org.jenkinsci.plugins.workflow.steps.scm.MultiSCMRevisionState>
+    <com.cloudbees.plugins.credentials.builds.CredentialsParameterBinder plugin="credentials@1447.v4cb_b_539b_5321">
+      <boundCredentials class="concurrent-hash-map"/>
+    </com.cloudbees.plugins.credentials.builds.CredentialsParameterBinder>
+    <hudson.plugins.sonar.action.SonarMarkerAction plugin="sonar@2.18"/>
+    <hudson.plugins.sonar.action.SonarAnalysisAction plugin="sonar@2.18">
+      <installationName>Sonarqube</installationName>
+      <installationUrl>http://172.17.0.2:9000</installationUrl>
+      <ceTaskId>0853d24d-a085-46db-ad42-98ca6f2b4b8b</ceTaskId>
+      <url>http://172.17.0.2:9000/dashboard?id=hours-server</url>
+      <serverUrl>http://172.17.0.2:9000</serverUrl>
+      <isNew>true</isNew>
+      <isSkipped>false</isSkipped>
+    </hudson.plugins.sonar.action.SonarAnalysisAction>
+    <org.jenkinsci.plugins.workflow.cps.EnvActionImpl plugin="workflow-cps@4209.v83c4e257f1e9">
+      <env class="tree-map"/>
+    </org.jenkinsci.plugins.workflow.cps.EnvActionImpl>
+    <jenkins.metrics.impl.SubTaskTimeInQueueAction plugin="metrics@4.2.37-487.v7d6048d8733c">
+      <queuingDurationMillis>24</queuingDurationMillis>
+      <blockedDurationMillis>0</blockedDurationMillis>
+      <buildableDurationMillis>18</buildableDurationMillis>
+      <waitingDurationMillis>2</waitingDurationMillis>
+      <executingDurationMillis>349264</executingDurationMillis>
+      <workUnitCount>1</workUnitCount>
+    </jenkins.metrics.impl.SubTaskTimeInQueueAction>
+  </actions>
+  <queueId>5</queueId>
+  <timestamp>1760195724354</timestamp>
+  <startTime>1760195724429</startTime>
+  <result>SUCCESS</result>
+  <duration>356454</duration>
+  <charset>UTF-8</charset>
+  <keepLog>false</keepLog>
+  <execution class="org.jenkinsci.plugins.workflow.cps.CpsFlowExecution">
+    <result>SUCCESS</result>
+    <script>pipeline {
+    agent any
+
+    environment {
+        // SonarQube token (stored in Jenkins credentials)
+        SONARQUBE = credentials(&apos;sonarqube_token&apos;)
+        
+        // Test secrets (safe for CI)
+        REFRESH_SECRET_KEY = &apos;test_refresh_secret_key_for_ci&apos;
+        ACCESS_SECRET_KEY = &apos;test_access_secret_key_for_ci&apos;
+        FRONTEND_URL = &apos;http://localhost:3000&apos;
+        BACKEND_URL = &apos;http://localhost:8000&apos;
+    }
+
+    stages {
+        stage(&apos;Checkout&apos;) {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage(&apos;Debug Branch Info&apos;) {
+            steps {
+                sh &apos;&apos;&apos;
+                echo &quot;========================================&quot;
+                echo &quot;Current branch: $(git rev-parse --abbrev-ref HEAD)&quot;
+                echo &quot;Environment branch: $BRANCH_NAME&quot;
+                echo &quot;Git branch output:&quot;
+                git branch -a
+                echo &quot;========================================&quot;
+                &apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Setup Python Environment&apos;) {
+            steps {
+                dir(&apos;server&apos;) {
+                    sh &apos;&apos;&apos;
+                    echo &quot;===== Setting up Python Virtual Environment =====&quot;
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install poetry
+                    poetry config virtualenvs.create false
+                    
+                    echo &quot;===== Poetry version: $(poetry --version) =====&quot;
+                    
+                    echo &quot;===== Checking and updating poetry.lock =====&quot;
+                    if [ -f poetry.lock ]; then
+                        echo &quot;poetry.lock exists, checking if it needs update...&quot;
+                        if poetry install; then
+                            echo &quot;✅ Dependencies installed successfully&quot;
+                        else
+                            echo &quot;⚠️ Install failed, regenerating lock file...&quot;
+                            poetry lock
+                            poetry install
+                        fi
+                    else
+                        echo &quot;poetry.lock not found, generating...&quot;
+                        poetry lock
+                        poetry install
+                    fi
+                    
+
+                    echo &quot;Python version: $(python --version)&quot;
+                    echo &quot;Poetry version: $(poetry --version)&quot;
+                    pip list | grep -E &quot;pytest|coverage|poetry&quot;
+                    &apos;&apos;&apos;
+                }
+            }
+        }
+
+        stage(&apos;Configure Test Environment (SQLite)&apos;) {
+            steps {
+                dir(&apos;server&apos;) {
+                    sh &apos;&apos;&apos;
+                    echo &quot;===== Configuring SQLite for tests =====&quot;
+                    cat &gt; .env &lt;&lt; EOF
+                    ENVIRONMENT=test
+                    POSTGRES_SERVER=sqlite
+                    POSTGRES_DB=test.db
+                    POSTGRES_USER=test
+                    POSTGRES_PASSWORD=test
+                    POSTGRES_PORT=0
+                    REFRESH_SECRET_KEY=test_refresh_secret_key_for_ci
+                    ACCESS_SECRET_KEY=test_access_secret_key_for_ci
+                    FRONTEND_URL=http://localhost:3000
+                    BACKEND_URL=http://localhost:8000
+                    EOF
+
+                    echo &quot;Final .env:&quot;
+                    cat .env
+                    &apos;&apos;&apos;
+                }
+            }
+        }
+
+//         stage(&apos;Run Tests &amp; Generate Coverage&apos;) {
+//             steps {
+//                 dir(&apos;server&apos;) {
+//                     sh &apos;&apos;&apos;
+//                     . venv/bin/activate
+
+//                     echo &quot;=== Verifying configuration ===&quot;
+                    
+//                     # Create a temporary Python script
+//                     cat &gt; verify_config.py &lt;&lt; &apos;EOF&apos;
+// try:
+//     from app.configs.app_config import app_config
+//     print(&apos;✅ Configuration loaded successfully&apos;)
+//     print(f&apos;DB URI: {app_config.SQLALCHEMY_DATABASE_URI}&apos;)
+// except Exception as e:
+//     print(f&apos;❌ Configuration failed: {e}&apos;)
+//     exit(1)
+// EOF
+
+//                     python verify_config.py
+//                     rm verify_config.py
+
+//                     #echo &quot;=== Running tests ===&quot;
+//                     #pytest app/tests/ \
+//                         #--maxfail=1 \
+//                         #--disable-warnings \
+//                         #-v \
+//                         #--cov=app \
+//                         #--cov-report=xml:coverage.xml \
+//                         #--cov-report=term-missing \
+//                         #--ignore=app/tests/dev \
+//                         #--ignore=app/tests/integration
+
+//                     if [ -f coverage.xml ]; then
+//                         echo &quot;✅ Coverage report generated&quot;
+//                         ls -lh coverage.xml
+//                     else
+//                         echo &quot;⚠️ Warning: coverage.xml not found&quot;
+//                     fi
+//                     &apos;&apos;&apos;
+//                 }
+//             }
+//         }
+
+        stage(&apos;SonarQube Analysis&apos;) {
+            steps {
+                dir(&apos;server&apos;) {
+                    withSonarQubeEnv(&apos;Sonarqube&apos;) {
+                        sh &apos;&apos;&apos;
+                        if [ ! -f coverage.xml ]; then
+                            echo &quot;⚠️ No coverage.xml — SonarQube will run without coverage&quot;
+                        fi
+
+                        sonar-scanner \
+                            -Dsonar.projectKey=hours-server \
+                            -Dsonar.sources=app \
+                            -Dsonar.python.coverage.reportPaths=coverage.xml \
+                            -Dsonar.exclusions=**/*.pyc,**/.venv/**,**/venv/**,**/__pycache__/**,**/migrations/**,**/uploads/**,**/scripts/**
+                        &apos;&apos;&apos;
+                    }
+                }
+            }
+        }
+
+        // ===== DEPLOYMENT STAGES =====
+        stage(&apos;Build Docker Image&apos;) {
+            when {
+                anyOf {
+                    branch &apos;main&apos;
+                    branch &apos;feat/CI-CD&apos;
+                    branch &apos;feature/*&apos;
+                }
+            }
+            steps {
+                dir(&apos;server&apos;) {
+                    sh &apos;&apos;&apos;
+                    echo &quot;===== Building Docker Image =====&quot;
+                    docker build -t chayenity-server:latest .
+                    echo &quot;✅ Docker image built successfully&quot;
+                    docker images chayenity-server:latest
+                    &apos;&apos;&apos;
+                }
+            }
+        }
+
+        stage(&apos;Deploy Container&apos;) {
+            when {
+                anyOf {
+                    branch &apos;main&apos;
+                    branch &apos;feat/CI-CD&apos;
+                    branch &apos;feature/*&apos;
+                }
+            }
+            steps {
+                sh &apos;&apos;&apos;
+                echo &quot;===== Deploying Container =====&quot;
+                # Stop and remove previous container if it exists
+                docker stop chayenity-server-container || true
+                docker rm chayenity-server-container || true
+                # Run the new container (adjust ports and environment as needed)
+                docker run -d \
+                    --name chayenity-server-container \
+                    -p 8000:8000 \
+                    -e POSTGRES_SERVER=sqlite \
+                    -e POSTGRES_DB=test.db \
+                    -e REFRESH_SECRET_KEY=test_refresh_secret_key_for_ci \
+                    -e ACCESS_SECRET_KEY=test_access_secret_key_for_ci \
+                    -e FRONTEND_URL=http://localhost:3000 \
+                    -e BACKEND_URL=http://localhost:8000 \
+                    chayenity-server:latest
+                echo &quot;✅ Container deployed successfully&quot;
+                docker ps
+                &apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Push to Docker Registry&apos;) {
+            when {
+                anyOf {
+                    branch &apos;main&apos;
+                    branch &apos;feat/CI-CD&apos;
+                    branch &apos;feature/*&apos;
+                }
+            }
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: &apos;dockerhub-cred&apos;, // Make sure this matches your Jenkins credential ID
+                    usernameVariable: &apos;DOCKER_USER&apos;,
+                    passwordVariable: &apos;DOCKER_PASS&apos;
+                )]) {
+                    sh &apos;&apos;&apos;
+                    echo &quot;===== Pushing to Docker Registry =====&quot;
+                    echo &quot;$DOCKER_PASS&quot; | docker login -u &quot;$DOCKER_USER&quot; --password-stdin
+
+                    IMAGE_TAG=${BUILD_NUMBER:-latest}
+                    GIT_SHA=$(git rev-parse --short=8 HEAD 2&gt;/dev/null || echo &quot;unknown&quot;)
+
+                    # Tag and push different versions
+                    docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${IMAGE_TAG}
+                    docker push $DOCKER_USER/chayenity-server:${IMAGE_TAG}
+
+                    docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${GIT_SHA}
+                    docker push $DOCKER_USER/chayenity-server:${GIT_SHA}
+
+                    docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:latest
+                    docker push $DOCKER_USER/chayenity-server:latest
+
+                    docker logout
+
+                    echo &quot;✅ Pushed images:&quot;
+                    echo &quot;  - $DOCKER_USER/chayenity-server:${IMAGE_TAG}&quot;
+                    echo &quot;  - $DOCKER_USER/chayenity-server:${GIT_SHA}&quot;
+                    echo &quot;  - $DOCKER_USER/chayenity-server:latest&quot;
+                    &apos;&apos;&apos;
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo &quot;Pipeline finished. Cleaning up...&quot;
+            // Clean up any leftover test containers
+            sh &apos;docker stop postgres-test 2&gt;/dev/null || true&apos;
+            sh &apos;docker rm postgres-test 2&gt;/dev/null || true&apos;
+            
+            // Clean up deployment container if needed
+            sh &apos;docker stop chayenity-server-container 2&gt;/dev/null || true&apos;
+            sh &apos;docker rm chayenity-server-container 2&gt;/dev/null || true&apos;
+        }
+    }
+}</script>
+    <loadedScripts class="linked-hash-map"/>
+    <durabilityHint>MAX_SURVIVABILITY</durabilityHint>
+    <timings class="map">
+      <entry>
+        <string>flowNode</string>
+        <long>4024357185</long>
+      </entry>
+      <entry>
+        <string>classLoad</string>
+        <long>2684902305</long>
+      </entry>
+      <entry>
+        <string>runQueue</string>
+        <long>36946727821</long>
+      </entry>
+      <entry>
+        <string>run</string>
+        <long>34118638805</long>
+      </entry>
+      <entry>
+        <string>parse</string>
+        <long>866097127</long>
+      </entry>
+      <entry>
+        <string>saveProgram</string>
+        <long>24751950850</long>
+      </entry>
+    </timings>
+    <internalCalls class="sorted-set">
+      <string>hudson.model.Result.fromString</string>
+      <string>org.jenkinsci.plugins.pipeline.StageStatus.TAG_NAME</string>
+      <string>org.jenkinsci.plugins.workflow.job.WorkflowRun.result</string>
+    </internalCalls>
+    <sandbox>true</sandbox>
+    <iota>89</iota>
+    <head>1:89</head>
+    <done>true</done>
+    <resumeBlocked>false</resumeBlocked>
+    <storageDir>workflow-completed</storageDir>
+  </execution>
+  <completed>true</completed>
+  <checkouts class="hudson.util.PersistedList">
+    <org.jenkinsci.plugins.workflow.job.WorkflowRun_-SCMCheckout>
+      <scm class="hudson.plugins.git.GitSCM" plugin="git@5.8.0">
+        <configVersion>2</configVersion>
+        <userRemoteConfigs>
+          <hudson.plugins.git.UserRemoteConfig>
+            <url>https://github.com/CHAYENITY/hourz.git</url>
+          </hudson.plugins.git.UserRemoteConfig>
+        </userRemoteConfigs>
+        <branches>
+          <hudson.plugins.git.BranchSpec>
+            <name>*/feat/CI-CD</name>
+          </hudson.plugins.git.BranchSpec>
+        </branches>
+        <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+        <submoduleCfg class="empty-list"/>
+        <extensions/>
+      </scm>
+      <node></node>
+      <workspace>/var/jenkins_home/workspace/hourz</workspace>
+      <changelogFile>/var/jenkins_home/jobs/hourz/builds/3/changelog16056995170409786688.xml</changelogFile>
+      <pollingBaseline class="hudson.scm.SCMRevisionState$None" reference="../../../actions/org.jenkinsci.plugins.workflow.steps.scm.MultiSCMRevisionState/revisionStates/entry/hudson.scm.SCMRevisionState_-None"/>
+    </org.jenkinsci.plugins.workflow.job.WorkflowRun_-SCMCheckout>
+    <org.jenkinsci.plugins.workflow.job.WorkflowRun_-SCMCheckout>
+      <scm class="hudson.plugins.git.GitSCM" reference="../../org.jenkinsci.plugins.workflow.job.WorkflowRun_-SCMCheckout/scm"/>
+      <node></node>
+      <workspace>/var/jenkins_home/workspace/hourz</workspace>
+      <pollingBaseline class="hudson.scm.SCMRevisionState$None" reference="../../../actions/org.jenkinsci.plugins.workflow.steps.scm.MultiSCMRevisionState/revisionStates/entry/hudson.scm.SCMRevisionState_-None"/>
+    </org.jenkinsci.plugins.workflow.job.WorkflowRun_-SCMCheckout>
+  </checkouts>
+</flow-build>

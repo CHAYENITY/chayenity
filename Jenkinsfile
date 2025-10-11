@@ -162,7 +162,7 @@ pipeline {
         // ===== DEPLOYMENT STAGES =====
         stage('Build Docker Image') {
             when {
-                branch 'feat/CI-CD'
+                branch pattern: "*/feat/CI-CD", comparator: "GLOB"
             }
             steps {
                 dir('server') {
@@ -178,7 +178,7 @@ pipeline {
 
         stage('Deploy Container') {
             when {
-                branch 'feat/CI-CD'
+                branch pattern: "*/feat/CI-CD", comparator: "GLOB"
             }
             steps {
                 sh '''
@@ -205,7 +205,7 @@ pipeline {
 
         stage('Push to Docker Registry') {
             when {
-                branch 'feat/CI-CD'
+                branch pattern: "*/feat/CI-CD", comparator: "GLOB"
             }
             steps {
                 withCredentials([usernamePassword(
