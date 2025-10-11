@@ -61,7 +61,6 @@ pipeline {
                         poetry install
                     fi
                     
-                    pip install pytest-cov
 
                     echo "Python version: $(python --version)"
                     echo "Poetry version: $(poetry --version)"
