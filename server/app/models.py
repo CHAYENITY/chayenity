@@ -43,16 +43,16 @@ class User(Base):
     __tablename__ = "user"
     id = Column(String, primary_key=True, default=lambda: str(uuid4()))
     email = Column(String, unique=True, index=True, nullable=False)
+    phone_number = Column(String, unique=True, index=True, nullable=False)
+
     hashed_password = Column(String, nullable=False)
 
-    first_name = Column(String, nullable=True)
-    last_name = Column(String, nullable=True)
-    phone_number = Column(String, nullable=True)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
     bio = Column(String, nullable=True)
     additional_contact = Column(String, nullable=True)
     profile_image_url = Column(String, nullable=True)
 
-    is_profile_setup = Column(Boolean, default=False)
     is_available = Column(Boolean, default=False)
     is_verified = Column(Boolean, default=False)
     reputation_score = Column(Float, default=5.0)
@@ -61,7 +61,7 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 
-    address_id = Column(String, ForeignKey("address.id"), unique=True)
+    address_id = Column(String, ForeignKey("address.id"), unique=True, nullable=False)
 
     address = relationship("Address", back_populates="user", uselist=False)
     # gigs_created = relationship("Gig", back_populates="seeker", foreign_keys="Gig.seeker_id")

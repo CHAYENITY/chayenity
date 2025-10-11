@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db
 from app.crud.buddy_crud import buddy_crud
-from app.crud import user_crud
+from app.modules.users import user_crud
 from app.schemas.buddy_schemas import (
     BuddyCreate,
     BuddyResponse,

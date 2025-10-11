@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 from app.database.session import get_db
 from app.models import User
-from app.crud.user_crud import get_user_by_id
+from app.modules.users.user_crud import get_user_by_id
 from app.configs.app_config import app_config
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

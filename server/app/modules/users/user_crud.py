@@ -5,16 +5,22 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
-
 from app.models import User, Address
-from app.schemas.user_schema import (
+from app.schemas.api_schema import CreateOut, UpdateOut
+
+from app.modules.users.user_schema import (
     UserCreate,
-    UserProfileUpsert,
+    UserUpdate,
 )
 
 
 async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
     result = await db.execute(select(User).where(User.email == email.lower()))
+    return result.scalar_one_or_none()
+
+
+async def get_user_by_phone_number(db: AsyncSession, phone_number: str) -> User | None:
+    result = await db.execute(select(User).filter(User.phone_number == phone_number))
     return result.scalar_one_or_none()
 
 
@@ -25,103 +31,79 @@ async def get_user_by_id(db: AsyncSession, user_id: str) -> User | None:
     return result.scalar_one_or_none()
 
 
-async def create_user(db: AsyncSession, user: UserCreate, password_hash: str) -> User:
+async def create_user(db: AsyncSession, user: UserCreate, password_hash: str) -> CreateOut:
+    address = Address(
+        address_line=user.address.address_line,
+        district=user.address.district,
+        province=user.address.province,
+        postal_code=user.address.postal_code,
+        country=user.address.country,
+    )
+    if user.address.latitude is not None and user.address.longitude is not None:
+        point = WKTElement(
+            f"POINT({user.address.longitude} {user.address.latitude})",
+            srid=4326,
+        )
+        address.location = point  # type: ignore
+
+    db.add(address)
+    await db.flush()
+
     db_user = User(
         email=user.email,
+        phone_number=user.phone_number,
         hashed_password=password_hash,
-        is_profile_setup=False,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        bio=user.bio,
+        additional_contact=user.additional_contact,
+        address_id=address.id,
     )
+    db.add(db_user)
     try:
-        db.add(db_user)
         await db.flush()
         await db.commit()
-        await db.refresh(db_user)
-        return db_user
+        return CreateOut(success=True)
     except IntegrityError as exc:
         await db.rollback()
-        raise HTTPException(status_code=409, detail="Email already registered") from exc
+        raise HTTPException(
+            status_code=409, detail="Email or Phone number already registered"
+        ) from exc
     except Exception as exc:
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Internal server error: {exc}") from exc
 
 
-async def upsert_user_profile(db: AsyncSession, id: str, user_profile: UserProfileUpsert) -> User:
+async def update_user(db: AsyncSession, id: str, user_update: UserUpdate) -> UpdateOut:
     db_user = await get_user_by_id(db, id)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    is_setup = getattr(db_user, "is_profile_setup", False)
+    # Update user fields (excluding address)
+    for field, value in user_update.model_dump(exclude_unset=True).items():
+        if field != "address":
+            setattr(db_user, field, value)
 
-    # * CREATE PROFILE
-    if not is_setup:
-        for field, value in user_profile.model_dump(exclude_unset=True).items():
-            if field != "address":
-                setattr(db_user, field, value)
-        setattr(db_user, "is_profile_setup", True)
-
-        address_data = getattr(user_profile, "address", None)
-        if address_data:
-            address = Address(
-                address_line=address_data.address_line,
-                district=address_data.district,
-                province=address_data.province,
-                postal_code=address_data.postal_code,
-                country=address_data.country,
-            )
+    # Update address if provided
+    address_data = getattr(user_update, "address", None)
+    if address_data:
+        address = await db.get(Address, db_user.address_id)
+        if address:
+            for field, value in address_data.model_dump(exclude_unset=True).items():
+                if field not in ("latitude", "longitude"):
+                    setattr(address, field, value)
             if address_data.latitude is not None and address_data.longitude is not None:
                 point = WKTElement(
                     f"POINT({address_data.longitude} {address_data.latitude})",
                     srid=4326,
                 )
                 address.location = point  # type: ignore
-            db.add(address)
-            await db.flush()
-            db_user.address_id = address.id
-
-    # * UPDATE PROFILE
-    else:
-        for field, value in user_profile.model_dump(exclude_unset=True).items():
-            if field != "address":
-                setattr(db_user, field, value)
-
-        address_data = getattr(user_profile, "address", None)
-        if address_data:
-            if db_user.address_id is not None:
-                address = await db.get(Address, db_user.address_id)
-                if address:
-                    for field, value in address_data.model_dump(exclude_unset=True).items():
-                        if field not in ("latitude", "longitude"):
-                            setattr(address, field, value)
-                    if address_data.latitude is not None and address_data.longitude is not None:
-                        point = WKTElement(
-                            f"POINT({address_data.longitude} {address_data.latitude})",
-                            srid=4326,
-                        )
-                        address.location = point  # type: ignore
-            else:
-                address = Address(
-                    address_line=address_data.address_line,
-                    district=address_data.district,
-                    province=address_data.province,
-                    postal_code=address_data.postal_code,
-                    country=address_data.country,
-                )
-                if address_data.latitude is not None and address_data.longitude is not None:
-                    point = WKTElement(
-                        f"POINT({address_data.longitude} {address_data.latitude})",
-                        srid=4326,
-                    )
-                    address.location = point  # type: ignore
-                db.add(address)
-                await db.flush()
-                db_user.address_id = address.id
     try:
         await db.commit()
-        await db.refresh(db_user)
-        return db_user
+        return UpdateOut(success=True)
     except IntegrityError as exc:
         await db.rollback()
-        raise HTTPException(status_code=400, detail="Failed to upsert user profile") from exc
+        raise HTTPException(status_code=400, detail="Failed to update user") from exc
 
 
 # async def verify_user(db: AsyncSession, user_id: UUID) -> User:
@@ -256,7 +238,7 @@ async def upsert_user_profile(db: AsyncSession, id: str, user_profile: UserProfi
 #     ]
 
 
-# async def get_user_profile(db: AsyncSession, user_id: UUID) -> User:
+# async def get_user_update(db: AsyncSession, user_id: UUID) -> User:
 #     """Get complete user profile including all fields"""
 #     stmt = select(User).where(User.id == user_id)
 #     result = await db.execute(stmt)

@@ -19,7 +19,7 @@ from app.schemas.transaction_schema import (
     PaymentSummarySchema
 )
 from app.crud.transaction_crud import TransactionCRUD
-from app.crud import user_crud as UserCRUD
+from app.modules.users import user_crud as UserCRUD
 from app.crud.gig_crud import GigCRUD
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])

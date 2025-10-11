@@ -19,7 +19,7 @@ from app.schemas.review_schema import (
     ReviewStatsSchema
 )
 from app.crud.review_crud import ReviewCRUD
-from app.crud import user_crud as UserCRUD
+from app.modules.users import user_crud as UserCRUD
 from app.crud.gig_crud import GigCRUD
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])

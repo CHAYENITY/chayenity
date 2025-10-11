@@ -2,14 +2,15 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User
-from app.schemas.api_schema import UpsertOut
-from app.schemas.user_schema import (
-    UserOut,
-    UserProfileUpsert,
-)
-from app.crud import user_crud
+from app.schemas.api_schema import UpdateOut
 from app.database.session import get_db
 from app.security import get_current_user_with_access_token
+
+from app.modules.users.user_schema import (
+    UserOut,
+    UserUpdate,
+)
+from app.modules.users import user_crud
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -19,14 +20,14 @@ async def read_me(current_user: User = Depends(get_current_user_with_access_toke
     return current_user
 
 
-@router.put("/profile", response_model=UpsertOut)
-async def upsert_user_profile(
-    profile_setup: UserProfileUpsert,
+@router.put("/me", response_model=UpdateOut)
+async def update_me(
+    user_update: UserUpdate,
     current_user: User = Depends(get_current_user_with_access_token),
     db: AsyncSession = Depends(get_db),
 ):
-    await user_crud.upsert_user_profile(db, str(current_user.id), profile_setup)
-    return {"success": True}
+    result = await user_crud.update_user(db, str(current_user.id), user_update)
+    return result
 
 
 # @router.put("/me", response_model=UserOut)
