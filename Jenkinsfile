@@ -159,84 +159,89 @@ pipeline {
             }
         }
 
-        // ===== DEPLOYMENT STAGES =====
         stage('Build Docker Image') {
-            when {
-                branch pattern: "*/feat/CI-CD", comparator: "GLOB"
-            }
             steps {
-                dir('server') {
-                    sh '''
-                    echo "===== Building Docker Image ====="
-                    docker build -t chayenity-server:latest .
-                    echo "✅ Docker image built successfully"
-                    docker images chayenity-server:latest
-                    '''
+                script {
+                    // This command reliably finds the branch name even in a detached HEAD state
+                    def branch_ref = sh(returnStdout: true, script: 'git name-rev --name-only HEAD').trim()
+                    echo "Detected branch reference: ${branch_ref}"
+
+                    // Check if the branch reference ends with the name we want
+                    if (branch_ref.endsWith('feat/CI-CD')) {
+                        echo "Branch is feat/CI-CD, running build..."
+                        dir('server') {
+                            sh '''
+                            echo "===== Building Docker Image ====="
+                            docker build -t chayenity-server:latest .
+                            echo "✅ Docker image built successfully"
+                            docker images chayenity-server:latest
+                            '''
+                        }
+                    } else {
+                        echo "Skipping stage because branch is '${branch_ref}', not 'feat/CI-CD'."
+                    }
                 }
             }
         }
 
         stage('Deploy Container') {
-            when {
-                branch pattern: "*/feat/CI-CD", comparator: "GLOB"
-            }
             steps {
-                sh '''
-                echo "===== Deploying Container ====="
-                # Stop and remove previous container if it exists
-                docker stop chayenity-server-container || true
-                docker rm chayenity-server-container || true
-                # Run the new container (adjust ports and environment as needed)
-                docker run -d \
-                    --name chayenity-server-container \
-                    -p 8000:8000 \
-                    -e POSTGRES_SERVER=sqlite \
-                    -e POSTGRES_DB=test.db \
-                    -e REFRESH_SECRET_KEY=test_refresh_secret_key_for_ci \
-                    -e ACCESS_SECRET_KEY=test_access_secret_key_for_ci \
-                    -e FRONTEND_URL=http://localhost:3000 \
-                    -e BACKEND_URL=http://localhost:8000 \
-                    chayenity-server:latest
-                echo "✅ Container deployed successfully"
-                docker ps
-                '''
+                script {
+                    def branch_ref = sh(returnStdout: true, script: 'git name-rev --name-only HEAD').trim()
+                    if (branch_ref.endsWith('feat/CI-CD')) {
+                        echo "Branch is feat/CI-CD, running deploy..."
+                        sh '''
+                        echo "===== Deploying Container ====="
+                        docker stop chayenity-server-container || true
+                        docker rm chayenity-server-container || true
+                        docker run -d \
+                            --name chayenity-server-container \
+                            -p 8000:8000 \
+                            -e POSTGRES_SERVER=sqlite \
+                            -e POSTGRES_DB=test.db \
+                            -e REFRESH_SECRET_KEY=test_refresh_secret_key_for_ci \
+                            -e ACCESS_SECRET_KEY=test_access_secret_key_for_ci \
+                            -e FRONTEND_URL=http://localhost:3000 \
+                            -e BACKEND_URL=http://localhost:8000 \
+                            chayenity-server:latest
+                        echo "✅ Container deployed successfully"
+                        docker ps
+                        '''
+                    } else {
+                        echo "Skipping stage because branch is '${branch_ref}', not 'feat/CI-CD'."
+                    }
+                }
             }
         }
 
         stage('Push to Docker Registry') {
-            when {
-                branch pattern: "*/feat/CI-CD", comparator: "GLOB"
-            }
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-cred', // Make sure this matches your Jenkins credential ID
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh '''
-                    echo "===== Pushing to Docker Registry ====="
-                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-
-                    IMAGE_TAG=${BUILD_NUMBER:-latest}
-                    GIT_SHA=$(git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
-
-                    # Tag and push different versions
-                    docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${IMAGE_TAG}
-                    docker push $DOCKER_USER/chayenity-server:${IMAGE_TAG}
-
-                    docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${GIT_SHA}
-                    docker push $DOCKER_USER/chayenity-server:${GIT_SHA}
-
-                    docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:latest
-                    docker push $DOCKER_USER/chayenity-server:latest
-
-                    docker logout
-
-                    echo "✅ Pushed images:"
-                    echo "  - $DOCKER_USER/chayenity-server:${IMAGE_TAG}"
-                    echo "  - $DOCKER_USER/chayenity-server:${GIT_SHA}"
-                    echo "  - $DOCKER_USER/chayenity-server:latest"
-                    '''
+                script {
+                    def branch_ref = sh(returnStdout: true, script: 'git name-rev --name-only HEAD').trim()
+                    if (branch_ref.endsWith('feat/CI-CD')) {
+                        echo "Branch is feat/CI-CD, running push..."
+                        withCredentials([usernamePassword(
+                            credentialsId: 'dockerhub-cred',
+                            usernameVariable: 'DOCKER_USER',
+                            passwordVariable: 'DOCKER_PASS'
+                        )]) {
+                            sh '''
+                            echo "===== Pushing to Docker Registry ====="
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                            IMAGE_TAG=${BUILD_NUMBER:-latest}
+                            GIT_SHA=$(git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
+                            docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${IMAGE_TAG}
+                            docker push $DOCKER_USER/chayenity-server:${IMAGE_TAG}
+                            docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:${GIT_SHA}
+                            docker push $DOCKER_USER/chayenity-server:${GIT_SHA}
+                            docker tag chayenity-server:latest $DOCKER_USER/chayenity-server:latest
+                            docker push $DOCKER_USER/chayenity-server:latest
+                            docker logout
+                            '''
+                        }
+                    } else {
+                        echo "Skipping stage because branch is '${branch_ref}', not 'feat/CI-CD'."
+                    }
                 }
             }
         }
