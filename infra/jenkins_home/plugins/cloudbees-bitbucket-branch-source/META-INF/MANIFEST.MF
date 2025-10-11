@@ -1,0 +1,35 @@
+Manifest-Version: 1.0
+Created-By: Maven Archiver 3.6.4
+Build-Jdk-Spec: 17
+Specification-Title: Bitbucket Branch Source Plugin
+Specification-Version: 937.1
+Implementation-Title: Bitbucket Branch Source Plugin
+Implementation-Version: 937.1.0
+Group-Id: org.jenkins-ci.plugins
+Artifact-Id: cloudbees-bitbucket-branch-source
+Short-Name: cloudbees-bitbucket-branch-source
+Long-Name: Bitbucket Branch Source Plugin
+Url: https://github.com/jenkinsci/bitbucket-branch-source-plugin
+Compatible-Since-Version: 937.0.0
+Plugin-Version: 937.1.0
+Hudson-Version: 2.504.1
+Jenkins-Version: 2.504.1
+Plugin-Dependencies: apache-httpcomponents-client-5-api:5.5-166.v870a_96
+ 374f91,commons-collections4-api:4.5.0-8.va_d5448ef9011,commons-lang3-ap
+ i:3.18.0-98.v3a_674c06072d,configuration-as-code:1985.vdda_32d0c4ea_b_;
+ resolution:=optional,authentication-tokens:1.144.v5ff4a_5ec5c33,display
+ -url-api:2.217.va_6b_de84cc74b_,git:5.7.0,handy-uri-templates-2-api:2.1
+ .8-36.v85e4cb_234a_13,jackson2-api:2.19.2-408.v18248a_324cfe,plain-cred
+ entials:199.v9f8e1f741799,scm-api:707.v749f968369d4,structs:353.v261ea_
+ 40a_80fb_
+Plugin-Developers: Antonio Muniz:amuniz:,Bobby Sandell:rsandell:,Vivek P
+ andey:vivek:,Joseph Petersen:casz:,Nikolas Falco:nfalco79:
+Plugin-License-Name: MIT License
+Plugin-License-Url: https://opensource.org/licenses/MIT
+Plugin-ScmConnection: scm:git:https://github.com/jenkinsci/bitbucket-bra
+ nch-source-plugin.git
+Plugin-ScmTag: 937.1.0
+Plugin-ScmUrl: https://github.com/jenkinsci/bitbucket-branch-source-plug
+ in
+Implementation-Build: 3531693acbeb7d81985f4d0b30893a5beceb4592
+

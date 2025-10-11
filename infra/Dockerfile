@@ -1,7 +1,8 @@
 FROM jenkins/jenkins:lts-jdk17
+
 USER root
 
-# Install Docker CLI only (no daemon)
+# Install Docker CLI and dependencies
 RUN apt-get update && \
     apt-get install -y curl gnupg lsb-release && \
     curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
@@ -11,19 +12,16 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Python 3.11, venv, and pip explicitly (fixes the first error)
+# Install Python 3.11, venv, and pip
 RUN apt-get update && \
     apt-get install -y python3.11 python3.11-venv python3-pip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Make python3.11 the default 'python3' command
+# Make python3.11 the default python3
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
-# Verify installation
-RUN python3 --version && pip3 --version
-
-# Install Poetry using the system pip, respecting PEP 668 (fixes the second error)
+# Install Poetry
 RUN python3 -m pip install --no-cache-dir --break-system-packages poetry
 
 # Install SonarScanner CLI
@@ -37,11 +35,14 @@ RUN cd /tmp && \
     chown -R jenkins:jenkins ${SONAR_SCANNER_HOME}
 ENV PATH=${SONAR_SCANNER_HOME}/bin:${PATH}
 
-# Verify SonarScanner installation
-RUN sonar-scanner -v
-
-# Note: Do NOT add jenkins user to docker group inside container for DooD
-# The group 'docker' may not exist and is unnecessary for socket access.
-# Ensure the container is run with -v /var/run/docker.sock:/var/run/docker.sock
+# Create the docker group manually and add jenkins user to it
+RUN groupadd -f docker && \
+    usermod -aG docker jenkins
 
 USER jenkins
+
+# Verify installations
+RUN python3 --version && \
+    pip3 --version && \
+    poetry --version && \
+    sonar-scanner -v

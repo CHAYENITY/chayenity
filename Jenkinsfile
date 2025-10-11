@@ -15,7 +15,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/CHAYENITY/hourz.git'
+                git 'https://github.com/CHAYENITY/hourz.git'
             }
         }
 
