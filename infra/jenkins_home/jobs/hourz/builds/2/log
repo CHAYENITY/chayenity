@@ -1,0 +1,583 @@
+Started by user [8mha:////4HiZOlxIGJgA79+Q1LEx+zEhhZpkqdF9Pnb6jMFcO1fsAAAAlx+LCAAAAAAAAP9b85aBtbiIQTGjNKU4P08vOT+vOD8nVc83PyU1x6OyILUoJzMv2y+/JJUBAhiZGBgqihhk0NSjKDWzXb3RdlLBUSYGJk8GtpzUvPSSDB8G5tKinBIGIZ+sxLJE/ZzEvHT94JKizLx0a6BxUmjGOUNodHsLgAzWEgZu/dLi1CL9xJTczDwAj6GcLcAAAAA=[0madmin
+Obtained Jenkinsfile from git https://github.com/CHAYENITY/hourz.git
+[8mha:////4KedhLfCrQHRIHLal5mXKnC2XpfYb7f8/k/Llz+Ae6wqAAAAoh+LCAAAAAAAAP9tjTEOwjAQBM8BClpKHuFItIiK1krDC0x8GCfWnbEdkooX8TX+gCESFVvtrLSa5wtWKcKBo5UdUu8otU4GP9jS5Mixv3geZcdn2TIl9igbHBs2eJyx4YwwR1SwULBGaj0nRzbDRnX6rmuvydanHMu2V1A5c4MHCFXMWcf8hSnC9jqYxPTz/BXAFEIGsfuclm8zQVqFvQAAAA==[0m[Pipeline] Start of Pipeline
+[8mha:////4IrZuKkd+go3CaOfAAHEuH4bznjOWe8yCSYyYFFcDw/5AAAApR+LCAAAAAAAAP9tjTEOwjAUQ3+KOrAycohUghExsUZZOEFIQkgb/d8mKe3EibgadyBQiQlLlmxL1nu+oE4RjhQdby12HpP2vA+jK4lPFLtroIm3dOGaMFGwXNpJkrGnpUrKFhaxClYC1hZ1oOTRZdiIVt1VExS65pxj2Q4CKm8GeAAThZxVzN8yR9jeRpMIf5y/AJj7DGxXvP/86jduZBmjwAAAAA==[0m[Pipeline] node
+Running on [8mha:////4FN7z0LjteFgNtAqx72txiCLGEI94y32MMFUdyYAhvEUAAAAoR+LCAAAAAAAAP9b85aBtbiIQTGjNKU4P08vOT+vOD8nVc83PyU1x6OyILUoJzMv2y+/JJUBAhiZGBgqihhk0NSjKDWzXb3RdlLBUSYGJk8GtpzUvPSSDB8G5tKinBIGIZ+sxLJE/ZzEvHT94JKizLx0a6BxUmjGOUNodHsLgAz2EgZR/eT83ILSktQifY2k0sycEt3MPE19AHHxbH3KAAAA[0mJenkins in /var/jenkins_home/workspace/hourz
+[8mha:////4MMNNqjoFnmJ3XuL9Z5qpBp+hcNdd78sBNR0OzQPvT5lAAAApR+LCAAAAAAAAP9tjTEOwjAUQ3+KOrAycoh0gA0xsUZZOEFIQkgb/d8mKe3EibgadyBQiQlLlmxL1nu+oE4RjhQdby12HpP2vA+jK4lPFLtroIm3dOGaMFGwXNpJkrGnpUrKFhaxClYC1hZ1oOTRZdiIVt1VExS65pxj2Q4CKm8GeAAThZxVzN8yR9jeRpMIf5y/AJj7DGxXvP/86jfoP95RwAAAAA==[0m[Pipeline] {
+[8mha:////4JYjrzxWY6BCPObHj0oZg78WrwL5cu+WELlRrcL7JCuTAAAApR+LCAAAAAAAAP9tjTEOwjAUQ3+KOrAycoh0gQkxsUZZOEFIQkgb/d8mKe3EibgadyBQiQlLlmxL1nu+oE4RjhQdby12HpP2vA+jK4lPFLtroIm3dOGaMFGwXNpJkrGnpUrKFhaxClYC1hZ1oOTRZdiIVt1VExS65pxj2Q4CKm8GeAAThZxVzN8yR9jeRpMIf5y/AJj7DGxXvP/86jc09154wAAAAA==[0m[Pipeline] stage
+[8mha:////4DVqrqldCdussN4q7FJjrFqK7tf0Rrl0XAtkYuBBWNT1AAAApR+LCAAAAAAAAP9tjTEOwjAUQ3+KOrAycoh0ggUxsUZZOEFIQkgb/d8mKe3EibgadyBQiQlLlmxL1nu+oE4RjhQdby12HpP2vA+jK4lPFLtroIm3dOGaMFGwXNpJkrGnpUrKFhaxClYC1hZ1oOTRZdiIVt1VExS65pxj2Q4CKm8GeAAThZxVzN8yR9jeRpMIf5y/AJj7DGxXvP/86jek7ggRwAAAAA==[0m[Pipeline] { (Declarative: Checkout SCM)
+[8mha:////4EkTWLbNvw1sD4FTcv9G+sU814Yda8xzaq3+PjOVu/UzAAAAoh+LCAAAAAAAAP9tjTEOAiEURD9rLGwtPQTbaWGsbAmNJ0AWEZb8zwLrbuWJvJp3kLiJlZNMMm+a93rDOic4UbLcG+wdZu14DKOti0+U+lugiXu6ck2YKRguzSSpM+cFJRUDS1gDKwEbgzpQdmgLbIVXD9UGhba9lFS/o4DGdQM8gYlqLiqVL8wJdvexy4Q/z18BzLEA29ce4gfg7KmOvAAAAA==[0m[Pipeline] checkout
+The recommended git tool is: git
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/jenkins_home/workspace/hourz/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/CHAYENITY/hourz.git # timeout=10
+Fetching upstream changes from https://github.com/CHAYENITY/hourz.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.39.5'
+ > git fetch --tags --force --progress -- https://github.com/CHAYENITY/hourz.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/feat/CI-CD^{commit} # timeout=10
+Checking out Revision e6643c4e9bb988c7470ac7f99228f6240452f793 (refs/remotes/origin/feat/CI-CD)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f e6643c4e9bb988c7470ac7f99228f6240452f793 # timeout=10
+Commit message: "refactor(Jenkinsfile):chage check out point"
+ > git rev-list --no-walk 789dddee7352aba1852769c7e76c9146b64d25dd # timeout=10
+[8mha:////4OtKA2IjocbdWWe0k0YBVUHOKhxP1HlaNidpOTyuIGCJAAAAoh+LCAAAAAAAAP9tjTEOAiEURD9rLGwtPQTbGRNjZUtoPAGyiLDkfxZYdytP5NW8g8RNrJxkknnTvNcb1jnBiZLl3mDvMGvHYxhtXXyi1N8CTdzTlWvCTMFwaSZJnTkvKKkYWMIaWAnYGNSBskNbYCu8eqg2KLTtpaT6HQU0rhvgCUxUc1GpfGFOsLuPXSb8ef4KYI6xADvU7j9Dg2gqvAAAAA==[0m[Pipeline] }
+[8mha:////4OvZmrl9hdC7IvjHgcibbAcFW8SrFMBdipo3CtgswK7xAAAAoh+LCAAAAAAAAP9tjTEOAiEURD9rLGwtPQRbWRhjZUtoPAGyiLDkfxZYdytP5NW8g8RNrJxkknnTvNcb1jnBiZLl3mDvMGvHYxhtXXyi1N8CTdzTlWvCTMFwaSZJnTkvKKkYWMIaWAnYGNSBskNbYCu8eqg2KLTtpaT6HQU0rhvgCUxUc1GpfGFOsLuPXSb8ef4KYI6xADvU7j9J+wGOvAAAAA==[0m[Pipeline] // stage
+[8mha:////4MGrFVBKXsiZ8Hn9U191ecIeJi6AKQdIo4vdte4+RbM8AAAAph+LCAAAAAAAAP9tjTEOwjAQBM9BKWgpeYQDEh2iorXc8AITG+PEugv2haTiRXyNPxCIRMVWOyut5vmCMic4UPKycdgGzHWQXez91ORAqb1EGmRDZ1kTZopOajdosu44oyZ2MEcUsFCwdFhHygE9w0o15m6qaNBXJ07TtldQBHuDBwg1mdkk/sKYYH3tbSb8ef4KYOwYxI6h2G4+x/INtuQqUcEAAAA=[0m[Pipeline] withEnv
+[8mha:////4NcF2DUMIlKlSN7aZLdgHQGmh+RfrMOoc+JcOwN/ACgXAAAApR+LCAAAAAAAAP9tjTEOwjAUQ3+DOrAycoiUzoiJNerCCUITQtLo/zZJSSdOxNW4Ay2VmPBg2Zas93pDGQOcKBjuNHYWY2t570czJ54pdDdPmTu68pYwkte80bkhpc9rbShpWFUw2AjYamw9RYsmwU44+ZCVl2iqSwrzdhTArBrgCYWYyUmG9C1TgP19VJHwx/kLgKlPwOrDYvXyLD8BobDcwgAAAA==[0m[Pipeline] {
+[8mha:////4Gi9Ak41Eb+hqlABt2Z1THQZi7IZiyhnZJa85OhowLuIAAAAph+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUZUVMrFEWThCaEJJG/7dJSjpxIq7GHWipxIQHy7ZkvdcbqhjgRMEwp7GzGFvLej+aObFMobt5yszRlbWEkbxmQmdBSp/XKihpWFWUsOGw1dh6ihZNgh138iFrL9HUlxTm7cihtGqAJxR8JicZ0rdMAfb3UUXCH+cvAKY+Qdk0ix2WZ/UBbwyqm8IAAAA=[0m[Pipeline] withCredentials
+Masking supported pattern matches of $SONARQUBE
+[8mha:////4JZTNLTRLzmHuYl0XUyRn3SuD5FszzwIDW+9rN0in2vrAAAAph+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUwIiYukZZOEFoQkgb/V9+UtqJE3E17kBLJSY8WLYl673eUESGE7ETjcXWY6y96ELvpiQG4vYaaBANXURNGClYoeygyNhqqYqShUVZDisJa4t1oOjRJdjIRj90GTS68px42o4Scm/u8IRMTuSkOX3LyLC99SYS/jh/ATB2CfLdfrbD/Cw+y7kUycIAAAA=[0m[Pipeline] {
+[8mha:////4Ce+1HqKqGwfVYdss2J+XFw9pGuZ2x4U0LCM8F7xISivAAAApx+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUCDbE1DXKwglCE0La6P/yk9JOnIircQdaKjHhwbItWe/1hiIynIidaCy2HmPtRRd6NyUxELfXQINo6CJqwkjBCmUHRcZWS1WULCzKclhJWFusA0WPLsFGNvqhy6DRlefE03aUkHtzhydkciInzelbRobtrTeR8Mf5C4CxS5Dv9rMd5mfxAbNWnxXCAAAA[0m[Pipeline] withEnv
+[8mha:////4P0aS7/oWvRpSlGv+q9ESqZGdHVM/eqflUlV0/ExtxtNAAAApx+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUSDAhpq5RFk4QmhDSRv+Xn5R24kRcjTvQUokJD5ZtyXqvNxSR4UTsRGOx9RhrL7rQuymJgbi9BhpEQxdRE0YKVig7KDK2WqqiZGFRlsNKwtpiHSh6dAk2stEPXQaNrjwnnrajhNybOzwhkxM5aU7fMjJsb72JhD/OXwCMXYJ8t5/tMD+LD5WQ+PfCAAAA[0m[Pipeline] {
+[8mha:////4FNJaj0WqR2S4/R67oerOrnfXg/WpdScPLwH1Mudq6ojAAAApx+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUDLAgpq5RFk4QmhDSRv+Xn5R24kRcjTvQUokJD5ZtyXqvNxSR4UTsRGOx9RhrL7rQuymJgbi9BhpEQxdRE0YKVig7KDK2WqqiZGFRlsNKwtpiHSh6dAk2stEPXQaNrjwnnrajhNybOzwhkxM5aU7fMjJsb72JhD/OXwCMXYJ8t5/tMD+LD/s94rDCAAAA[0m[Pipeline] stage
+[8mha:////4Ps0i1tlBTJ6JT6iKMLieBr3djTS37A2YXvxuV9hA8MIAAAApx+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohULDAgpq5RFk4QmhDSRv+Xn5R24kRcjTvQUokJD5ZtyXqvNxSR4UTsRGOx9RhrL7rQuymJgbi9BhpEQxdRE0YKVig7KDK2WqqiZGFRlsNKwtpiHSh6dAk2stEPXQaNrjwnnrajhNybOzwhkxM5aU7fMjJsb72JhD/OXwCMXYJ8t5/tMD+LD1+IXOLCAAAA[0m[Pipeline] { (Checkout)
+[8mha:////4A0f1A2VHm9T3jJnQ3tIlFFx2/qxhfUGrqam3/7KfhBKAAAApB+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOIiKpAQVVrLDS8wsTFOrDtjOyQVL+Jr/IFAJCq2WO1sM88XLFOEI0eLraHOUWocBt/baeHAsbt4HrDlMzZMib1BaQbJ2tQzSs4G5hQlLASsDDWekyObYS1adVeVV2SrU47TdxBQOn2DBxRiMmcV8xfGCJtrrxPTz/NXAGPIUG53n9qHNxXfVKy+AAAA[0m[Pipeline] checkout
+The recommended git tool is: git
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/jenkins_home/workspace/hourz/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/CHAYENITY/hourz.git # timeout=10
+Fetching upstream changes from https://github.com/CHAYENITY/hourz.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.39.5'
+ > git fetch --tags --force --progress -- https://github.com/CHAYENITY/hourz.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/feat/CI-CD^{commit} # timeout=10
+Checking out Revision e6643c4e9bb988c7470ac7f99228f6240452f793 (refs/remotes/origin/feat/CI-CD)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f e6643c4e9bb988c7470ac7f99228f6240452f793 # timeout=10
+Commit message: "refactor(Jenkinsfile):chage check out point"
+[8mha:////4LddHqAcZx/llxPKH6cI4y+RNIBN0gUoWoK8TOv5+h8nAAAApB+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOIiKoQQVVrLDS8wsTFOrDtjOyQVL+Jr/IFAJCq2WO1sM88XLFOEI0eLraHOUWocBt/baeHAsbt4HrDlMzZMib1BaQbJ2tQzSs4G5hQlLASsDDWekyObYS1adVeVV2SrU47TdxBQOn2DBxRiMmcV8xfGCJtrrxPTz/NXAGMIGcrt/lO7N9Jjga++AAAA[0m[Pipeline] }
+[8mha:////4KBSySciEaeJtH6udKaxb/SZGXVwQhHEkYfxiXizn3m0AAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOICFDQoFa3lhheYxBgn1l2wHZyKF/E1/oBFJCq2WO1sM683LIOHmr3BTlNvKTQWBzeavDCx76+OE3Z8wYYpsNModZLc6tOMkqOGOUUJCwErTY3jYMlEWItOPVTlFJnqHH3+jgJK297hCYXI5qh8/MLkYXMb28D08/wVwDQMEcr9Ntfu8AERGGHOvgAAAA==[0m[Pipeline] // stage
+[8mha:////4D48+35AGd98TtYXyAmc9O8m3rgI7hl+Fe1xacDF8u8QAAAAqB+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohURWJCTF2jLpwgNCEkjf4vSUo6cSKuxh0IVGLCg2Vbst7zBVXwcCSvmVU4GAy9YaObdE4skR8ujhKzdGY9YSCnWKdSR1K1S+0oKlhUlLDisFbYOwoGdYQNt+IuaidQ16fo83bgUBp5gwcUPJOj8PFbZg/b6yQD4Y/zFwDzGKFs9tl2zedZvQHeFw+cwgAAAA==[0m[Pipeline] stage
+[8mha:////4OxTazPu4rShOBLz7lpcHJxDY6kccytmPRm3alVCzBpQAAAAph+LCAAAAAAAAP9tjTEOwjAUQ3+DOrAycohUdEVMrFEXThCaEJJG/7dJSjpxIq7GHWipxIQHy7ZkvdcbyhjgRMFwp7GzGFvLez+aOfFMobt5ytzRlbeEkbzmjc4NKX1ea0NJw6qCwUbAVmPrKVo0CXbCyYesvERTXVKYt6MAZtUATyjETE4ypG+ZAuzvo4qEP85fAEx9AlYfFquXZ/kBAsTc3cIAAAA=[0m[Pipeline] { (Debug Branch Info)
+[8mha:////4M5b5zwyIT8hyi+0MNbvp8xFt2gcocOdD4NtBHSmyyGzAAAAox+LCAAAAAAAAP9tjTESwiAURH/iWNhaeggyE0vHypah8QSYIEKY/wkQSeWJvJp3EM2MlVvs7NvmPV+wjgGOFDSzCgeDsTPMu0mXxTKF4eooM0sX1hFGcooJlQX16rSgoKRgSVXDisNGYecoGtQJttzKu2ycRN2cUyjfgUNt+hEeUPFiTjKkL8wBdrepj4Q/z18BzD5B3baf2vs3w5BRkb4AAAA=[0m[Pipeline] sh
++ echo ========================================
+========================================
++ git rev-parse --abbrev-ref HEAD
++ echo Current branch: HEAD
+Current branch: HEAD
++ echo Environment branch: 
+Environment branch: 
++ echo Git branch output:
+Git branch output:
++ git branch -a
+* (HEAD detached at e6643c4)
+  remotes/origin/feat/CI-CD
+  remotes/origin/feat/srv/buddy-system
+  remotes/origin/feat/srv/set-up-sql-model
+  remotes/origin/main
++ echo ========================================
+========================================
+[8mha:////4DOiQ191Rxv/OvJY8a3+d1LiPmcVZwvp7+BR0E7uCSfuAAAApB+LCAAAAAAAAP9tjbEOwiAURV9rHFwd/QiaNG7GyZWw+AXYIkLJexSodPKL/DX/QbSJk3e4uecu5/mCdQxwpKCZVTgYjJ1h3k26LJYpDFdHmVm6sI4wklNMqCyoV6cFBSUFS6oaVhw2CjtH0aBOsOVW3mXjJOrmnEL5Dhxq04/wgIoXc5IhfWEOsLtNfST8ef4KYPY+Qd3uP9W+Ad3NsHm+AAAA[0m[Pipeline] }
+[8mha:////4O5Yo0TIaN/m8yRGE+f0mpt+8ZZ2CEGGo7Zu9B386jgGAAAApB+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOIikKgQVVrLDS8wsTFOrDtjOyQVL+Jr/IFAJCq2WO1sM88XLFOEI0eLraHOUWocBt/baeHAsbt4HrDlMzZMib1BaQbJ2tQzSs4G5hQlLASsDDWekyObYS1adVeVV2SrU47TdxBQOn2DBxRiMmcV8xfGCJtrrxPTz/NXAGMIGcrd/lPbN8JP5Su+AAAA[0m[Pipeline] // stage
+[8mha:////4PnUGBLbAoNaVIXmKR1EVGnzmnRA6p5H9qCNw4MM3xExAAAAqB+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUIMGCOrFGXThBaEJIGv1fkpR04kRcjTsQqMSEB8u2ZL3nC6rgoSGvmVXYGwydYYMbdU4ske8vjhKzdGYdYSCnWKtSS1Id59pSVDCrKGHBYamwcxQM6ggrbsVd1E6grk/R5+3AoTTyBg8oeCZH4eO3TB7W11EGwh/nLwCmIUK52WXb7j/P6g1mJwqBwgAAAA==[0m[Pipeline] stage
+[8mha:////4DStDQmNO4Xj/a1C1MFC4j5aQRwpuMRXlCM2HrhNjolwAAAAqB+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUYoABMXWNsnCC0ISQNvq//KS0EyfiatyBlkpMeLBsS9Z7vaGIDCdiJxqLrcdYe9GF3k1JDMTtNdAgGrqImjBSsELZQZGx1VIVJQuLshxWEtYW60DRo0uwkY1+6DJodOU58bQdJeTe3OEJmZzISXP6lpFhe+tNJPxx/gJg7BLku/1sh/lZfAAyQCqkwgAAAA==[0m[Pipeline] { (Setup Python Environment)
+[8mha:////4LBgpOkb/anX/q6+X8h1xetOP9zYobk1/AmSro5dxohoAAAAqB+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUYgEJMXWNsnCC0ISQNvq//KS0EyfiatyBlkpMeLBsS9Z7vaGIDCdiJxqLrcdYe9GF3k1JDMTtNdAgGrqImjBSsELZQZGx1VIVJQuLshxWEtYW60DRo0uwkY1+6DJodOU58bQdJeTe3OEJmZzISXP6lpFhe+tNJPxx/gJg7BLku/1sh/lZfAAnLfKUwgAAAA==[0m[Pipeline] dir
+Running in /var/jenkins_home/workspace/hourz/server
+[8mha:////4FNWlrKPgkB6UnRUMbFzvWgQloWohpD40tze3tW4s7M1AAAApx+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUYgIhpq5RFk4QmhDSRv+Xn5R24kRcjTvQUokJD5ZtyXqvNxSR4UTsRGOx9RhrL7rQuymJgbi9BhpEQxdRE0YKVig7KDK2WqqiZGFRlsNKwtpiHSh6dAk2stEPXQaNrjwnnrajhNybOzwhkxM5aU7fMjJsb72JhD/OXwCMXYJ8t5/tMD+LD0QKVszCAAAA[0m[Pipeline] {
+[8mha:////4BPkgDhsQgowynMA2CC2gMMC+3X8maHSCLx79/YRn8P3AAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOKCoEIoFa3lhheYxBgn1l2wHZyKF/E1/oBFJCq2WO1sM683LIOHmr3BTlNvKTQWBzeavDCx76+OE3Z8wYYpsNModZLc6tOMkqOGOUUJCwErTY3jYMlEWItOPVTlFJnqHH3+jgJK297hCYXI5qh8/MLkYXMb28D08/wVwDREKHeHXPvt8AHN/bm5vgAAAA==[0m[Pipeline] sh
++ echo ===== Setting up Python Virtual Environment =====
+===== Setting up Python Virtual Environment =====
++ python3 -m venv venv
++ . venv/bin/activate
++ deactivate nondestructive
++ [ -n  ]
++ [ -n  ]
++ [ -n  -o -n  ]
++ [ -n  ]
++ unset VIRTUAL_ENV
++ unset VIRTUAL_ENV_PROMPT
++ [ ! nondestructive = nondestructive ]
++ VIRTUAL_ENV=/var/jenkins_home/workspace/hourz/server/venv
++ export VIRTUAL_ENV
++ _OLD_VIRTUAL_PATH=/opt/sonar-scanner/bin:/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
++ PATH=/var/jenkins_home/workspace/hourz/server/venv/bin:/opt/sonar-scanner/bin:/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
++ export PATH
++ [ -n  ]
++ [ -z  ]
++ _OLD_VIRTUAL_PS1=$ 
++ PS1=(venv) $ 
++ export PS1
++ VIRTUAL_ENV_PROMPT=(venv) 
++ export VIRTUAL_ENV_PROMPT
++ [ -n  -o -n  ]
++ pip install --upgrade pip
+Requirement already satisfied: pip in ./venv/lib/python3.11/site-packages (23.0.1)
+Collecting pip
+  Downloading pip-25.2-py3-none-any.whl (1.8 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 3.5 MB/s eta 0:00:00
+Installing collected packages: pip
+  Attempting uninstall: pip
+    Found existing installation: pip 23.0.1
+    Uninstalling pip-23.0.1:
+      Successfully uninstalled pip-23.0.1
+Successfully installed pip-25.2
++ pip install poetry
+Collecting poetry
+  Downloading poetry-2.2.1-py3-none-any.whl.metadata (7.4 kB)
+Collecting build<2.0.0,>=1.2.1 (from poetry)
+  Downloading build-1.3.0-py3-none-any.whl.metadata (5.6 kB)
+Collecting cachecontrol<0.15.0,>=0.14.0 (from cachecontrol[filecache]<0.15.0,>=0.14.0->poetry)
+  Downloading cachecontrol-0.14.3-py3-none-any.whl.metadata (3.1 kB)
+Collecting cleo<3.0.0,>=2.1.0 (from poetry)
+  Downloading cleo-2.1.0-py3-none-any.whl.metadata (12 kB)
+Collecting dulwich<0.25.0,>=0.24.0 (from poetry)
+  Downloading dulwich-0.24.2-cp311-cp311-manylinux_2_28_x86_64.whl.metadata (5.4 kB)
+Collecting fastjsonschema<3.0.0,>=2.18.0 (from poetry)
+  Downloading fastjsonschema-2.21.2-py3-none-any.whl.metadata (2.3 kB)
+Collecting findpython<0.8.0,>=0.6.2 (from poetry)
+  Downloading findpython-0.7.0-py3-none-any.whl.metadata (5.4 kB)
+Collecting installer<0.8.0,>=0.7.0 (from poetry)
+  Downloading installer-0.7.0-py3-none-any.whl.metadata (936 bytes)
+Collecting keyring<26.0.0,>=25.1.0 (from poetry)
+  Downloading keyring-25.6.0-py3-none-any.whl.metadata (20 kB)
+Collecting packaging>=24.2 (from poetry)
+  Downloading packaging-25.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting pbs-installer<2026.0.0,>=2025.1.6 (from pbs-installer[download,install]<2026.0.0,>=2025.1.6->poetry)
+  Downloading pbs_installer-2025.10.10-py3-none-any.whl.metadata (992 bytes)
+Collecting pkginfo<2.0,>=1.12 (from poetry)
+  Downloading pkginfo-1.12.1.2-py3-none-any.whl.metadata (13 kB)
+Collecting platformdirs<5,>=3.0.0 (from poetry)
+  Downloading platformdirs-4.5.0-py3-none-any.whl.metadata (12 kB)
+Collecting poetry-core==2.2.1 (from poetry)
+  Downloading poetry_core-2.2.1-py3-none-any.whl.metadata (3.8 kB)
+Collecting pyproject-hooks<2.0.0,>=1.0.0 (from poetry)
+  Downloading pyproject_hooks-1.2.0-py3-none-any.whl.metadata (1.3 kB)
+Collecting requests<3.0,>=2.26 (from poetry)
+  Downloading requests-2.32.5-py3-none-any.whl.metadata (4.9 kB)
+Collecting requests-toolbelt<2.0.0,>=1.0.0 (from poetry)
+  Downloading requests_toolbelt-1.0.0-py2.py3-none-any.whl.metadata (14 kB)
+Collecting shellingham<2.0,>=1.5 (from poetry)
+  Downloading shellingham-1.5.4-py2.py3-none-any.whl.metadata (3.5 kB)
+Collecting tomlkit<1.0.0,>=0.11.4 (from poetry)
+  Downloading tomlkit-0.13.3-py3-none-any.whl.metadata (2.8 kB)
+Collecting trove-classifiers>=2022.5.19 (from poetry)
+  Downloading trove_classifiers-2025.9.11.17-py3-none-any.whl.metadata (2.4 kB)
+Collecting virtualenv>=20.26.6 (from poetry)
+  Downloading virtualenv-20.35.3-py3-none-any.whl.metadata (4.6 kB)
+Collecting msgpack<2.0.0,>=0.5.2 (from cachecontrol<0.15.0,>=0.14.0->cachecontrol[filecache]<0.15.0,>=0.14.0->poetry)
+  Downloading msgpack-1.1.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.1 kB)
+Collecting filelock>=3.8.0 (from cachecontrol[filecache]<0.15.0,>=0.14.0->poetry)
+  Downloading filelock-3.20.0-py3-none-any.whl.metadata (2.1 kB)
+Collecting crashtest<0.5.0,>=0.4.1 (from cleo<3.0.0,>=2.1.0->poetry)
+  Downloading crashtest-0.4.1-py3-none-any.whl.metadata (1.1 kB)
+Collecting rapidfuzz<4.0.0,>=3.0.0 (from cleo<3.0.0,>=2.1.0->poetry)
+  Downloading rapidfuzz-3.14.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (12 kB)
+Collecting urllib3>=2.2.2 (from dulwich<0.25.0,>=0.24.0->poetry)
+  Downloading urllib3-2.5.0-py3-none-any.whl.metadata (6.5 kB)
+Collecting typing_extensions>=4.0 (from dulwich<0.25.0,>=0.24.0->poetry)
+  Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting SecretStorage>=3.2 (from keyring<26.0.0,>=25.1.0->poetry)
+  Downloading secretstorage-3.4.0-py3-none-any.whl.metadata (3.9 kB)
+Collecting jeepney>=0.4.2 (from keyring<26.0.0,>=25.1.0->poetry)
+  Downloading jeepney-0.9.0-py3-none-any.whl.metadata (1.2 kB)
+Collecting importlib_metadata>=4.11.4 (from keyring<26.0.0,>=25.1.0->poetry)
+  Downloading importlib_metadata-8.7.0-py3-none-any.whl.metadata (4.8 kB)
+Collecting jaraco.classes (from keyring<26.0.0,>=25.1.0->poetry)
+  Downloading jaraco.classes-3.4.0-py3-none-any.whl.metadata (2.6 kB)
+Collecting jaraco.functools (from keyring<26.0.0,>=25.1.0->poetry)
+  Downloading jaraco_functools-4.3.0-py3-none-any.whl.metadata (2.9 kB)
+Collecting jaraco.context (from keyring<26.0.0,>=25.1.0->poetry)
+  Downloading jaraco.context-6.0.1-py3-none-any.whl.metadata (4.1 kB)
+Collecting httpx<1,>=0.27.0 (from pbs-installer[download,install]<2026.0.0,>=2025.1.6->poetry)
+  Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+Collecting zstandard>=0.21.0 (from pbs-installer[download,install]<2026.0.0,>=2025.1.6->poetry)
+  Downloading zstandard-0.25.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (3.3 kB)
+Collecting anyio (from httpx<1,>=0.27.0->pbs-installer[download,install]<2026.0.0,>=2025.1.6->poetry)
+  Downloading anyio-4.11.0-py3-none-any.whl.metadata (4.1 kB)
+Collecting certifi (from httpx<1,>=0.27.0->pbs-installer[download,install]<2026.0.0,>=2025.1.6->poetry)
+  Downloading certifi-2025.10.5-py3-none-any.whl.metadata (2.5 kB)
+Collecting httpcore==1.* (from httpx<1,>=0.27.0->pbs-installer[download,install]<2026.0.0,>=2025.1.6->poetry)
+  Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Collecting idna (from httpx<1,>=0.27.0->pbs-installer[download,install]<2026.0.0,>=2025.1.6->poetry)
+  Downloading idna-3.10-py3-none-any.whl.metadata (10 kB)
+Collecting h11>=0.16 (from httpcore==1.*->httpx<1,>=0.27.0->pbs-installer[download,install]<2026.0.0,>=2025.1.6->poetry)
+  Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting charset_normalizer<4,>=2 (from requests<3.0,>=2.26->poetry)
+  Downloading charset_normalizer-3.4.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (36 kB)
+Collecting zipp>=3.20 (from importlib_metadata>=4.11.4->keyring<26.0.0,>=25.1.0->poetry)
+  Downloading zipp-3.23.0-py3-none-any.whl.metadata (3.6 kB)
+Collecting cryptography>=2.0 (from SecretStorage>=3.2->keyring<26.0.0,>=25.1.0->poetry)
+  Downloading cryptography-46.0.2-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (5.7 kB)
+Collecting cffi>=2.0.0 (from cryptography>=2.0->SecretStorage>=3.2->keyring<26.0.0,>=25.1.0->poetry)
+  Downloading cffi-2.0.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.6 kB)
+Collecting pycparser (from cffi>=2.0.0->cryptography>=2.0->SecretStorage>=3.2->keyring<26.0.0,>=25.1.0->poetry)
+  Downloading pycparser-2.23-py3-none-any.whl.metadata (993 bytes)
+Collecting distlib<1,>=0.3.7 (from virtualenv>=20.26.6->poetry)
+  Downloading distlib-0.4.0-py2.py3-none-any.whl.metadata (5.2 kB)
+Collecting sniffio>=1.1 (from anyio->httpx<1,>=0.27.0->pbs-installer[download,install]<2026.0.0,>=2025.1.6->poetry)
+  Downloading sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+Collecting more-itertools (from jaraco.classes->keyring<26.0.0,>=25.1.0->poetry)
+  Downloading more_itertools-10.8.0-py3-none-any.whl.metadata (39 kB)
+Collecting backports.tarfile (from jaraco.context->keyring<26.0.0,>=25.1.0->poetry)
+  Downloading backports.tarfile-1.2.0-py3-none-any.whl.metadata (2.0 kB)
+Downloading poetry-2.2.1-py3-none-any.whl (281 kB)
+Downloading poetry_core-2.2.1-py3-none-any.whl (338 kB)
+Downloading build-1.3.0-py3-none-any.whl (23 kB)
+Downloading cachecontrol-0.14.3-py3-none-any.whl (21 kB)
+Downloading cleo-2.1.0-py3-none-any.whl (78 kB)
+Downloading crashtest-0.4.1-py3-none-any.whl (7.6 kB)
+Downloading dulwich-0.24.2-cp311-cp311-manylinux_2_28_x86_64.whl (1.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 5.3 MB/s  0:00:00
+Downloading fastjsonschema-2.21.2-py3-none-any.whl (24 kB)
+Downloading findpython-0.7.0-py3-none-any.whl (21 kB)
+Downloading installer-0.7.0-py3-none-any.whl (453 kB)
+Downloading keyring-25.6.0-py3-none-any.whl (39 kB)
+Downloading msgpack-1.1.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (426 kB)
+Downloading pbs_installer-2025.10.10-py3-none-any.whl (64 kB)
+Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+Downloading pkginfo-1.12.1.2-py3-none-any.whl (32 kB)
+Downloading platformdirs-4.5.0-py3-none-any.whl (18 kB)
+Downloading pyproject_hooks-1.2.0-py3-none-any.whl (10 kB)
+Downloading rapidfuzz-3.14.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (3.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.2/3.2 MB 13.2 MB/s  0:00:00
+Downloading requests-2.32.5-py3-none-any.whl (64 kB)
+Downloading charset_normalizer-3.4.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (150 kB)
+Downloading idna-3.10-py3-none-any.whl (70 kB)
+Downloading requests_toolbelt-1.0.0-py2.py3-none-any.whl (54 kB)
+Downloading shellingham-1.5.4-py2.py3-none-any.whl (9.8 kB)
+Downloading tomlkit-0.13.3-py3-none-any.whl (38 kB)
+Downloading urllib3-2.5.0-py3-none-any.whl (129 kB)
+Downloading certifi-2025.10.5-py3-none-any.whl (163 kB)
+Downloading filelock-3.20.0-py3-none-any.whl (16 kB)
+Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Downloading importlib_metadata-8.7.0-py3-none-any.whl (27 kB)
+Downloading jeepney-0.9.0-py3-none-any.whl (49 kB)
+Downloading packaging-25.0-py3-none-any.whl (66 kB)
+Downloading secretstorage-3.4.0-py3-none-any.whl (15 kB)
+Downloading cryptography-46.0.2-cp311-abi3-manylinux_2_34_x86_64.whl (4.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 12.5 MB/s  0:00:00
+Downloading cffi-2.0.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (215 kB)
+Downloading trove_classifiers-2025.9.11.17-py3-none-any.whl (14 kB)
+Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+Downloading virtualenv-20.35.3-py3-none-any.whl (6.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.0/6.0 MB 12.0 MB/s  0:00:00
+Downloading distlib-0.4.0-py2.py3-none-any.whl (469 kB)
+Downloading zipp-3.23.0-py3-none-any.whl (10 kB)
+Downloading zstandard-0.25.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (5.6 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.6/5.6 MB 13.4 MB/s  0:00:00
+Downloading anyio-4.11.0-py3-none-any.whl (109 kB)
+Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+Downloading jaraco.classes-3.4.0-py3-none-any.whl (6.8 kB)
+Downloading jaraco.context-6.0.1-py3-none-any.whl (6.8 kB)
+Downloading backports.tarfile-1.2.0-py3-none-any.whl (30 kB)
+Downloading jaraco_functools-4.3.0-py3-none-any.whl (10 kB)
+Downloading more_itertools-10.8.0-py3-none-any.whl (69 kB)
+Downloading pycparser-2.23-py3-none-any.whl (118 kB)
+Installing collected packages: trove-classifiers, fastjsonschema, distlib, zstandard, zipp, urllib3, typing_extensions, tomlkit, sniffio, shellingham, rapidfuzz, pyproject-hooks, pycparser, poetry-core, platformdirs, pkginfo, pbs-installer, packaging, msgpack, more-itertools, jeepney, installer, idna, h11, filelock, crashtest, charset_normalizer, certifi, backports.tarfile, virtualenv, requests, jaraco.functools, jaraco.context, jaraco.classes, importlib_metadata, httpcore, findpython, dulwich, cleo, cffi, build, anyio, requests-toolbelt, httpx, cryptography, cachecontrol, SecretStorage, keyring, poetry
+
+Successfully installed SecretStorage-3.4.0 anyio-4.11.0 backports.tarfile-1.2.0 build-1.3.0 cachecontrol-0.14.3 certifi-2025.10.5 cffi-2.0.0 charset_normalizer-3.4.3 cleo-2.1.0 crashtest-0.4.1 cryptography-46.0.2 distlib-0.4.0 dulwich-0.24.2 fastjsonschema-2.21.2 filelock-3.20.0 findpython-0.7.0 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.10 importlib_metadata-8.7.0 installer-0.7.0 jaraco.classes-3.4.0 jaraco.context-6.0.1 jaraco.functools-4.3.0 jeepney-0.9.0 keyring-25.6.0 more-itertools-10.8.0 msgpack-1.1.2 packaging-25.0 pbs-installer-2025.10.10 pkginfo-1.12.1.2 platformdirs-4.5.0 poetry-2.2.1 poetry-core-2.2.1 pycparser-2.23 pyproject-hooks-1.2.0 rapidfuzz-3.14.1 requests-2.32.5 requests-toolbelt-1.0.0 shellingham-1.5.4 sniffio-1.3.1 tomlkit-0.13.3 trove-classifiers-2025.9.11.17 typing_extensions-4.15.0 urllib3-2.5.0 virtualenv-20.35.3 zipp-3.23.0 zstandard-0.25.0
++ poetry config virtualenvs.create false
++ poetry --version
++ echo ===== Poetry version: Poetry (version 2.2.1) =====
+===== Poetry version: Poetry (version 2.2.1) =====
++ echo ===== Checking and updating poetry.lock =====
+===== Checking and updating poetry.lock =====
++ [ -f poetry.lock ]
++ echo poetry.lock exists, checking if it needs update...
+poetry.lock exists, checking if it needs update...
++ poetry install
+Installing dependencies from lock file
+
+pyproject.toml changed significantly since poetry.lock was last generated. Run `poetry lock` to fix the lock file.
++ echo ⚠️ Install failed, regenerating lock file...
+⚠️ Install failed, regenerating lock file...
++ poetry lock
+Resolving dependencies...
+
+Writing lock file
++ poetry install
+Installing dependencies from lock file
+
+Package operations: 67 installs, 4 updates, 0 removals
+
+  - Installing mdurl (0.1.2)
+  - Downgrading typing-extensions (4.15.0 -> 4.13.2)
+  - Downgrading anyio (4.11.0 -> 4.9.0)
+  - Installing markdown-it-py (3.0.0)
+  - Installing pygments (2.19.1)
+  - Installing annotated-types (0.7.0)
+  - Downgrading certifi (2025.10.5 -> 2025.4.26)
+  - Installing httptools (0.6.4)
+  - Installing pydantic-core (2.33.2)
+  - Installing python-dotenv (1.1.0)
+  - Installing click (8.2.1)
+  - Installing rich (14.0.0)
+  - Installing typing-inspection (0.4.1)
+  - Installing pyyaml (6.0.2)
+  - Installing uvloop (0.21.0)
+  - Installing watchfiles (1.0.5)
+  - Installing websockets (15.0.1)
+  - Installing dnspython (2.7.0)
+  - Installing greenlet (3.2.3)
+  - Installing markupsafe (3.0.2)
+  - Installing pluggy (1.6.0)
+  - Installing pydantic (2.11.5)
+  - Installing rich-toolkit (0.14.7)
+  - Installing typer (0.16.0)
+  - Installing uvicorn (0.34.2)
+  - Installing six (1.17.0)
+  - Installing iniconfig (2.1.0)
+  - Installing pyasn1 (0.6.1)
+  - Installing coverage (7.10.7)
+  - Installing ecdsa (0.19.1)
+  - Installing fastapi-cli (0.0.7)
+  - Installing email-validator (2.2.0)
+  - Installing jproperties (2.1.2)
+  - Installing itsdangerous (2.2.0)
+  - Installing orjson (3.10.18)
+  - Installing jinja2 (3.1.6)
+  - Installing psycopg-binary (3.2.9)
+  - Installing pydantic-settings (2.9.1)
+  - Installing pyfakefs (5.9.3)
+  - Installing mypy-extensions (1.1.0)
+  - Installing responses (0.25.8)
+  - Downgrading platformdirs (4.5.0 -> 4.3.8)
+  - Installing pydantic-extra-types (2.10.4)
+  - Installing pytest (8.4.2)
+  - Installing pathspec (0.12.1)
+  - Installing mako (1.3.10)
+  - Installing rsa (4.9.1)
+  - Installing python-multipart (0.0.20)
+  - Installing sqlalchemy (2.0.41)
+  - Installing starlette (0.46.2)
+  - Installing tomli (2.2.1)
+  - Installing ujson (5.10.0)
+  - Installing aiosqlite (0.21.0)
+  - Installing alembic (1.16.2)
+  - Installing bcrypt (4.3.0)
+  - Installing black (25.1.0)
+  - Installing geoalchemy2 (0.18.0)
+  - Installing graphviz (0.21)
+  - Installing passlib (1.7.4)
+  - Installing fastapi (0.115.12)
+  - Installing psycopg2-binary (2.9.10)
+  - Installing asyncpg (0.30.0)
+  - Installing pytest-cov (6.3.0)
+  - Installing python-jose (3.5.0)
+  - Installing ruff (0.11.12)
+  - Installing tenacity (9.1.2)
+  - Installing pysonar (1.2.0.2419)
+  - Installing pillow (10.4.0)
+  - Installing psycopg (3.2.9)
+  - Installing sqlmodel (0.0.24)
+  - Installing pytest-asyncio (1.2.0)
+Installing /var/jenkins_home/workspace/hourz/server/venv/bin/fastapi over existing file
+
+Installing the current project: app (1.0.0)
++ python --version
++ echo Python version: Python 3.11.2
+Python version: Python 3.11.2
++ poetry --version
++ echo Poetry version: Poetry (version 2.2.1)
+Poetry version: Poetry (version 2.2.1)
++ pip list
++ grep -E pytest|coverage|poetry
+coverage             7.10.7
+poetry               2.2.1
+poetry-core          2.2.1
+pytest               8.4.2
+pytest-asyncio       1.2.0
+pytest-cov           6.3.0
+[8mha:////4AKf/94GKEQ6s0TUNytNvd0LFTeJO9Ktc5bGzAxZwL8lAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOIioEIoFa3lhheYxBgn1l2wHZyKF/E1/oBFJCq2WO1sM683LIOHmr3BTlNvKTQWBzeavDCx76+OE3Z8wYYpsNModZLc6tOMkqOGOUUJCwErTY3jYMlEWItOPVTlFJnqHH3+jgJK297hCYXI5qh8/MLkYXMb28D08/wVwDQMEcr9Ntfu8AFSjtgYvgAAAA==[0m[Pipeline] }
+[8mha:////4CxP3vwQvfGtDtlixrUT/xOCc3pYf5aW60Sik9LQ2WNWAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOIihQYJUaW10vACExvjxLoztkNS8SK+xh+wiETFFqudbeb1hnUMcOJgsNc0WIqdRe9GkxdOHIar4wl7vmDHFNlpbPXUstLNgi0nDUuKElYCNpo6x9GSSbAVvXzIykky1TmF/B0FlFbd4QmFyOYkQ/rCHGB3G1Vk+nn+CmD2PkG5r3PVhw9qzEvpvgAAAA==[0m[Pipeline] // dir
+[8mha:////4CUgF9+qdrIWdsK16e/Y0iykmwb4Cy/j7gdysTjLjZlDAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPMKRSEGBqNJaaXiBiQ/jxLoztkNS8SK+xh+wiETFFqudbeb1hnUMcOJgRI80WIqdFd6NJi8xcRiujifR80V0TJEdihanljU2C7acEJYUJawkbJA6x9GSSbCVvXqoyiky1TmF/B0llFbf4QmFzOakQvrCHGB3G3Vk+nn+CmD2PkFZ17n2hw9eAqiyvgAAAA==[0m[Pipeline] }
+[8mha:////4GrjQGyoPSw7/whlqv7poQhbBRwS+5htUzXl3EBcgt6jAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOIiAaJBqWgtN7zAJMY4se6C7eBUvIiv8QcsIlGxxWpnm3m9YRk81OwNdpp6S6GxOLjR5IWJfX91nLDjCzZMgZ1GqZPkVp9mlBw1zClKWAhYaWocB0smwlp06qEqp8hU5+jzdxRQ2vYOTyhENkfl4xcmD5vb2Aamn+evAKZhiFDu9rm2hw9wAqrYvgAAAA==[0m[Pipeline] // stage
+[8mha:////4HuhZy5NdPKH5w3ruJz/h4gNWTDhzieNNSGiUhTNBZxKAAAAqB+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUCHVCTF2jLJwgJCGkjf4vSUo7cSKuxh0IVGLCg2Vbst7zBVUMcKRgWWewdxiVY4MfbU5sotBfPE2sozNThJG8YcJMgrRplyooGVhUlLDisDaoPEWHNsGGd/Iuay/R1qcU8nbgUDp9gwcUPJOTDOlb5gDb66gj4Y/zFwDzkKDcNdn2zedZvQF8XumhwgAAAA==[0m[Pipeline] stage
+[8mha:////4HUo/wQKTQoUObxbSZfWao4j77ZH/9PfDUzv3jQOqv/0AAAApx+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycoh0QLAgpq5RFk4QmhDSRv+Xn5R24kRcjTvQUokJD5ZtyXqvNxSR4UTsRGOx9RhrL7rQuymJgbi9BhpEQxdRE0YKVig7KDK2WqqiZGFRlsNKwtpiHSh6dAk2stEPXQaNrjwnnrajhNybOzwhkxM5aU7fMjJsb72JhD/OXwCMXYJ8t5/tMD+LD02yRsvCAAAA[0m[Pipeline] { (Configure Test Environment (SQLite))
+[8mha:////4DnfW4DSg0/X5FyG5/ZsH93DGQV2h1Xc1uOfp4k3fiB0AAAAqB+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycoh0QIIBMXWNsnCC0ISQNvq//KS0EyfiatyBlkpMeLBsS9Z7vaGIDCdiJxqLrcdYe9GF3k1JDMTtNdAgGrqImjBSsELZQZGx1VIVJQuLshxWEtYW60DRo0uwkY1+6DJodOU58bQdJeTe3OEJmZzISXP6lpFhe+tNJPxx/gJg7BLku/1sh/lZfADpB/iZwgAAAA==[0m[Pipeline] dir
+Running in /var/jenkins_home/workspace/hourz/server
+[8mha:////4I8TH9Uf2/WqJtPH5Ugdkwk6IWwWbvBg2B1ijUWGGqzBAAAAqB+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycoh0YAAJMXWNsnCC0ISQNvq//KS0EyfiatyBlkpMeLBsS9Z7vaGIDCdiJxqLrcdYe9GF3k1JDMTtNdAgGrqImjBSsELZQZGx1VIVJQuLshxWEtYW60DRo0uwkY1+6DJodOU58bQdJeTe3OEJmZzISXP6lpFhe+tNJPxx/gJg7BLku/1sh/lZfAD8aiCpwgAAAA==[0m[Pipeline] {
+[8mha:////4LuFS1j3tMuU58y3N67w1OjAB+KwWxmZkOQ1i9w2UwYfAAAApB+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOJS0IAQVVrLDS8wsTFOrDtjOyQVL+Jr/IFAJCq2WO1sM88XLFOEI0eLraHOUWocBt/baeHAsbt4HrDlMzZMib1BaQbJ2tQzSs4G5hQlLASsDDWekyObYS1adVeVV2SrU47TdxBQOn2DBxRiMmcV8xfGCJtrrxPTz/NXAGPIUG53n9qHN65NpgK+AAAA[0m[Pipeline] sh
++ echo ===== Configuring SQLite for tests =====
+===== Configuring SQLite for tests =====
++ cat
+[8mha:////4HQVcCeIBk0oeEWMz9VpFbQQB3eJw7prRGwo6kTFBp+CAAAAph+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOKCBAUSSkVrueEFJjHGiXUXbAen4kV8jT9gEYmKLVY728zrDcvgoWZvsNPUWwqNxcGNJi9M7Pur44QdX7BhCuw0Sp0kt/o0o+SoYU5RwkLASlPjOFgyEdaiUw9VOUWmOkefv6OA0rZ3eEIhsjkqH78wedjcxjYw/Tx/BTANQ4Ryv821O3wArmI/eL4AAAA=[0m[Pipeline] }
+[8mha:////4AFJN6y/IQwy/3lYPGjmoq/PxN8wMdILwQVPDNZlouXcAAAAph+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOIiBBIFSkVrueEFJjHGiXUXbAen4kV8jT9gEYmKLVY728zrDcvgoWZvsNPUWwqNxcGNJi9M7Pur44QdX7BhCuw0Sp0kt/o0o+SoYU5RwkLASlPjOFgyEdaiUw9VOUWmOkefv6OA0rZ3eEIhsjkqH78wedjcxjYw/Tx/BTANQ4Ryv821O3wAmqzcI74AAAA=[0m[Pipeline] // dir
+[8mha:////4EdDPJYtqKwi/vpY7KvJ8rKag4HOvW1Z9VbvVZoGhqgrAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOIiAaJBqWgtN7zAJMY4se6C7eBUvIiv8QcsIlGxxWpnm3m9YRk81OwNdpp6S6GxOLjR5IWJfX91nLDjCzZMgZ1GqZPkVp9mlBw1zClKWAhYaWocB0smwlp06qEqp8hU5+jzdxRQ2vYOTyhENkfl4xcmD5vb2Aamn+evAKZhiFDut7l2hw+i7k/SvgAAAA==[0m[Pipeline] }
+[8mha:////4FXXSl3ELKIBXSF23YOmvkBA7W+4ddH0q2KgWT8j0F8SAAAApB+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOJSBCpEldZKwwtMbIwT687YDknFi/gaf8AiEhVbrHa2mdcb1jHAiYPBXtNgKXYWvRtNXjhxGK6OJ+z5gh1TZKex1VPLSjcLtpw0LClKWAnYaOocR0smwVb08iErJ8lU5xTydxRQWnWHJxQim5MM6QtzgN1tVJHp5/krgNn7BOW+zlUfPr1sGoC+AAAA[0m[Pipeline] // stage
+[8mha:////4BA5ysTwoMb/USVBBjBQcPBt6jzi1+ZkVqypO260NAfJAAAAqB+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUSGVCTF2jLJwgJCGkjf4vSUo7cSKuxh0IVGLCg2Vbst7zBVUMcKRgWWewdxiVY4MfbU5sotBfPE2sozNThJG8YcJMgrRplyooGVhUlLDisDaoPEWHNsGGd/Iuay/R1qcU8nbgUDp9gwcUPJOTDOlb5gDb66gj4Y/zFwDzkKDc7bM1zedZvQFXsxKvwgAAAA==[0m[Pipeline] stage
+[8mha:////4NU8VbTlGfUUURRB3MZDU+M5aYXEcQo0dVrta9EbC37LAAAAph+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycoh0KRNiYo2ycILQhJA0+r9NUtKJE3E17kBLJSY8WLYl673eUMUAJwqGOY2dxdha1vvRzIllCt3NU2aOrqwljOQ1EzoLUvq8VkFJw6qihA2HrcbWU7RoEuy4kw9Ze4mmvqQwb0cOpVUDPKHgMznJkL5lCrC/jyoS/jh/ATD1CcqmWeywPKsPIshjPcIAAAA=[0m[Pipeline] { (SonarQube Analysis)
+[8mha:////4PGoTLJP09ylMCtR35mquIfwMyskfWaktR4tn42UP6K1AAAApx+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycoh0ARbE1DXKwglCE0La6P/yk9JOnIircQdaKjHhwbItWe/1hiIynIidaCy2HmPtRRd6NyUxELfXQINo6CJqwkjBCmUHRcZWS1WULCzKclhJWFusA0WPLsFGNvqhy6DRlefE03aUkHtzhydkciInzelbRobtrTeR8Mf5C4CxS5Dv9rMd5mfxAUxleXrCAAAA[0m[Pipeline] dir
+Running in /var/jenkins_home/workspace/hourz/server
+[8mha:////4KcymS/YTgnFbGu/xAqAb944AV373ZjVWvYsuiCtMxgFAAAApx+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycoh0QTAgpq5RFk4QmhDSRv+Xn5R24kRcjTvQUokJD5ZtyXqvNxSR4UTsRGOx9RhrL7rQuymJgbi9BhpEQxdRE0YKVig7KDK2WqqiZGFRlsNKwtpiHSh6dAk2stEPXQaNrjwnnrajhNybOzwhkxM5aU7fMjJsb72JhD/OXwCMXYJ8t5/tMD+LD+jQxyjCAAAA[0m[Pipeline] {
+[8mha:////4BldS7/rI7zpiMPsvXvItnP1iTcZM4QFN6XP58kTbK0mAAAAqB+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycoh0QQIJMXWNsnCC0ISQNvq//KS0EyfiatyBlkpMeLBsS9Z7vaGIDCdiJxqLrcdYe9GF3k1JDMTtNdAgGrqImjBSsELZQZGx1VIVJQuLshxWEtYW60DRo0uwkY1+6DJodOU58bQdJeTe3OEJmZzISXP6lpFhe+tNJPxx/gJg7BLku/1sh/lZfAD9vR8YwgAAAA==[0m[Pipeline] withSonarQubeEnv
+Injecting SonarQube environment variables using the configuration: Sonarqube
+[8mha:////4O4Qj06juUBQGEtiEiMgIk/gW5DGAvxZMz5dPnAFsYmmAAAApx+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycoh0YQAhpq5RFk4QmhDSRv+Xn5R24kRcjTvQUokJD5ZtyXqvNxSR4UTsRGOx9RhrL7rQuymJgbi9BhpEQxdRE0YKVig7KDK2WqqiZGFRlsNKwtpiHSh6dAk2stEPXQaNrjwnnrajhNybOzwhkxM5aU7fMjJsb72JhD/OXwCMXYJ8t5/tMD+LD56au0DCAAAA[0m[Pipeline] {
+[8mha:////4IM8aSVfP78+xs8fvO6HhZbpGP8/cB5yHjSfIz+5/pReAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOJCAQVCqWgtN7zAJMY4se6C7eBUvIiv8QcsIlGxxWpnm3m9YRk81OwNdpp6S6GxOLjR5IWJfX91nLDjCzZMgZ1GqZPkVp9mlBw1zClKWAhYaWocB0smwlp06qEqp8hU5+jzdxRQ2vYOTyhENkfl4xcmD5vb2Aamn+evAKYhQrk75Npvhw/4iFt7vgAAAA==[0m[Pipeline] sh
++ [ ! -f coverage.xml ]
++ echo ⚠️ No coverage.xml — SonarQube will run without coverage
+⚠️ No coverage.xml — SonarQube will run without coverage
++ sonar-scanner -Dsonar.projectKey=hours-server -Dsonar.sources=app -Dsonar.python.coverage.reportPaths=coverage.xml -Dsonar.exclusions=**/*.pyc,**/.venv/**,**/venv/**,**/__pycache__/**,**/migrations/**,**/uploads/**,**/scripts/**
+INFO: Scanner configuration file: /opt/sonar-scanner/conf/sonar-scanner.properties
+INFO: Project root configuration file: /var/jenkins_home/workspace/hourz/server/sonar-project.properties
+INFO: SonarScanner 5.0.1.3006
+INFO: Java 17.0.7 Eclipse Adoptium (64-bit)
+INFO: Linux 6.6.87.2-microsoft-standard-WSL2 amd64
+INFO: User cache: /var/jenkins_home/.sonar/cache
+INFO: Analyzing on SonarQube server 25.9.0.112764
+INFO: Default locale: "en", source code encoding: "UTF-8"
+INFO: Load global settings
+INFO: Load global settings (done) | time=1032ms
+INFO: Server id: 147B411E-AZm1aveweFjIGBNStyId
+INFO: Loading required plugins
+INFO: Load plugins index
+INFO: Load plugins index (done) | time=307ms
+INFO: Load/download plugins
+INFO: Load/download plugins (done) | time=2787ms
+INFO: Process project properties
+INFO: Process project properties (done) | time=38ms
+INFO: Project key: hours-server
+INFO: Base dir: /var/jenkins_home/workspace/hourz/server
+INFO: Working dir: /var/jenkins_home/workspace/hourz/server/.scannerwork
+INFO: Load project settings for component key: 'hours-server'
+INFO: Load project settings for component key: 'hours-server' (done) | time=216ms
+INFO: Load quality profiles
+INFO: Load quality profiles (done) | time=1019ms
+INFO: Auto-configuring with CI 'Jenkins'
+INFO: Load active rules
+INFO: Load active rules (done) | time=2733ms
+INFO: Load analysis cache
+INFO: Load analysis cache | time=80ms
+INFO: Preprocessing files...
+INFO: 1 language detected in 63 preprocessed files (done) | time=1138ms
+INFO: 0 files ignored because of inclusion/exclusion patterns
+INFO: 0 files ignored because of scm ignore settings
+INFO: Loading plugins for detected languages
+INFO: Load/download plugins
+INFO: Load/download plugins (done) | time=1603ms
+INFO: Load project repositories
+INFO: Load project repositories (done) | time=379ms
+INFO: Indexing files...
+INFO: Project configuration:
+INFO:   Excluded sources: **/*.pyc, **/.venv/**, **/venv/**, **/__pycache__/**, **/migrations/**, **/uploads/**, **/scripts/**
+INFO:   Excluded sources for coverage: **/tests/**, **/migrations/**
+INFO: 63 files indexed (done) | time=301ms
+INFO: Quality profile for py: Sonar way
+INFO: ------------- Run sensors on module Chayenity Server
+INFO: Load metrics repository
+INFO: Load metrics repository (done) | time=55ms
+INFO: Sensor JaCoCo XML Report Importer [jacoco]
+INFO: 'sonar.coverage.jacoco.xmlReportPaths' is not defined. Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml
+INFO: No report imported, no coverage information will be imported by JaCoCo XML Report Importer
+INFO: Sensor JaCoCo XML Report Importer [jacoco] (done) | time=7ms
+INFO: Sensor IaC Docker Sensor [iac]
+INFO: 0 source files to be analyzed
+INFO: 0/0 source files have been analyzed
+INFO: Sensor IaC Docker Sensor [iac] (done) | time=156ms
+INFO: Sensor Java Config Sensor [iac]
+INFO: 0 source files to be analyzed
+INFO: 0/0 source files have been analyzed
+INFO: Sensor Java Config Sensor [iac] (done) | time=38ms
+INFO: Sensor Python Sensor [python]
+INFO: Starting global symbols computation
+INFO: 61 source files to be analyzed
+INFO: 61/61 source files have been analyzed
+INFO: Finished step global symbols computation in 2027ms
+INFO: Starting rules execution
+INFO: 61 source files to be analyzed
+INFO: 28/61 files analyzed, current file: test_file_upload_integration.py
+INFO: 61/61 source files have been analyzed
+INFO: Finished step rules execution in 16896ms
+INFO: The Python analyzer was able to leverage cached data from previous analyses for 0 out of 61 files. These files were not parsed.
+INFO: Sensor Python Sensor [python] (done) | time=19649ms
+INFO: Sensor Cobertura Sensor for Python coverage [python]
+WARN: No report was found for sonar.python.coverage.reportPaths using pattern coverage.xml
+INFO: Sensor Cobertura Sensor for Python coverage [python] (done) | time=17407ms
+INFO: Sensor PythonXUnitSensor [python]
+INFO: Sensor PythonXUnitSensor [python] (done) | time=14670ms
+INFO: Sensor Python Dependency Sensor [python]
+INFO: Sensor Python Dependency Sensor [python] (done) | time=52ms
+INFO: Sensor TextAndSecretsSensor [text]
+INFO: Available processors: 16
+INFO: Using 16 threads for analysis.
+INFO: The property "sonar.tests" is not set. To improve the analysis accuracy, we categorize a file as a test file if any of the following is true:
+  * The filename starts with "test"
+  * The filename contains "test." or "tests."
+  * Any directory in the file path is named: "doc", "docs", "test" or "tests"
+  * Any directory in the file path has a name ending in "test" or "tests"
+
+INFO: Start fetching files for the text and secrets analysis
+INFO: Using Git CLI to retrieve untracked files
+INFO: Retrieving language associated files and files included via "sonar.text.inclusions" that are tracked by git
+INFO: Starting the text and secrets analysis
+INFO: 61 source files to be analyzed for the text and secrets analysis
+INFO: 61/61 source files have been analyzed for the text and secrets analysis
+INFO: Sensor TextAndSecretsSensor [text] (done) | time=8901ms
+INFO: ------------- Run sensors on project
+INFO: Sensor Zero Coverage Sensor
+INFO: Sensor Zero Coverage Sensor (done) | time=156ms
+INFO: ------------- Gather SCA dependencies on project
+INFO: Dependency analysis skipped
+INFO: CPD Executor 8 files had no CPD blocks
+INFO: CPD Executor Calculating CPD for 53 files
+INFO: CPD Executor CPD calculation finished (done) | time=218ms
+INFO: SCM revision ID 'e6643c4e9bb988c7470ac7f99228f6240452f793'
+INFO: Analysis report generated in 1195ms, dir size=1.3 MB
+INFO: Analysis report compressed in 8891ms, zip size=632.1 kB
+INFO: Analysis report uploaded in 544ms
+INFO: ANALYSIS SUCCESSFUL, you can find the results at: http://172.17.0.2:9000/dashboard?id=hours-server
+INFO: Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report
+INFO: More about the report processing at http://172.17.0.2:9000/api/ce/task?id=81bf63ab-73af-40b0-9421-549134a7f5b7
+INFO: Analysis total time: 1:26.307 s
+INFO: ------------------------------------------------------------------------
+INFO: EXECUTION SUCCESS
+INFO: ------------------------------------------------------------------------
+INFO: Total time: 1:43.798s
+INFO: Final Memory: 42M/164M
+INFO: ------------------------------------------------------------------------
+[8mha:////4B5piY7RQT/p7GrHOFgBz2zGIe4exaVw3iqtGtyr1ZgKAAAAph+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOIiJCgQSkVrueEFJjHGiXUXbAen4kV8jT9gEYmKLVY728zrDcvgoWZvsNPUWwqNxcGNJi9M7Pur44QdX7BhCuw0Sp0kt/o0o+SoYU5RwkLASlPjOFgyEdaiUw9VOUWmOkefv6OA0rZ3eEIhsjkqH78wedjcxjYw/Tx/BTANQ4Ryv821O3wA7hxSLb4AAAA=[0m[Pipeline] }
+[8mha:////4B++AjzvsBbdFG/4iweSCA/V4Oe+VjBRN8pExBro8CWTAAAAph+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOIiIZCQUCpayw0vMIkxTqy7YDs4FS/ia/wBi0hUbLHa2WZeb1gGDzV7g52m3lJoLA5uNHlhYt9fHSfs+IINU2CnUeokudWnGSVHDXOKEhYCVpoax8GSibAWnXqoyiky1Tn6/B0FlLa9wxMKkc1R+fiFycPmNraB6ef5K4BpGCKU+22u3eED1l7B3L4AAAA=[0m[Pipeline] // withSonarQubeEnv
+[8mha:////4CrljjD6KuFy7hJ7z2aGvGY/tmBLvp8t0aVCWpGC7RoQAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOJSAKJAqWgtN7zAJMY4se6C7eBUvIiv8QcsIlGxxWpnm3m9YRk81OwNdpp6S6GxOLjR5IWJfX91nLDjCzZMgZ1GqZPkVp9mlBw1zClKWAhYaWocB0smwlp06qEqp8hU5+jzdxRQ2vYOTyhENkfl4xcmD5vb2Aamn+evAKZhiFDut7l2hw/ikCKHvgAAAA==[0m[Pipeline] }
+[8mha:////4Owl93+QL+/zkg7CaisjSBklJpQPJkJkKNN4qxq5UD+KAAAApB+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOLSBBpEldZKwwtMbIwT687YDknFi/gaf8AiEhVbrHa2mdcb1jHAiYPBXtNgKXYWvRtNXjhxGK6OJ+z5gh1TZKex1VPLSjcLtpw0LClKWAnYaOocR0smwVb08iErJ8lU5xTydxRQWnWHJxQim5MM6QtzgN1tVJHp5/krgNn7BOW+zlUfPsyQIO2+AAAA[0m[Pipeline] // dir
+[8mha:////4NUMUr4Wkal6/YKeiiVcSO8Cdi4+1vBoTbmyKgB9REXeAAAApB+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPMJpSIWoaC03vMAkh3Fi3Rnbwal4EV/jD1hEomKL1c4283rDOgY4cjBiQBotxc4K7yZTlsgcxqvjLAa+iI4pskOhMCvu8bSg4oSwpKphJWGD1DmOlkyCrRz0QzdOk2nOKZTvIKG2/R2eUMliTjqkL8wBdrepj0w/z18BzN4nqNu21L79ANMSdb++AAAA[0m[Pipeline] }
+[8mha:////4OkyKd7FwAOkULsBVQMV80WR4o53jMFo0YQXHkBIWsGjAAAApB+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOLSBBpEldZKwwtMbIwT687YDknFi/gaf8AiEhVbrHa2mdcb1jHAiYPBXtNgKXYWvRtNXjhxGK6OJ+z5gh1TZKex1VPLSjcLtpw0LClKWAnYaOocR0smwVb08iErJ8lU5xTydxRQWnWHJxQim5MM6QtzgN1tVJHp5/krgNn7BOX+kKuuP+tQ5k6+AAAA[0m[Pipeline] // stage
+[8mha:////4JVXHIa86jSqoX0V4WzR/Sf1PH0dWT9fbzNZ/Exp1Q8eAAAAqB+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUDBUDYuoaZeEEIQkhbfR/SVLaiRNxNe5AoBITHizbkvWeL6higCMFyzqDvcOoHBv8aHNiE4X+4mliHZ2ZIozkDRNmEqRNu1RBycCiooQVh7VB5Sk6tAk2vJN3WXuJtj6lkLcDh9LpGzyg4JmcZEjfMgfYXkcdCX+cvwCYhwTlrsnW7D/P6g1NyvGPwgAAAA==[0m[Pipeline] stage
+[8mha:////4OkLallPCMvh1SzbRRlTzfsR4Pp8RSA3byjNv/FS4FIWAAAApx+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycoh0QiAhpq5RFk4QmhDSRv+Xn5R24kRcjTvQUokJD5ZtyXqvNxSR4UTsRGOx9RhrL7rQuymJgbi9BhpEQxdRE0YKVig7KDK2WqqiZGFRlsNKwtpiHSh6dAk2stEPXQaNrjwnnrajhNybOzwhkxM5aU7fMjJsb72JhD/OXwCMXYJ8t5/tMD+LDyb6zSXCAAAA[0m[Pipeline] { (Build Docker Image)
+Stage "Build Docker Image" skipped due to when conditional
+[8mha:////4PaS7brRB2c+z4Qg4e2iFMvganiKjtywF7WcYbR+UtggAAAApB+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOJSIYEQVVrLDS8wsTFOrDtjOyQVL+Jr/IFAJCq2WO1sM88XLFOEI0eLraHOUWocBt/baeHAsbt4HrDlMzZMib1BaQbJ2tQzSs4G5hQlLASsDDWekyObYS1adVeVV2SrU47TdxBQOn2DBxRiMmcV8xfGCJtrrxPTz/NXAGPIUG53n9qHN5s4RMC+AAAA[0m[Pipeline] getContext
+[8mha:////4B7bP+dguAp192ioV/Xo8QWaHks15826qwxs4cci5oIoAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOJCA0JCqWgtN7zAJMY4se6C7eBUvIiv8QcsIlGxxWpnm3m9YRk81OwNdpp6S6GxOLjR5IWJfX91nLDjCzZMgZ1GqZPkVp9mlBw1zClKWAhYaWocB0smwlp06qEqp8hU5+jzdxRQ2vYOTyhENkfl4xcmD5vb2Aamn+evAKZhiFDut7l2hw8B1Pq5vgAAAA==[0m[Pipeline] }
+[8mha:////4IgyGYp3uBnTHKpq3wtu/AiqvY01EIAPRPN0plDksaiDAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOIiCqBAqWgtN7zAJMY4se6C7eBUvIiv8QcsIlGxxWpnm3m9YRk81OwNdpp6S6GxOLjR5IWJfX91nLDjCzZMgZ1GqZPkVp9mlBw1zClKWAhYaWocB0smwlp06qEqp8hU5+jzdxRQ2vYOTyhENkfl4xcmD5vb2Aamn+evAKZhiFDut7l2hw81GhnivgAAAA==[0m[Pipeline] // stage
+[8mha:////4CuHgXurZ9T6LoXCxcmy8dw1Iwq5tT/v6Z1OqTM2PvpaAAAAqB+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUIMGCOrFGXThBaEJIGv1fkpR04kRcjTsQqMSEB8u2ZL3nC6rgoSGvmVXYGwydYYMbdU4ske8vjhKzdGYdYSCnWKtSS1Id59pSVDCrKGHBYamwcxQM6ggrbsVd1E6grk/R5+3AoTTyBg8oeCZH4eO3TB7W11EGwh/nLwCmIUK52WXbbz/P6g1jQdTuwgAAAA==[0m[Pipeline] stage
+[8mha:////4CClS2QZeAvhG+cuSdH8grV2/KaD/gQG8V1J74MKUttzAAAAqB+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUAokFMXWNsnCC0ISQNvq//KS0EyfiatyBlkpMeLBsS9Z7vaGIDCdiJxqLrcdYe9GF3k1JDMTtNdAgGrqImjBSsELZQZGx1VIVJQuLshxWEtYW60DRo0uwkY1+6DJodOU58bQdJeTe3OEJmZzISXP6lpFhe+tNJPxx/gJg7BLkh91s+/lZfADKbit4wgAAAA==[0m[Pipeline] { (Deploy Container)
+Stage "Deploy Container" skipped due to when conditional
+[8mha:////4MqoEnxMc3YvfnxPXxegSrX6KySzoBeqAkNOpn4uRy0kAAAApB+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOJSgGgQVVrLDS8wsTFOrDtjOyQVL+Jr/IFAJCq2WO1sM88XLFOEI0eLraHOUWocBt/baeHAsbt4HrDlMzZMib1BaQbJ2tQzSs4G5hQlLASsDDWekyObYS1adVeVV2SrU47TdxBQOn2DBxRiMmcV8xfGCJtrrxPTz/NXAGPIUO63n9qFN5arJPu+AAAA[0m[Pipeline] getContext
+[8mha:////4AwlhltahoyQmT1V0yetHV/xRdKbG6LvOYLd/keFI+nXAAAApB+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOJSIGgQVVrLDS8wsTFOrDtjOyQVL+Jr/IFAJCq2WO1sM88XLFOEI0eLraHOUWocBt/baeHAsbt4HrDlMzZMib1BaQbJ2tQzSs4G5hQlLASsDDWekyObYS1adVeVV2SrU47TdxBQOn2DBxRiMmcV8xfGCJtrrxPTz/NXAGMIGcr97lPbN/nPyFW+AAAA[0m[Pipeline] }
+[8mha:////4NJjvrZ1SFYuBqnkgszkYY8VaPDn6PGlqu1R0Wxpad5KAAAApB+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOIiUaRBVLRWGl5gEmPsWHeO7eBUvIiv8QcCkajYYrWzzTxfsI4Bjhw0WkW9odga9G7U88LMob86zmj5gi1TZKewUbnhTp0WbDgpWFKUsBKwUdQ6joZ0gq2w8i4rJ0lX5xTm7yCgNN0ADyjEbE4ypC9MAXa3sYtMP89fAUzeJyjr+lP7N8GNW6S+AAAA[0m[Pipeline] // stage
+[8mha:////4OpD7nItsFBXocjjya8+VbkrlMyNbCZrf6bdLW/TMdTQAAAAqB+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUDMCAOrFGXThBaEJIGv1fkpR04kRcjTsQqMSEB8u2ZL3nC6rgoSGvmVXYGwydYYMbdU4ske8vjhKzdGYdYSCnWKtSS1Id59pSVDCrKGHBYamwcxQM6ggrbsVd1E6grk/R5+3AoTTyBg8oeCZH4eO3TB7W11EGwh/nLwCmIUK52Wbb7T/P6g3Q0Bm+wgAAAA==[0m[Pipeline] stage
+[8mha:////4M5t7eD1hcItJICeyMvBHs38/SGKcmvgANTcSa3uVHnmAAAApx+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycoh0AyTE1DXKwglCE0La6P/yk9JOnIircQdaKjHhwbItWe/1hiIynIidaCy2HmPtRRd6NyUxELfXQINo6CJqwkjBCmUHRcZWS1WULCzKclhJWFusA0WPLsFGNvqhy6DRlefE03aUkHtzhydkciInzelbRobtrTeR8Mf5C4CxS5Dv9rMd5mfxAUsyu2PCAAAA[0m[Pipeline] { (Push to Docker Registry)
+Stage "Push to Docker Registry" skipped due to when conditional
+[8mha:////4H3YjXvJMTLYSCVnEJnzgTClRZH9bH26MSqjddc6k5GxAAAApB+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOLSIRCiSmu54QUmNsaJdWdsh6TiRXyNPxCIRMUWq51t5vmCZYpw5GixNdQ5So3D4Hs7LRw4dhfPA7Z8xoYpsTcozSBZm3pGydnAnKKEhYCVocZzcmQzrEWr7qryimx1ynH6DgJKp2/wgEJM5qxi/sIYYXPtdWL6ef4KYAwZyu3uU/vwBiGBjUy+AAAA[0m[Pipeline] getContext
+[8mha:////4ETZxKLs8Yfrf6jZjTrWvawEp0hERySQU7KE3v4qNUPlAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOJCBUgoFa3lhheYxBgn1l2wHZyKF/E1/oBFJCq2WO1sM683LIOHmr3BTlNvKTQWBzeavDCx76+OE3Z8wYYpsNModZLc6tOMkqOGOUUJCwErTY3jYMlEWItOPVTlFJnqHH3+jgJK297hCYXI5qh8/MLkYXMb28D08/wVwDQMEcr9Ntfu8AF2jKA0vgAAAA==[0m[Pipeline] }
+[8mha:////4A1ooDHS5L9fJikGSX6BenY5vAmmgOwJE20aPB+Oa9rCAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOIiGlIgqrRWGl5gYmOcWHfGdkgqXsTX+AMWkajYYrWzzbzesI4BThwM9poGS7Gz6N1o8sKJw3B1PGHPF+yYIjuNrZ5aVrpZsOWkYUlRwkrARlPnOFoyCbailw9ZOUmmOqeQv6OA0qo7PKEQ2ZxkSF+YA+xuo4pMP89fAczeJyjrfa5D/QFCQkNvvgAAAA==[0m[Pipeline] // stage
+[8mha:////4IYY6sKCo6AL6krbQCbDe8ZjX6D8+PqcCPXJpUhMVDQ7AAAAqB+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUICEG1Ik16sIJQhNC0uj/kqSkEyfiatyBQCUmPFi2Jes9X1AFDw15zazC3mDoDBvcqHNiiXx/cZSYpTPrCAM5xVqVWpLqONeWooJZRQkLDkuFnaNgUEdYcSvuonYCdX2KPm8HDqWRN3hAwTM5Ch+/ZfKwvo4yEP44fwEwDRHKzS7bfvt5Vm/XSqNIwgAAAA==[0m[Pipeline] stage
+[8mha:////4EZQd+QFaVGm/KJEvl63wFDew2Rd2bT7dn3aJI+aWy2jAAAAqB+LCAAAAAAAAP9tjTEOwjAUQ3+LOrAycohUgoEBMXWNsnCC0ISQNvq//KS0EyfiatyBlkpMeLBsS9Z7vaGIDCdiJxqLrcdYe9GF3k1JDMTtNdAgGrqImjBSsELZQZGx1VIVJQuLshxWEtYW60DRo0uwkY1+6DJodOU58bQdJeTe3OEJmZzISXP6lpFhe+tNJPxx/gJg7BLkh91s+/lZfAARKflFwgAAAA==[0m[Pipeline] { (Declarative: Post Actions)
+[8mha:////4HU6vhxsFp3717v9RrWDoUFoUYh2ISIBMkhe6GkwufyYAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOJSgESBqNJabniBiY1xYt0Z2yGpeBFf4w8EIlGxxWpnm3m+YJkiHDlabA11jlLjMPjeTgsHjt3F84Atn7FhSuwNSjNI1qaeUXI2MKcoYSFgZajxnBzZDGvRqruqvCJbnXKcvoOA0ukbPKAQkzmrmL8wRthce52Yfp6/AhhDhnK//dQuvAE/wUw2vgAAAA==[0m[Pipeline] echo
+Pipeline finished. Cleaning up...
+[8mha:////4MrUuPzHdqgkJRX2En8d5KMznuJomp3/b6ylDwM8MKR5AAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOJSIESBqNJabniBiY1xYt0Z2yGpeBFf4w8EIlGxxWpnm3m+YJkiHDlabA11jlLjMPjeTgsHjt3F84Atn7FhSuwNSjNI1qaeUXI2MKcoYSFgZajxnBzZDGvRqruqvCJbnXKcvoOA0ukbPKAQkzmrmL8wRthce52Yfp6/AhhDhnK//dQuvAF+8FcvvgAAAA==[0m[Pipeline] sh
++ docker stop postgres-test
++ true
+[8mha:////4IEjpu/qcIHdcfHPg22a6/JCJQ+m8/5O14wxwNfO0auUAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOJSIEGBqNJabniBiY1xYt0Z2yGpeBFf4w8EIlGxxWpnm3m+YJkiHDlabA11jlLjMPjeTgsHjt3F84Atn7FhSuwNSjNI1qaeUXI2MKcoYSFgZajxnBzZDGvRqruqvCJbnXKcvoOA0ukbPKAQkzmrmL8wRthce52Yfp6/AhhDhnK//dQuvAG9o3oEvgAAAA==[0m[Pipeline] sh
++ docker rm postgres-test
++ true
+[8mha:////4Hfy+dekv3DzDUjRL9u5Fdm/5x8icu3kRbA+U5u3ycsaAAAApB+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOJSUKRAVLRWGl5gEmPsWHeO7eBUvIiv8QcCkajYYrWzzTxfsI4Bjhw0WkW9odga9G7U88LMob86zmj5gi1TZKewUbnhTp0WbDgpWFKUsBKwUdQ6joZ0gq2w8i4rJ0lX5xTm7yCgNN0ADyjEbE4ypC9MAXa3sYtMP89fAUw+QVnvP1X7N/ySYR2+AAAA[0m[Pipeline] sh
++ docker stop chayenity-server-container
++ true
+[8mha:////4NyNBg5qkDd/Ij9N/cIwR61X6SOBQNE8o5/slHv3s80UAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOJSUICEqNJabniBiY1xYt0Z2yGpeBFf4w8EIlGxxWpnm3m+YJkiHDlabA11jlLjMPjeTgsHjt3F84Atn7FhSuwNSjNI1qaeUXI2MKcoYSFgZajxnBzZDGvRqruqvCJbnXKcvoOA0ukbPKAQkzmrmL8wRthce52Yfp6/AhhDhnK3/dQ+vAEzjvmavgAAAA==[0m[Pipeline] sh
++ docker rm chayenity-server-container
++ true
+[8mha:////4H6xNDNLzzV5eAmPkn0X2zvAsT7UHf7c7l+OtCCtWIeHAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOJSUCCEqNJabniBiY1xYt0Z2yGpeBFf4w8EIlGxxWpnm3m+YJkiHDlabA11jlLjMPjeTgsHjt3F84Atn7FhSuwNSjNI1qaeUXI2MKcoYSFgZajxnBzZDGvRqruqvCJbnXKcvoOA0ukbPKAQkzmrmL8wRthce52Yfp6/AhhDyFDu9p/avgF3NWadvgAAAA==[0m[Pipeline] }
+[8mha:////4EpGv+5eW9o3OsgIe8jjXtgMLdw40ZOkTpNsx3zbM1nHAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOKCaEBCqWgtN7zAJMY4se6C7eBUvIiv8QcsIlGxxWpnm3m9YRk81OwNdpp6S6GxOLjR5IWJfX91nLDjCzZMgZ1GqZPkVp9mlBw1zClKWAhYaWocB0smwlp06qEqp8hU5+jzdxRQ2vYOTyhENkfl4xcmD5vb2Aamn+evAKZhiFAetrn2uw/AJCY7vgAAAA==[0m[Pipeline] // stage
+[8mha:////4PEBvry0MKxPrqcFGPsyaf1GNmjT3KowILcpy7Z41hPMAAAAph+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOKiFEhIiCqtlYYXmNgYJ9adsR2SihfxNf6ARSQqtljtbDOvN6xjgBMHg72mwVLsLHo3mrxw4jBcHU/Y8wU7pshOY6unlpVuFmw5aVhSlLASsNHUOY6WTIKt6OVDVk6Sqc4p5O8ooLTqDk8oRDYnGdIX5gC726gi08/zVwCz9wnKQ52r3n8AQMVEOL4AAAA=[0m[Pipeline] }
+[8mha:////4LPG4fpkySMm/yXvyq5xUKpgBbOO6R8FWRdFIgHz/OLJAAAAph+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOIiEAUSSkVrueEFJjHGiXUXbAen4kV8jT9gEYmKLVY728zrDcvgoWZvsNPUWwqNxcGNJi9M7Pur44QdX7BhCuw0Sp0kt/o0o+SoYU5RwkLASlPjOFgyEdaiUw9VOUWmOkefv6OA0rZ3eEIhsjkqH78wedjcxjYw/Tx/BTANQ4TysMu13X8AeIfXyb4AAAA=[0m[Pipeline] // withEnv
+[8mha:////4PqAfK9H0qBOGzL70AZVzqbgNCl3z7jGpKWeyQGEkX3sAAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPMIRSoOEqNJaaXiBiQ/jxLoztkNS8SK+xh+wiETFFqudbeb1hnUMcOJgRI80WIqdFd6NJi8xcRiujifR80V0TJEdihanljU2C7acEJYUJawkbJA6x9GSSbCVvXqoyiky1TmF/B0llFbf4QmFzOakQvrCHGB3G3Vk+nn+CmD2PkF5qHPt6w9+we+cvgAAAA==[0m[Pipeline] }
+[8mha:////4KsPHdt4s4SxiLrzt5hTEprlkmgPtUbYozUvQ8cX4A7nAAAAph+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOIiEAUSSkVrueEFJjHGiXUXbAen4kV8jT9gEYmKLVY728zrDcvgoWZvsNPUWwqNxcGNJi9M7Pur44QdX7BhCuw0Sp0kt/o0o+SoYU5RwkLASlPjOFgyEdaiUw9VOUWmOkefv6OA0rZ3eEIhsjkqH78wedjcxjYw/Tx/BTANQ4TysM+13X0AUMHt9r4AAAA=[0m[Pipeline] // withCredentials
+[8mha:////4Hljk/NjQO/E4OuK/WMsklCqCb1y2v2rcrFBu87rqvw9AAAAph+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOKiFEhIiCqtlYYXmNgYJ9adsR2SihfxNf6ARSQqtljtbDOvN6xjgBMHg72mwVLsLHo3mrxw4jBcHU/Y8wU7pshOY6unlpVuFmw5aVhSlLASsNHUOY6WTIKt6OVDVk6Sqc4p5O8ooLTqDk8oRDYnGdIX5gC726gi08/zVwCz9wnKwz5XXX8AT0O4pL4AAAA=[0m[Pipeline] }
+[8mha:////4GzBuv9XdBm7T/LTs8MLFgj6BWytZbr5igoERfwrDLM+AAAApR+LCAAAAAAAAP9tjTEOwjAQBC9BFLSUPOICDUJCqWgtN7zAJMY4se6C7eBUvIiv8QcsIlGxxWpnm3m9YRk81OwNdpp6S6GxOLjR5IWJfX91nLDjCzZMgZ1GqZPkVp9mlBw1zClKWAhYaWocB0smwlp06qEqp8hU5+jzdxRQ2vYOTyhENkfl4xcmD5vb2Aamn+evAKZhiFAe9rl22w93AStVvgAAAA==[0m[Pipeline] // withEnv
+[8mha:////4F4DooVViGTw7+i7f/mdhr8CMT9xPar75kP9Qzit0XE5AAAApB+LCAAAAAAAAP9tjTEOwjAQBDdBFLSUPMJpkEBCVLRWGl5gEmOcWHfBvpBUvIiv8QciIlGx1c4083pjmSKOHJ1qLLWeUuVVF3o3PTVwbK+BB9XwRVVMiYNVpR1Kru1pxpLFYl6WY6GxslQFTp6cYK0b8zBFMOSKs8TJHTRyX9/xRKanspgoXxgjNre+Tky/zt8Axq4T5PudINt+AF2make9AAAA[0m[Pipeline] }
+[8mha:////4KydyJqgi4nWf15dpqbymqOHpwi8BGJK/zB0VRzCJj79AAAAox+LCAAAAAAAAP9tjbEOgjAURS8YB1dHP6IMLiTGybVh8Qsq1Fpo3sP2IUx+kb/mP0gkcfJO95zlvN5Yp4gjR6daS52nVHvVh8HNT40cu2vgUbV8UTVT4mBVZceKG3tasGKxWJblWGlsLNWBkycn2OrWPEwRDLniLHF2B43cN3c8kem5LCbKF6aI3W1oEtOv8zeAqe8FeVkKsv0HL6ReW70AAAA=[0m[Pipeline] // node
+[8mha:////4L5FA7un6nF8EdaGAHl6242gddhT14kED98ANqgWqA8xAAAAox+LCAAAAAAAAP9tjTEOwjAQBDdBFLSUPMKRqECIitZKwwtMYowT6y7YF5KKF/E1/kBEJCq22plmXm8sU8SRo1ONpdZTqrzqQu+mpwaO7TXwoBq+qIopcbCqtEPJtT3NWLJYzMtyLDRWlqrAyZMTrHVjHqYIhlxxlji5g0bu6zueyPRUFhPlC2PE5tbXienX+RvA2HWCfLcXZNsPCb05Eb0AAAA=[0m[Pipeline] End of Pipeline
+Finished: SUCCESS
